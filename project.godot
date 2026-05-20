@@ -1,0 +1,22 @@
+; Engine configuration file.
+; It's stored in a binary format, so don't modify it manually.
+; Godot 4.6.2
+
+[application]
+config/name="灵墟旅商"
+config/description="像素风修仙模拟经营游戏"
+run/main_scene="res://scenes/main.tscn"
+config/icon="res://icon.png"
+
+[rendering]
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="glow_enabled=false"
+
+[input]
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/mode=0
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"

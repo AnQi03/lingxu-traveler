@@ -1,0 +1,12 @@
+{
+  "mcp_server": {
+    "enabled": true,
+    "host": "127.0.0.1",
+    "port": 18765
+  },
+  "features": {
+    "code_editing": true,
+    "scene_editing": true,
+    "resource_management": true
+  }
+}
