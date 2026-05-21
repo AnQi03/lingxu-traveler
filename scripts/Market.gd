@@ -9,6 +9,7 @@ func _ready():
 	set_process_mode(PROCESS_MODE_WHEN_PAUSED)
 	_build_ui()
 	market_ui.visible = false
+	print("Market.gd _ready() 执行完毕，按M应能触发_input")
 
 
 func _build_ui():

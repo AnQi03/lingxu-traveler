@@ -71,7 +71,6 @@ func _update_ui() -> void:
 		var inv = PlayerData.inventory
 		var inv_text = "库存:\n"
 		for item in inv:
-			var tier_names = ["凡品", "灵品", "宝品", "仙品"]
 			inv_text += "  %s x%d\n" % [item.name, item.count]
 		inventory_info.text = inv_text
 	else:
@@ -111,7 +110,7 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	_on_slider_changed(haggle_slider.value)
 
 
-func _on_trade_completed(item_id: String, count: int, price: int) -> void:
+func _on_trade_completed(_item_id: String, _count: int, price: int) -> void:
 	haggle_result.text = "✅ 成交！获得 %d灵石" % price
 	is_trading = false
 	# 2秒后隐藏结果
@@ -120,7 +119,7 @@ func _on_trade_completed(item_id: String, count: int, price: int) -> void:
 	haggle_panel.hide()
 
 
-func _on_trade_failed(item_id: String, count: int, reason: String) -> void:
+func _on_trade_failed(_item_id: String, _count: int, reason: String) -> void:
 	haggle_result.text = "❌ %s" % reason
 	is_trading = false
 	await get_tree().create_timer(1.5).timeout
