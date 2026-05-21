@@ -22,6 +22,9 @@ stall_action=[Object(InputEventKey,"resource_local_to_scene":false,"device":-1,"
 open_inventory=[Object(InputEventKey,"resource_local_to_scene":false,"device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":73,"physical_keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
 ]
 
+[autoload]
+PlayerData="*res://scripts/PlayerData.gd"
+
 [display]
 window/size/viewport_width=1280
 window/size/viewport_height=720
