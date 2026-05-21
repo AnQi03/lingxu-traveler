@@ -41,11 +41,11 @@ func spend_stones(amount: int) -> bool:
 	
 	var remaining = amount
 	while remaining >= 10000 and high_spirit_stones > 0:
-		var use: int = mini(high_spirit_stones, int(remaining / 10000))
+		var use: int = mini(high_spirit_stones, int(float(remaining) / 10000.0))
 		high_spirit_stones -= use
 		remaining -= use * 10000
 	while remaining >= 100 and mid_spirit_stones > 0:
-		var use: int = mini(mid_spirit_stones, int(remaining / 100))
+		var use: int = mini(mid_spirit_stones, int(float(remaining) / 100.0))
 		mid_spirit_stones -= use
 		remaining -= use * 100
 	spirit_stones -= remaining
