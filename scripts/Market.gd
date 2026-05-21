@@ -73,6 +73,13 @@ func _input(event):
 		get_viewport().set_input_as_handled()
 
 
+func toggle():
+	if is_open:
+		close()
+	else:
+		open()
+
+
 func open():
 	is_open = true
 	market_ui.visible = true

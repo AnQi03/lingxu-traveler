@@ -8,25 +8,21 @@ func _ready():
 	print("初始灵石: %d" % PlayerData.spirit_stones)
 	print("时间: %s" % PlayerData.get_time_label())
 	
-	# 创建集市节点
 	_create_market()
 	
-	# 加载摆摊场景
 	var stall = preload("res://scenes/StallScene.tscn")
 	if stall:
 		stall_scene = stall.instantiate()
 		add_child(stall_scene)
-	else:
-		print("警告：StallScene.tscn 未找到")
 	
 	print("按 M 打开集市  |  按 S 开张收摊  |  按 F 熔炉")
 
 
 func _create_market():
-	# 用代码创建集市UI，完全避免.tscn引用问题
 	var market_layer = CanvasLayer.new()
 	market_layer.name = "Market"
 	market_layer.layer = 3
+	market_layer.set_process_mode(PROCESS_MODE_WHEN_PAUSED)
 	add_child(market_layer)
 	
 	var script = load("res://scripts/Market.gd")
@@ -35,7 +31,18 @@ func _create_market():
 
 
 func _input(event):
-	if event.is_action_pressed("stall_action"):
+	if event.is_action_pressed("open_market"):
+		var market = find_child("Market", true, false)
+		if market and market.has_method("toggle"):
+			market.toggle()
+		elif market and market.has_method("open"):
+			if market.get("is_open"):
+				market.close()
+			else:
+				market.open()
+		get_viewport().set_input_as_handled()
+	
+	elif event.is_action_pressed("stall_action"):
 		if stall_scene:
 			var manager = stall_scene.get_node("StallManager")
 			if manager:
