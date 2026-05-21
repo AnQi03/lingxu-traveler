@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3 uid="uid://cgxfjqg4rnd2d"]
+
+[extent type="Script" path="res://scripts/Market.gd"]
+[id="1"]
+
+[node name="Market" type="CanvasLayer"]
+script = ExtResource("1")
+layer = 2
+
+[node name="MarketUI" type="Panel" parent="."]
+anchors_preset = 0
+offset_left = 100.0
+offset_top = 40.0
+offset_right = 1052.0
+offset_bottom = 608.0
+visible = false
+
+[node name="Background" type="ColorRect" parent="MarketUI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.1, 0.15, 0.25, 0.95)
+
+[node name="TitleBar" type="HBoxContainer" parent="MarketUI"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 952.0
+offset_bottom = 40.0
+
+[node name="TitleLabel" type="Label" parent="MarketUI/TitleBar"]
+text = "  中央荒原 · 集市"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+
+[node name="CloseButton" type="Button" parent="MarketUI/TitleBar"]
+text = "  关闭 [M]  "
+theme_override_colors/font_color = Color(1, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 16
+
+[node name="ItemListContainer" type="ScrollContainer" parent="MarketUI"]
+offset_left = 20.0
+offset_top = 50.0
+offset_right = 932.0
+offset_bottom = 548.0
+
+[node name="ItemGrid" type="GridContainer" parent="MarketUI/ItemListContainer"]
+columns = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+size_flags_horizontal = 3
+size_flags_vertical = 3
