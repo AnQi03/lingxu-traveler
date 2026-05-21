@@ -4,7 +4,7 @@
 # ============================================================
 extends CanvasLayer
 
-var stall_manager: StallManager
+var stall_manager
 var is_trading: bool = false
 
 @onready var bg_sprite: TextureRect = $BG

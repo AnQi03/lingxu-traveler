@@ -3,6 +3,7 @@
 # 生成随机顾客，管理顾客队列和议价流程
 # ============================================================
 extends RefCounted
+class_name CustomerGenerator
 
 ## 顾客性格类型
 enum Personality { 

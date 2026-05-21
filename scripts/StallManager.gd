@@ -3,6 +3,7 @@
 # 管理摆摊状态、顾客队列、交易流程
 # ============================================================
 extends Node
+class_name StallManager
 
 signal customer_arrived(customer_data: Dictionary)
 signal trade_completed(item_id: String, count: int, price: int)

@@ -3,6 +3,7 @@
 # 静态数据定义和工具方法
 # ============================================================
 extends RefCounted
+class_name MaterialData
 
 enum Tier { FAN = 0, LING = 1, BAO = 2, XIAN = 3 }
 enum Element { JIN = 0, MU = 1, SHUI = 2, HUO = 3, TU = 4 }
