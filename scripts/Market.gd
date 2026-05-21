@@ -6,6 +6,7 @@ var item_grid: GridContainer = null
 
 
 func _ready():
+	set_process_mode(PROCESS_MODE_WHEN_PAUSED)
 	_build_ui()
 	market_ui.visible = false
 
