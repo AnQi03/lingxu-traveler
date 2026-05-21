@@ -1,0 +1,29 @@
+{
+  "name": "灵墟旅商",
+  "description": "像素风修仙模拟经营游戏 — Godot 4.6.2",
+  "stack": ["godot", "gdscript", "gpt-image-2"],
+  "services": ["game"],
+  "checks": {
+    "lint": null,
+    "test": null,
+    "build": null
+  },
+  "agents": ["hermes"],
+  "standards": {
+    "project_tracker": "设定文档/README.md",
+    "mvp_plan": "MVP_PLAN.md",
+    "best_practices": "docs/godot-best-practices.md"
+  },
+  "env": {
+    "godot_version": "4.6.2",
+    "project_path_wsl": "/home/ziyuting/Projects/灵墟旅商",
+    "project_path_win": "C:\\Users\\35595\\Desktop\\灵墟旅商",
+    "sync_command": "cp {wsl_file} {win_file}"
+  },
+  "branches": ["main"],
+  "notes": {
+    "dev_env_dual_paths": "WSL和Windows桌面双目录，修改后需cp同步",
+    "mcp_unstable": "MCP桥接在WSL→Windows间不稳定，改用直接写文件+Git",
+    "scene_prefer_code_ui": ".tscn写入不稳定，优先用代码生成UI"
+  }
+}
