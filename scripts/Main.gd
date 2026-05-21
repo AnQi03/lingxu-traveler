@@ -1,9 +1,14 @@
 extends Node2D
 
 var stall_scene: Node = null
+var market_node: Node = null
 
 
 func _ready():
+	set_process_mode(PROCESS_MODE_WHEN_PAUSED)
+	
+	_setup_actions()
+	
 	print("灵墟旅商 loaded!")
 	print("初始灵石: %d" % PlayerData.spirit_stones)
 	print("时间: %s" % PlayerData.get_time_label())
@@ -18,6 +23,24 @@ func _ready():
 	print("按 M 打开集市  |  按 S 开张收摊  |  按 F 熔炉")
 
 
+func _setup_actions():
+	if not InputMap.has_action("open_market"):
+		InputMap.add_action("open_market")
+		var ev = InputEventKey.new()
+		ev.keycode = KEY_M
+		InputMap.action_add_event("open_market", ev)
+	if not InputMap.has_action("stall_action"):
+		InputMap.add_action("stall_action")
+		var ev = InputEventKey.new()
+		ev.keycode = KEY_S
+		InputMap.action_add_event("stall_action", ev)
+	if not InputMap.has_action("open_furnace"):
+		InputMap.add_action("open_furnace")
+		var ev = InputEventKey.new()
+		ev.keycode = KEY_F
+		InputMap.action_add_event("open_furnace", ev)
+
+
 func _create_market():
 	var market_layer = CanvasLayer.new()
 	market_layer.name = "Market"
@@ -28,18 +51,17 @@ func _create_market():
 	var script = load("res://scripts/Market.gd")
 	if script:
 		market_layer.set_script(script)
+	
+	market_node = market_layer
 
 
 func _input(event):
+	if event is InputEventMouseMotion or event is InputEventMouseButton:
+		return
+	
 	if event.is_action_pressed("open_market"):
-		var market = find_child("Market", true, false)
-		if market and market.has_method("toggle"):
-			market.toggle()
-		elif market and market.has_method("open"):
-			if market.get("is_open"):
-				market.close()
-			else:
-				market.open()
+		if market_node and market_node.has_method("toggle"):
+			market_node.toggle()
 		get_viewport().set_input_as_handled()
 	
 	elif event.is_action_pressed("stall_action"):
@@ -50,4 +72,7 @@ func _input(event):
 					manager.close_stall()
 				else:
 					manager.open_stall()
+		get_viewport().set_input_as_handled()
+	
+	elif event.is_action_pressed("open_furnace"):
 		get_viewport().set_input_as_handled()

@@ -8,8 +8,11 @@ var item_grid: GridContainer = null
 func _ready():
 	set_process_mode(PROCESS_MODE_WHEN_PAUSED)
 	_build_ui()
-	market_ui.visible = false
-	print("Market.gd _ready() 执行完毕，按M应能触发_input")
+	if is_instance_valid(market_ui):
+		market_ui.visible = false
+		print("Market.gd _ready() 完成，市场UI已创建")
+	else:
+		print("Market.gd _ready() 警告：_build_ui 未能创建 market_ui！")
 
 
 func _build_ui():
@@ -64,13 +67,7 @@ func _build_ui():
 	scroll.add_child(item_grid)
 
 
-func _input(event):
-	if event.is_action_pressed("open_market"):
-		if is_open:
-			close()
-		else:
-			open()
-		get_viewport().set_input_as_handled()
+# ===== 输入统一由 Main.gd 转发调用 toggle()，这里不设 _input =====
 
 
 func toggle():
@@ -81,6 +78,17 @@ func toggle():
 
 
 func open():
+	print("open() called, is_instance_valid(market_ui)=", is_instance_valid(market_ui), " is_open=", is_open)
+	
+	# 安全重建：如果market_ui没了就重建
+	if not is_instance_valid(market_ui):
+		print("market_ui 失效，执行重建...")
+		_build_ui()
+	
+	if not is_instance_valid(market_ui):
+		print("重建后 market_ui 依然无效！")
+		return
+	
 	is_open = true
 	market_ui.visible = true
 	_refresh_grid()
@@ -88,8 +96,12 @@ func open():
 
 
 func close():
+	print("close() called, is_instance_valid(market_ui)=", is_instance_valid(market_ui))
+	
+	if is_instance_valid(market_ui):
+		market_ui.visible = false
+	
 	is_open = false
-	market_ui.visible = false
 	get_tree().paused = false
 
 
