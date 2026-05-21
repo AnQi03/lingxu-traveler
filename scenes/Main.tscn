@@ -1,8 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://b4tcx3lvnkq3m"]
+[gd_scene load_steps=3 format=3 uid="uid://b4tcx3lvnkq3m"]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_6x8ln"]
 [ext_resource type="Script" path="res://scripts/HUD.gd" id="2_7m9kp"]
-[ext_resource type="Script" path="res://scripts/Market.gd" id="3_8n0lq"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_6x8ln")
@@ -45,49 +44,3 @@ theme_override_colors/font_color = Color(1, 0.87, 0.53, 1)
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 2
 vertical_alignment = 1
-
-[node name="Market" type="CanvasLayer" parent="."]
-layer = 3
-script = ExtResource("3_8n0lq")
-
-[node name="MarketUI" type="Panel" parent="Market"]
-offset_left = 100.0
-offset_top = 40.0
-offset_right = 1180.0
-offset_bottom = 680.0
-visible = false
-
-[node name="Background" type="ColorRect" parent="Market/MarketUI"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-color = Color(0.1, 0.15, 0.25, 0.95)
-
-[node name="TitleBar" type="HBoxContainer" parent="Market/MarketUI"]
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 1080.0
-offset_bottom = 40.0
-
-[node name="TitleLabel" type="Label" parent="Market/MarketUI/TitleBar"]
-text = "  中央荒原 · 集市"
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 20
-
-[node name="CloseButton" type="Button" parent="Market/MarketUI/TitleBar"]
-text = "  关闭 [M]  "
-theme_override_colors/font_color = Color(1, 0.5, 0.5, 1)
-theme_override_font_sizes/font_size = 16
-
-[node name="ItemListContainer" type="ScrollContainer" parent="Market/MarketUI"]
-offset_left = 20.0
-offset_top = 50.0
-offset_right = 1060.0
-offset_bottom = 620.0
-
-[node name="ItemGrid" type="GridContainer" parent="Market/MarketUI/ItemListContainer"]
-columns = 2
-theme_override_constants/h_separation = 10
-theme_override_constants/v_separation = 10
-size_flags_horizontal = 3
-size_flags_vertical = 3
