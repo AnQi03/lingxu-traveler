@@ -30,6 +30,9 @@ const MAX_DAILY_REFINE: int = 5
 var ling_shi: int = 100
 const MAX_LING_SHI: int = 100
 
+## ---------- 顾客关系 ----------
+var customer_relations: Dictionary = {}
+
 
 # ============================================================
 # 灵石
@@ -76,6 +79,29 @@ func spend_ling_shi(amount: int) -> bool:
 
 func reset_ling_shi() -> void:
 	ling_shi = MAX_LING_SHI
+
+
+## ---------- 顾客关系 ----------
+
+func update_customer_relation(customer_name: String, delta: int) -> void:
+	if not customer_relations.has(customer_name):
+		customer_relations[customer_name] = {"loyalty": 0, "visits": 0, "last_seen": 0}
+	var r = customer_relations[customer_name]
+	r.loyalty = clampi(r.loyalty + delta, 0, 10)
+	r.visits += 1
+	r.last_seen = game_day
+
+func get_customer_loyalty(customer_name: String) -> int:
+	if not customer_relations.has(customer_name):
+		return 0
+	return customer_relations[customer_name].loyalty
+
+func get_known_customer_names() -> Array:
+	var names = []
+	for name in customer_relations:
+		if customer_relations[name].loyalty > 0:
+			names.append(name)
+	return names
 
 
 # ============================================================

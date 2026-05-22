@@ -73,6 +73,7 @@ func start_haggle(player_offer: int) -> Dictionary:
 				PlayerData.earn_stones(total_price)
 				daily_income += total_price
 				today_customers += 1
+				PlayerData.update_customer_relation(current_customer.name, 2)
 				trade_completed.emit(item.id, count, total_price)
 				current_customer = {}
 			else:
@@ -83,6 +84,7 @@ func start_haggle(player_offer: int) -> Dictionary:
 				
 		"walk_away":
 			# 顾客走了
+			PlayerData.update_customer_relation(current_customer.name, -1)
 			trade_failed.emit(current_customer.want_item.id, 0, "顾客走了")
 			current_customer = {}
 			
@@ -96,6 +98,7 @@ func start_haggle(player_offer: int) -> Dictionary:
 ## 逐出当前顾客（玩家不想卖了）
 func dismiss_customer() -> void:
 	if not current_customer.is_empty():
+		PlayerData.update_customer_relation(current_customer.name, -2)
 		trade_failed.emit(current_customer.want_item.id, 0, "玩家拒绝交易")
 		current_customer = {}
 
