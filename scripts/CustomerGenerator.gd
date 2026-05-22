@@ -19,11 +19,11 @@ const FIRST_NAMES = [
 ]
 
 const REGULARS = [
-	{"name": "石老", "personality": Personality.NAIXIN, "pref_element": Element.TU, "mood": "须发皆白的老修士，总是慢悠悠地逛到你摊前", "bg": "散修联盟的长老，痴迷收集稀有灵材"},
-	{"name": "青儿", "personality": Personality.QINGXIN, "pref_element": Element.MU, "mood": "一个蹦蹦跳跳的少女，腰间挂满了药篓", "bg": "万木灵宗的外门弟子，师父让她来历练"},
-	{"name": "霍老板", "personality": Personality.JINGMING, "pref_element": Element.HUO, "mood": "穿着考究的中年商人，眼神精明", "bg": "灵墟商会的分区管事，手里有很多进货渠道"},
-	{"name": "冷面客", "personality": Personality.DUOYI, "pref_element": Element.SHUI, "mood": "戴斗笠的黑衣人，从不主动说话", "bg": "寒渊宗的影子护卫，替宗门采买物资"},
-	{"name": "金娘子", "personality": Personality.LINSE, "pref_element": Element.JIN, "mood": "衣着华贵但钱包捂得紧紧的中年妇人", "bg": "铸魂殿的离任炼器师，开了一家小作坊"},
+	{"name": "石老", "personality": Personality.NAIXIN, "pref_element": MaterialData.Element.TU, "mood": "须发皆白的老修士，总是慢悠悠地逛到你摊前", "bg": "散修联盟的长老，痴迷收集稀有灵材"},
+	{"name": "青儿", "personality": Personality.QINGXIN, "pref_element": MaterialData.Element.MU, "mood": "一个蹦蹦跳跳的少女，腰间挂满了药篓", "bg": "万木灵宗的外门弟子，师父让她来历练"},
+	{"name": "霍老板", "personality": Personality.JINGMING, "pref_element": MaterialData.Element.HUO, "mood": "穿着考究的中年商人，眼神精明", "bg": "灵墟商会的分区管事，手里有很多进货渠道"},
+	{"name": "冷面客", "personality": Personality.DUOYI, "pref_element": MaterialData.Element.SHUI, "mood": "戴斗笠的黑衣人，从不主动说话", "bg": "寒渊宗的影子护卫，替宗门采买物资"},
+	{"name": "金娘子", "personality": Personality.LINSE, "pref_element": MaterialData.Element.JIN, "mood": "衣着华贵但钱包捂得紧紧的中年妇人", "bg": "铸魂殿的离任炼器师，开了一家小作坊"},
 ]
 
 static func generate_customer() -> Dictionary:
