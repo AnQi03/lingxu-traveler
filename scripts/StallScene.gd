@@ -105,6 +105,13 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	
 	customer_name.text = "👤 %s" % customer.name
 	customer_mood.text = "状态: %s" % customer.mood
+	
+	# 商道提示：足够高时显示顾客可能接受的价位
+	if PlayerData.shang_dao >= 30:
+		var hint_min = customer.offer_price
+		var hint_max = customer.max_price
+		customer_mood.text += "\n💼 商道眼光：%d~%d灵石" % [hint_min, hint_max]
+	
 	customer_request.text = "想要: [%s][%s] %s × %d" % [tier_names[item.tier], elem_str, item.name, customer.want_count]
 	
 	# 显示参考价（集市单价）和顾客出价

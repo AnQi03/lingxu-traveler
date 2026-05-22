@@ -18,6 +18,14 @@ const FIRST_NAMES = [
 	"马老三", "胡郎中", "何阵师", "吕符师", "林器师"
 ]
 
+const REGULARS = [
+	{"name": "石老", "personality": Personality.NAIXIN, "pref_element": Element.TU, "mood": "须发皆白的老修士，总是慢悠悠地逛到你摊前", "bg": "散修联盟的长老，痴迷收集稀有灵材"},
+	{"name": "青儿", "personality": Personality.QINGXIN, "pref_element": Element.MU, "mood": "一个蹦蹦跳跳的少女，腰间挂满了药篓", "bg": "万木灵宗的外门弟子，师父让她来历练"},
+	{"name": "霍老板", "personality": Personality.JINGMING, "pref_element": Element.HUO, "mood": "穿着考究的中年商人，眼神精明", "bg": "灵墟商会的分区管事，手里有很多进货渠道"},
+	{"name": "冷面客", "personality": Personality.DUOYI, "pref_element": Element.SHUI, "mood": "戴斗笠的黑衣人，从不主动说话", "bg": "寒渊宗的影子护卫，替宗门采买物资"},
+	{"name": "金娘子", "personality": Personality.LINSE, "pref_element": Element.JIN, "mood": "衣着华贵但钱包捂得紧紧的中年妇人", "bg": "铸魂殿的离任炼器师，开了一家小作坊"},
+]
+
 static func generate_customer() -> Dictionary:
 	var items = MaterialData.get_market_items()
 	var target_item = items[randi() % items.size()]
@@ -25,10 +33,26 @@ static func generate_customer() -> Dictionary:
 	var personality = randi() % 8
 	var name = ""
 	var loyalty = 0
+	var customer_bg = ""
 	
-	# 30%概率生成回头客
 	var known = PlayerData.get_known_customer_names()
-	if not known.is_empty() and randf() < 0.3:
+	
+	# 20%概率生成有名常客
+	if randf() < 0.2:
+		var regular = REGULARS[randi() % REGULARS.size()]
+		name = regular.name
+		personality = regular.personality
+		loyalty = PlayerData.get_customer_loyalty(name)
+		customer_bg = regular.bg
+		# 常客偏好特定五行，60%概率要对应灵材
+		if randf() < 0.6:
+			var matching = []
+			for it in items:
+				if it.element == regular.pref_element:
+					matching.append(it)
+			if not matching.is_empty():
+				target_item = matching[randi() % matching.size()]
+	elif not known.is_empty() and randf() < 0.3:
 		name = known[randi() % known.size()]
 		loyalty = PlayerData.get_customer_loyalty(name)
 	else:
@@ -82,6 +106,8 @@ static func generate_customer() -> Dictionary:
 		mood = "⭐ 老顾客(好感%d) — " % loyalty + mood
 	elif loyalty >= 1:
 		mood = "回头客(好感%d) — " % loyalty + mood
+	elif customer_bg != "":
+		mood = "🏷 " + customer_bg
 	
 	return {
 		"name": name,
@@ -96,7 +122,8 @@ static func generate_customer() -> Dictionary:
 		"round": 0,
 		"is_urgent": is_urgent,
 		"mood": mood,
-		"loyalty": loyalty
+		"loyalty": loyalty,
+		"bg": customer_bg
 	}
 
 
@@ -106,6 +133,9 @@ static func handle_haggle(customer: Dictionary, player_offer: int) -> Dictionary
 	var result_msg = ""
 	var result_type = ""
 	var final_price = 0
+	
+	# 察言观色：每轮顾客情绪变化
+	var round_mood = _get_round_mood(customer)
 	
 	if player_offer <= customer.offer_price:
 		result_type = "accept"
@@ -128,12 +158,26 @@ static func handle_haggle(customer: Dictionary, player_offer: int) -> Dictionary
 		result_type = "counter"
 		result_msg = _get_counter_msg(customer)
 	
+	# 情绪提示附加到消息
+	if result_type == "counter" or result_type == "walk_away":
+		result_msg = "[" + round_mood + "] " + result_msg
+	
 	return {
 		"result": result_type,
 		"message": result_msg,
 		"final_price": final_price,
-		"customer": customer
+		"customer": customer,
+		"round_mood": round_mood
 	}
+
+
+static func _get_round_mood(customer: Dictionary) -> String:
+	var remaining = customer.patience - customer.round
+	match remaining:
+		0: return "💢 快没耐心了"
+		1: return "🤨 有些不耐烦"
+		2: return "😐 还在犹豫"
+		_: return "🤔 在考虑中"
 
 
 static func _get_offer_ratio(personality: int, urgent: bool) -> float:
