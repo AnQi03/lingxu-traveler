@@ -121,6 +121,15 @@ func _build_ui():
 	upgrade_btn.pressed.connect(_do_upgrade)
 	furnace_panel.add_child(upgrade_btn)
 	
+	var slice_btn = Button.new()
+	slice_btn.name = "slice_btn"
+	slice_btn.text = "🔪 切片加工"
+	slice_btn.position = Vector2(465, 135)
+	slice_btn.size = Vector2(140, 50)
+	slice_btn.disabled = true
+	slice_btn.pressed.connect(_do_slice)
+	furnace_panel.add_child(slice_btn)
+	
 	var tier_label = Label.new()
 	tier_label.name = "tier_label"
 	tier_label.position = Vector2(465, 260)
@@ -209,6 +218,9 @@ func _refresh_items():
 	var btn = find_child("smelt_btn", true, false)
 	if btn:
 		btn.disabled = true
+	var sbtn = find_child("slice_btn", true, false)
+	if sbtn:
+		sbtn.disabled = true
 	var name_label = find_child("select_name", true, false)
 	if name_label:
 		name_label.text = "未选择灵材"
@@ -272,6 +284,10 @@ func _select_item(idx: int):
 	var btn = find_child("smelt_btn", true, false)
 	if btn:
 		btn.disabled = false
+	
+	var sbtn = find_child("slice_btn", true, false)
+	if sbtn:
+		sbtn.disabled = false
 
 
 func _do_smelt():
@@ -447,3 +463,33 @@ func _show_result(text: String, color: Color):
 	if is_instance_valid(result_label):
 		result_label.text = text
 		result_label.add_theme_color_override("font_color", color)
+
+
+func _do_slice():
+	if selected_item_idx < 0 or selected_item_idx >= PlayerData.inventory.size():
+		return
+	
+	if not PlayerData.spend_ling_shi(5):
+		_show_result("灵识耗尽！切片需要 5 灵识。", Color(1, 0.5, 0.2))
+		return
+	
+	var item = PlayerData.inventory[selected_item_idx]
+	
+	if "片" in item.get("name", ""):
+		_show_result("灵材片不能再切片了。", Color(1, 0.5, 0.2))
+		return
+	
+	var success = PlayerData.remove_item(item.id, 1)
+	if not success:
+		return
+	
+	var sliced = item.duplicate()
+	sliced.name = item.name + "片"
+	sliced.id = item.id + "_slice"
+	sliced.price = int(item.price * 1.15)
+	sliced.count = 1
+	PlayerData.add_item(sliced)
+	
+	_show_result("🔪 切片完成！%s → %s（+15%%价值）" % [item.name, sliced.name], Color(0.5, 0.9, 0.5))
+	_refresh_items()
+	_refresh_history()
