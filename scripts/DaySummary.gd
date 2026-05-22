@@ -19,8 +19,8 @@ func _build_ui():
 	summary_panel.visible = false
 	add_child(summary_panel)
 	
-	summary_panel.position = Vector2(340, 200)
-	summary_panel.size = Vector2(600, 280)
+	summary_panel.position = Vector2(340, 160)
+	summary_panel.size = Vector2(600, 360)
 	
 	var bg = ColorRect.new()
 	bg.color = Color(0.05, 0.08, 0.18, 0.95)
@@ -41,16 +41,32 @@ func _build_ui():
 	var info_label = Label.new()
 	info_label.name = "info_label"
 	info_label.position = Vector2(30, 60)
-	info_label.size = Vector2(540, 180)
+	info_label.size = Vector2(540, 110)
 	info_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	info_label.add_theme_font_size_override("font_size", 16)
 	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	summary_panel.add_child(info_label)
 	
+	var tomorrow_label = Label.new()
+	tomorrow_label.name = "tomorrow_label"
+	tomorrow_label.position = Vector2(30, 180)
+	tomorrow_label.size = Vector2(540, 30)
+	tomorrow_label.add_theme_color_override("font_color", Color(0.6, 0.75, 0.9))
+	tomorrow_label.add_theme_font_size_override("font_size", 14)
+	summary_panel.add_child(tomorrow_label)
+	
+	var goal_label = Label.new()
+	goal_label.name = "goal_label"
+	goal_label.position = Vector2(30, 215)
+	goal_label.size = Vector2(540, 30)
+	goal_label.add_theme_color_override("font_color", Color(0.9, 0.8, 0.5))
+	goal_label.add_theme_font_size_override("font_size", 14)
+	summary_panel.add_child(goal_label)
+	
 	var hint = Label.new()
 	hint.name = "hint_label"
 	hint.text = "（点击任意位置关闭，或10秒后自动消失……）"
-	hint.position = Vector2(0, 245)
+	hint.position = Vector2(0, 320)
 	hint.size = Vector2(600, 30)
 	hint.add_theme_color_override("font_color", Color(0.4, 0.4, 0.5))
 	hint.add_theme_font_size_override("font_size", 12)
@@ -88,6 +104,45 @@ func show_summary():
 		info.text = "第%d天营业结束\n\n当前灵石：%d 下品\n库存：%d 种（%d 件）\n熔炼次数：%d/5" % [
 			day - 1, players, inv_count, total_items, PlayerData.daily_refine_count
 		]
+	
+	var tomorrow = find_child("tomorrow_label", true, false)
+	if tomorrow:
+		tomorrow.text = _get_tomorrow_hint(PlayerData.game_day)
+	
+	var goal = find_child("goal_label", true, false)
+	if goal:
+		goal.text = _get_goal_hint()
+
+
+func _get_tomorrow_hint(day: int) -> String:
+	if day <= 7:
+		return "📅 明天：灵材市场照常开市，多囤点凡品灵材吧。"
+	elif day <= 14:
+		return "📅 明天：有传言说灵材需求要涨，抓住机会！"
+	elif day <= 21:
+		return "📅 明天：集市可能上新货，记得去看看。"
+	else:
+		return "📅 明天：老顾客会越来越多，稳住口碑。"
+
+
+func _get_goal_hint() -> String:
+	var total = PlayerData.get_total_stones()
+	
+	if total < 200:
+		return "💡 小目标：攒够200灵石，升级熔炉！"
+	
+	var refine_ready = 0
+	for item in PlayerData.inventory:
+		if item.get("tier", 0) < 3:
+			refine_ready += item.get("count", 0)
+	
+	if refine_ready > 0 and PlayerData.daily_refine_count < PlayerData.MAX_DAILY_REFINE:
+		return "💡 你有灵材还没熔炼——明天试试运气？"
+	
+	if total < 500:
+		return "💡 小目标：攒够500灵石，解锁更多功能！"
+	
+	return "💡 生意渐入佳境，继续保持！"
 
 
 func _dismiss():
