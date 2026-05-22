@@ -2,20 +2,43 @@ extends CanvasLayer
 
 @onready var time_label: Label = $HUD_Background/TopBar/TimeLabel
 @onready var stone_label: Label = $HUD_Background/TopBar/StoneLabel
+@onready var hud_bg: ColorRect = $HUD_Background
 
 var period_label: Label = null
+var pause_label: Label = null
+var current_period: String = ""
+
+# 各时段的 HUD 背景色（带透明度）
+var period_colors = {
+	"morning": Color(0, 0, 0, 0.35),
+	"afternoon": Color(0, 0, 0, 0.30),
+	"evening": Color(0.15, 0.08, 0.02, 0.50),
+	"night": Color(0.05, 0.02, 0.10, 0.65)
+}
 
 
 func _ready() -> void:
-	# 创建时段标签（代码生成，避免改.tscn）
+	# 时段标签
 	period_label = Label.new()
 	period_label.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
 	period_label.add_theme_font_size_override("font_size", 14)
 	period_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	period_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	$HUD_Background/TopBar.add_child(period_label)
-	# 放在 TimeLabel 和 StoneLabel 之间
 	$HUD_Background/TopBar.move_child(period_label, 1)
+	
+	# 时间暂停提示
+	pause_label = Label.new()
+	pause_label.text = "⏸ 暂停"
+	pause_label.add_theme_color_override("font_color", Color(1, 0.8, 0.3))
+	pause_label.add_theme_font_size_override("font_size", 12)
+	pause_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	pause_label.position = Vector2(0, 0)
+	pause_label.size = Vector2(100, 20)
+	pause_label.visible = false
+	$HUD_Background/TopBar.add_child(pause_label)
+	$HUD_Background/TopBar.move_child(pause_label, 2)
 	
 	_update_display()
 
@@ -31,9 +54,26 @@ func _update_display() -> void:
 	# 更新时间
 	time_label.text = PlayerData.get_time_label()
 	
-	# 更新时段
+	# 更新时段标签
+	var p = DayCycle.get_period_label(PlayerData.time_of_day)
 	if period_label:
-		period_label.text = DayCycle.get_period_label(PlayerData.time_of_day)
+		period_label.text = p
+	
+	# 更新背景色（根据时段变化）
+	var period_name = DayCycle.get_period_name(PlayerData.time_of_day)
+	if period_name != current_period:
+		current_period = period_name
+		if period_colors.has(period_name):
+			hud_bg.color = period_colors[period_name]
+	
+	# 时间暂停提示
+	var main = get_node("/root/Main")
+	var is_paused = false
+	if main and main.has_method("is_any_panel_open"):
+		is_paused = main.is_any_panel_open()
+	
+	if pause_label:
+		pause_label.visible = is_paused
 	
 	# 更新灵石
 	var stones = PlayerData.spirit_stones

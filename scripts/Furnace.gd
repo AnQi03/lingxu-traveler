@@ -1,10 +1,5 @@
 extends CanvasLayer
 
-# ================================================================
-# 天道熔炉 - Furnace.gd
-# 按 F 打开，投入灵材 → 熔炼 → 出结果
-# ================================================================
-
 var is_open: bool = false
 var furnace_panel: Panel = null
 var selected_item_idx: int = -1
@@ -35,7 +30,6 @@ func _build_ui():
 	bg.mouse_filter = 0
 	furnace_panel.add_child(bg)
 	
-	# 标题
 	var title_bar = HBoxContainer.new()
 	title_bar.position = Vector2(0, 0)
 	title_bar.size = Vector2(900, 36)
@@ -54,7 +48,6 @@ func _build_ui():
 	close_btn.pressed.connect(_on_close)
 	title_bar.add_child(close_btn)
 	
-	# 提示文字
 	var info = Label.new()
 	info.text = "  选择灵材投入熔炉（每天最多5次）  |  今日已熔炼: %d/5" % PlayerData.daily_refine_count
 	info.name = "refine_info"
@@ -63,7 +56,6 @@ func _build_ui():
 	info.add_theme_font_size_override("font_size", 13)
 	furnace_panel.add_child(info)
 	
-	# 左侧：背包中的灵材列表
 	var left_label = Label.new()
 	left_label.text = "  背包中的灵材"
 	left_label.position = Vector2(15, 65)
@@ -82,7 +74,6 @@ func _build_ui():
 	item_grid.add_theme_constant_override("v_separation", 4)
 	left_scroll.add_child(item_grid)
 	
-	# 右侧：操作区
 	var right_label = Label.new()
 	right_label.text = "  熔炼操作"
 	right_label.position = Vector2(460, 65)
@@ -90,7 +81,6 @@ func _build_ui():
 	right_label.add_theme_font_size_override("font_size", 15)
 	furnace_panel.add_child(right_label)
 	
-	# 选中的灵材显示
 	var select_frame = ColorRect.new()
 	select_frame.name = "select_frame"
 	select_frame.position = Vector2(465, 90)
@@ -114,7 +104,6 @@ func _build_ui():
 	select_desc.add_theme_font_size_override("font_size", 12)
 	furnace_panel.add_child(select_desc)
 	
-	# 熔炼按钮
 	var smelt_btn = Button.new()
 	smelt_btn.name = "smelt_btn"
 	smelt_btn.text = "🔥 开始熔炼"
@@ -124,7 +113,6 @@ func _build_ui():
 	smelt_btn.pressed.connect(_do_smelt)
 	furnace_panel.add_child(smelt_btn)
 	
-	# 结果区域
 	var result_bg = ColorRect.new()
 	result_bg.name = "result_bg"
 	result_bg.position = Vector2(465, 280)
@@ -141,7 +129,6 @@ func _build_ui():
 	result_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	furnace_panel.add_child(result_label)
 	
-	# 熔炼历史
 	var history_label = Label.new()
 	history_label.text = "  今日熔炼记录"
 	history_label.position = Vector2(15, 420)
@@ -191,6 +178,12 @@ func _on_close():
 	close()
 
 
+func _get_base_id(item_id: String) -> String:
+	if "_t" in item_id:
+		return item_id.split("_t")[0]
+	return item_id
+
+
 func _refresh_items():
 	for child in item_grid.get_children():
 		child.queue_free()
@@ -229,14 +222,13 @@ func _refresh_items():
 		hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.add_child(hbox)
 		
-		var name_label = Label.new()
-		name_label.text = "[%s][%s] %s ×%d" % [tier_str, elem_str, item.name, item.get("count", 1)]
-		name_label.add_theme_color_override("font_color", Color.WHITE)
-		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		name_label.add_theme_font_size_override("font_size", 13)
-		hbox.add_child(name_label)
+		var label = Label.new()
+		label.text = "[%s][%s] %s ×%d" % [tier_str, elem_str, item.name, item.get("count", 1)]
+		label.add_theme_color_override("font_color", Color.WHITE)
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.add_theme_font_size_override("font_size", 13)
+		hbox.add_child(label)
 		
-		# 添加点击选择
 		var idx = i
 		card.gui_input.connect(func(event):
 			if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -275,82 +267,107 @@ func _do_smelt():
 			result_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
 		return
 	
-	var item = PlayerData.inventory[selected_item_idx]
+	if not PlayerData.spend_ling_shi(15):
+		if is_instance_valid(result_label):
+			result_label.text = "灵识耗尽！今天你已经太累了，休息吧。"
+			result_label.add_theme_color_override("font_color", Color(1, 0.5, 0.2))
+		return
 	
-	# 扣减灵材（只消耗1个）
+	var item = PlayerData.inventory[selected_item_idx]
+	var base_id = _get_base_id(item.id)
+	
 	var success = PlayerData.remove_item(item.id, 1)
 	if not success:
 		return
 	
-	# 基础概率
-	var base_luck = 0.2  # 20%概率升品
-	var base_fail = 0.3  # 30%概率降品
-	var base_destroy = 0.1  # 10%概率报废
-	var base_same = 1.0 - base_luck - base_fail - base_destroy  # 40%原样
+	var base_luck = 0.35
+	var base_fail = 0.25
+	var base_destroy = 0.1
+	
+	# 品阶越高升品越难，降品/报废风险越大
+	match item.tier:
+		0:  # 凡品 → 灵品
+			base_luck = 0.35
+			base_fail = 0.25
+			base_destroy = 0.08
+		1:  # 灵品 → 宝品
+			base_luck = 0.20
+			base_fail = 0.30
+			base_destroy = 0.12
+		2:  # 宝品 → 仙品
+			base_luck = 0.007
+			base_fail = 0.35
+			base_destroy = 0.25
+		_:  # 仙品无法再升品
+			base_luck = 0.0
+			base_fail = 0.40
+			base_destroy = 0.30
+	var base_same = 1.0 - base_luck - base_fail - base_destroy
 	
 	var roll = randf()
 	var result_text = ""
 	var result_color = Color(0.6, 0.6, 0.6)
 	
 	if roll < base_destroy:
-		# 报废
 		result_text = "💀 熔炼失败！灵材化为灰烬……"
 		result_color = Color(0.5, 0.2, 0.2)
 		PlayerData.daily_refine_count += 1
-		
+	
 	elif roll < base_destroy + base_fail:
-		# 降品
-		var new_tier = max(0, item.tier - 1)
-		var new_item = item.duplicate()
-		new_item.tier = new_item.get("tier", 0) - 1
-		if new_item.tier < 0: new_item.tier = 0
-		new_item.count = 1
-		PlayerData.add_item(new_item)
-		result_text = "⚠️ 品阶下降：[%s] %s → [%s]" % [tier_names[item.tier], item.name, tier_names[new_item.tier]]
+		var nt = max(0, item.tier - 1)
+		var new_id = base_id + "_t" + str(nt) if nt > 0 else base_id
+		PlayerData.add_item({
+			"id": new_id,
+			"name": item.name,
+			"tier": nt,
+			"element": item.element,
+			"price": max(1, item.price / 3),
+			"count": 1
+		})
+		result_text = "⚠️ 品阶下降：[%s] %s → [%s]" % [tier_names[item.tier], item.name, tier_names[nt]]
 		result_color = Color(0.7, 0.5, 0.2)
 		PlayerData.daily_refine_count += 1
-		
+	
 	elif roll < base_destroy + base_fail + base_same:
-		# 原样
-		PlayerData.add_item(item.duplicate())
+		var keep_tier = max(0, item.tier)
+		var keep_id = base_id + "_t" + str(keep_tier) if keep_tier > 0 else base_id
+		PlayerData.add_item({
+			"id": keep_id,
+			"name": item.name,
+			"tier": keep_tier,
+			"element": item.element,
+			"price": item.get("base_price", item.price),
+			"count": 1
+		})
 		result_text = "  熔炼完成，品阶不变：[%s] %s" % [tier_names[item.tier], item.name]
 		result_color = Color(0.6, 0.6, 0.6)
 		PlayerData.daily_refine_count += 1
-		
+	
 	else:
-		# 升品
-		var new_tier = min(3, item.tier + 1)
-		var new_item = item.duplicate()
-		new_item.tier = new_tier
-		new_item.count = 1
-		new_item.price = item.price * 3
-		new_item.name = _get_upgraded_name(item.name, new_tier)
-		PlayerData.add_item(new_item)
-		result_text = "✨ 升品成功！[%s] %s → [%s] %s！" % [tier_names[item.tier], item.name, tier_names[new_tier], new_item.name]
+		var nt = min(3, item.tier + 1)
+		var new_id = base_id + "_t" + str(nt)
+		PlayerData.add_item({
+			"id": new_id,
+			"name": item.name,
+			"tier": nt,
+			"element": item.element,
+			"price": item.price * 3,
+			"count": 1
+		})
+		result_text = "✨ 升品成功！[%s] %s → [%s]！" % [tier_names[item.tier], item.name, tier_names[nt]]
 		result_color = Color(1, 0.8, 0.3)
 		PlayerData.daily_refine_count += 1
 	
-	# 显示结果
 	if is_instance_valid(result_label):
 		result_label.text = result_text
 		result_label.add_theme_color_override("font_color", result_color)
 	
-	# 刷新
 	_refresh_items()
 	_refresh_history()
 	
-	# 检查熔炼次数
 	if PlayerData.daily_refine_count >= PlayerData.MAX_DAILY_REFINE:
 		if is_instance_valid(result_label):
-			var old = result_label.text
-			result_label.text = "⚠️ 今日熔炼次数已用完！\n" + old
-
-
-func _get_upgraded_name(old_name: String, new_tier: int) -> String:
-	var prefixes = ["凡", "灵", "宝", "仙"]
-	if new_tier > 0 and new_tier < prefixes.size():
-		return old_name.trim_prefix("凡品·").trim_prefix("灵品·").trim_prefix("宝品·").trim_prefix("仙品·")
-	return old_name
+			result_label.text = "⚠️ 今日熔炼次数已用完！\n" + result_label.text
 
 
 func _refresh_history():
@@ -361,7 +378,6 @@ func _refresh_history():
 	for child in history_box.get_children():
 		child.queue_free()
 	
-	# 现在只有简单的提示
 	var help = Label.new()
 	help.text = "  每次熔炼消耗1件灵材。升品有概率，已熔炼 %d/%d 次。" % [PlayerData.daily_refine_count, PlayerData.MAX_DAILY_REFINE]
 	help.add_theme_color_override("font_color", Color(0.4, 0.4, 0.5))

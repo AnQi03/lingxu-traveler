@@ -54,6 +54,9 @@ func start_haggle(player_offer: int) -> Dictionary:
 	if current_customer.is_empty():
 		return { "result": "error", "message": "没有顾客" }
 	
+	if not PlayerData.spend_ling_shi(5):
+		return { "result": "error", "message": "灵识耗尽！今天你已经太累了，休息吧。" }
+	
 	var result = CustomerGenerator.handle_haggle(current_customer, player_offer)
 	current_customer = result.customer
 	

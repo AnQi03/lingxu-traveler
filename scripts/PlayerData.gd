@@ -5,7 +5,7 @@
 extends Node
 
 ## ---------- 灵石 ----------
-var spirit_stones: int = 30          # 下品灵石
+var spirit_stones: int = 100          # 下品灵石
 var mid_spirit_stones: int = 0       # 中品灵石
 var high_spirit_stones: int = 0      # 上品灵石
 
@@ -25,6 +25,10 @@ var inventory: Array = []
 ## ---------- 熔炼 ----------
 var daily_refine_count: int = 0
 const MAX_DAILY_REFINE: int = 5
+
+## ---------- 灵识 ----------
+var ling_shi: int = 100
+const MAX_LING_SHI: int = 100
 
 
 # ============================================================
@@ -60,6 +64,18 @@ func earn_stones(amount: int) -> void:
 		mid_spirit_stones += 1
 		total -= 100
 	spirit_stones += total
+
+
+## ---------- 灵识 ----------
+
+func spend_ling_shi(amount: int) -> bool:
+	if ling_shi < amount:
+		return false
+	ling_shi -= amount
+	return true
+
+func reset_ling_shi() -> void:
+	ling_shi = MAX_LING_SHI
 
 
 # ============================================================
@@ -100,10 +116,11 @@ func find_item(item_id: String) -> Dictionary:
 
 func advance_time(hours: float) -> void:
 	time_of_day += hours
-	if time_of_day >= 24.0:
+	while time_of_day >= 24.0:
 		time_of_day -= 24.0
 		game_day += 1
 		daily_refine_count = 0
+		reset_ling_shi()
 	is_daytime = time_of_day >= 5.0 and time_of_day < 19.0
 
 func get_time_label() -> String:

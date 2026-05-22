@@ -127,9 +127,10 @@ func _get_tomorrow_hint(day: int) -> String:
 
 func _get_goal_hint() -> String:
 	var total = PlayerData.get_total_stones()
+	var ling = PlayerData.ling_shi
 	
 	if total < 200:
-		return "💡 小目标：攒够200灵石，升级熔炉！"
+		return "💡 小目标：攒够200灵石，升级熔炉！（当前灵识：%d）" % ling
 	
 	var refine_ready = 0
 	for item in PlayerData.inventory:
@@ -137,12 +138,12 @@ func _get_goal_hint() -> String:
 			refine_ready += item.get("count", 0)
 	
 	if refine_ready > 0 and PlayerData.daily_refine_count < PlayerData.MAX_DAILY_REFINE:
-		return "💡 你有灵材还没熔炼——明天试试运气？"
+		return "💡 你有灵材还没熔炼——明天试试运气？（当前灵识：%d）" % ling
 	
 	if total < 500:
-		return "💡 小目标：攒够500灵石，解锁更多功能！"
+		return "💡 小目标：攒够500灵石，解锁更多功能！（当前灵识：%d）" % ling
 	
-	return "💡 生意渐入佳境，继续保持！"
+	return "💡 生意渐入佳境，继续保持！（当前灵识：%d）" % ling
 
 
 func _dismiss():
