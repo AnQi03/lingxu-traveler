@@ -105,7 +105,7 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	var elem_str = element_icons[item.element] if item.element >= 0 else "无"
 	
 	customer_name.text = "👤 %s" % customer.name
-	customer_mood.text = "状态: %s" % customer.mood
+	customer_mood.text = "状态: 😐  %s" % customer.mood
 	
 	# 商道提示：越高越能感知顾客底线
 	if PlayerData.shang_dao >= 50:
@@ -136,18 +136,41 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 
 func _on_trade_completed(_item_id: String, _count: int, price: int) -> void:
 	SoundManager.sfx_deal()
-	haggle_result.text = "✅ 成交！获得 %d灵石" % price
+	var streak = PlayerData.trade_streak
+	var bonus_text = ""
+	if streak >= 7:
+		bonus_text = "\n💎 财源滚滚！连续成交 %d 笔！" % streak
+	elif streak >= 5:
+		bonus_text = "\n✨ 生意兴隆！连续成交 %d 笔！" % streak
+	elif streak >= 3:
+		bonus_text = "\n🔥 手感正热！连续成交 %d 笔！" % streak
+	
+	haggle_result.text = "✅ 成交！获得 %d灵石%s" % [price, bonus_text]
+	haggle_result.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
 	is_trading = false
-	# 2秒后隐藏结果
-	await get_tree().create_timer(2.0).timeout
+	
+	# 灵石到账效果 — HUD 会自己跳动，这里加个成交特效
+	var tw = create_tween()
+	tw.tween_property(haggle_result, "scale", Vector2(1.15, 1.15), 0.1)
+	tw.tween_property(haggle_result, "scale", Vector2(1.0, 1.0), 0.15)
+	
+	await get_tree().create_timer(2.5).timeout
 	customer_panel.hide()
 	haggle_panel.hide()
 
 
 func _on_trade_failed(_item_id: String, _count: int, reason: String) -> void:
-	haggle_result.text = "❌ %s" % reason
+	var fail_text = "❌ %s" % reason
+	# 给点鼓励——不是所有失败都是坏事
+	if "走了" in reason or "离开" in reason:
+		fail_text += "\n💡 下次试试降低要价？"
+	elif "激怒" in reason or "生气" in reason:
+		fail_text += "\n💡 这个顾客对价格很敏感，下次注意"
+	
+	haggle_result.text = fail_text
+	haggle_result.add_theme_color_override("font_color", Color(0.9, 0.35, 0.25))
 	is_trading = false
-	await get_tree().create_timer(1.5).timeout
+	await get_tree().create_timer(2.0).timeout
 	customer_panel.hide()
 	haggle_panel.hide()
 
@@ -193,23 +216,63 @@ func _on_slider_changed(value: float) -> void:
 	var val = int(value)
 	var risk_text = ""
 	var risk_color = Color(0.5, 0.5, 0.5)
+	var expression = "😐"
 	
 	if stall_manager and stall_manager.current_customer:
 		var c = stall_manager.current_customer
 		var max_p = c.max_price
-		# 玩家是卖家，要价越低顾客越高兴
-		if val <= c.offer_price:
+		var offer_p = c.offer_price
+		var pers = c.get("personality", 1)
+		
+		# 性格修正系数：敏感型阈值更低，大方型阈值更高
+		var mod = _personality_threshold_mod(pers)
+		
+		# 价格区间判定 + 表情映射
+		if val <= offer_p:
 			risk_text = "🟢 顾客肯定接受"
 			risk_color = Color(0.3, 0.9, 0.3)
-		elif val <= max_p * 0.7:
+			expression = "😊"
+		elif val <= max_p * (0.45 + mod):
+			risk_text = "🟢 这个价格很安全"
+			risk_color = Color(0.3, 0.85, 0.3)
+			expression = "🙂"
+		elif val <= max_p * (0.7 + mod):
 			risk_text = "🟡 很大概率成交"
 			risk_color = Color(0.8, 0.8, 0.3)
-		elif val <= max_p:
+			expression = "🤔"
+		elif val <= max_p * (0.9 + mod):
 			risk_text = "🟠 对方可能犹豫"
 			risk_color = Color(0.9, 0.6, 0.2)
+			expression = "😰"
+		elif val <= max_p:
+			risk_text = "🟠 接近对方底线了！"
+			risk_color = Color(0.95, 0.45, 0.15)
+			expression = "😣"
 		else:
 			risk_text = "🔴 对方很可能拒绝！"
 			risk_color = Color(0.9, 0.2, 0.2)
+			expression = "😡"
+		
+		# 商道提示：级别越高越准确
+		if PlayerData.shang_dao >= 50:
+			risk_text += " 💼「他的底线大约在%d灵石左右」" % max_p
+		elif PlayerData.shang_dao >= 25:
+			risk_text += " 💼「大概还能再加点...」"
+		
+		# 更新顾客表情显示
+		customer_mood.text = "状态: %s  %s" % [expression, c.mood]
 	
 	haggle_value.text = "%d灵石 %s" % [val, risk_text]
 	haggle_value.add_theme_color_override("font_color", risk_color)
+
+## 性格→阈值修正（负数=更敏感，正数=更大方）
+func _personality_threshold_mod(personality: int) -> float:
+	match personality:
+		0: return 0.15   # 爽直 — 不太讲价
+		4: return -0.15  # 吝啬 — 对价格极敏感
+		5: return 0.20   # 慷慨 — 大方
+		2: return -0.08  # 急躁 — 容易生气
+		3: return 0.12   # 耐心 — 慢慢磨
+		6: return -0.05  # 多疑 — 略带怀疑
+		7: return 0.10   # 轻信 — 容易开心
+		_: return 0.0    # 精明(1) — 标准
