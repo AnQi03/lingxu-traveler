@@ -10,6 +10,9 @@ var scene_bg: Control = null
 var atmosphere_label: Label = null
 var player: Player = null
 
+## 交互点 {name, pos, radius, action}
+var interact_points: Array = []
+
 
 func _ready():
 	set_process_mode(PROCESS_MODE_ALWAYS)
@@ -27,10 +30,7 @@ func _ready():
 		stall_scene = stall.instantiate()
 		add_child(stall_scene)
 	
-	# 场景背景（简化版——先跳过玩家测试）
 	_create_scene_background()
-	
-	# 玩家角色
 	_create_player()
 	_setup_camera()
 	_create_interact_points()
@@ -45,7 +45,6 @@ func _process(delta):
 	_process_interact_hint(delta)
 
 func _create_scene_background():
-	# 场景背景 — 使用像素场景图
 	scene_bg = TextureRect.new()
 	scene_bg.name = "SceneBackground"
 	scene_bg.size = Vector2(1152, 648)
@@ -55,7 +54,6 @@ func _create_scene_background():
 	add_child(scene_bg)
 	move_child(scene_bg, 0)
 	
-	# 暗色遮罩覆盖
 	var overlay = ColorRect.new()
 	overlay.name = "SceneOverlay"
 	overlay.size = Vector2(1152, 648)
@@ -77,13 +75,11 @@ func _create_scene_background():
 func _update_background():
 	var t = PlayerData.time_of_day
 	var is_night = t >= 19.0 or t < 5.0
-	
 	var tex_path = "res://assets/img/ui/bg/night_scene.png" if is_night else "res://assets/img/ui/bg/market_scene.png"
 	var tex = load(tex_path)
 	if tex:
 		scene_bg.texture = tex
 	
-	# 暗色遮罩随时段变化
 	var overlay = scene_bg.find_child("SceneOverlay", false, false)
 	if overlay:
 		if t >= 19.0 and t < 21.0:
@@ -117,13 +113,10 @@ func _create_market():
 	market_layer.layer = 3
 	market_layer.set_process_mode(PROCESS_MODE_WHEN_PAUSED)
 	add_child(market_layer)
-	
 	var script = load("res://scripts/Market.gd")
 	if script:
 		market_layer.set_script(script)
-	
 	market_node = market_layer
-
 
 func _create_dev_console():
 	var console_layer = CanvasLayer.new()
@@ -131,13 +124,10 @@ func _create_dev_console():
 	console_layer.layer = 10
 	console_layer.set_process_mode(PROCESS_MODE_WHEN_PAUSED)
 	add_child(console_layer)
-	
 	var script = load("res://scripts/DevConsole.gd")
 	if script:
 		console_layer.set_script(script)
-	
 	dev_console_node = console_layer
-
 
 func _create_furnace():
 	var furnace_layer = CanvasLayer.new()
@@ -145,13 +135,10 @@ func _create_furnace():
 	furnace_layer.layer = 4
 	furnace_layer.set_process_mode(PROCESS_MODE_WHEN_PAUSED)
 	add_child(furnace_layer)
-	
 	var script = load("res://scripts/Furnace.gd")
 	if script:
 		furnace_layer.set_script(script)
-	
 	furnace_node = furnace_layer
-
 
 func _create_inventory():
 	var inv_layer = CanvasLayer.new()
@@ -159,11 +146,9 @@ func _create_inventory():
 	inv_layer.layer = 5
 	inv_layer.set_process_mode(PROCESS_MODE_WHEN_PAUSED)
 	add_child(inv_layer)
-	
 	var script = load("res://scripts/Inventory.gd")
 	if script:
 		inv_layer.set_script(script)
-	
 	inventory_node = inv_layer
 
 
@@ -177,13 +162,6 @@ func is_any_panel_open() -> bool:
 	if inventory_node and inventory_node.get("is_open"):
 		return true
 	return false
-
-
-func _is_stall_open() -> bool:
-	if not stall_scene:
-		return false
-	var manager = stall_scene.get_node("StallManager")
-	return manager and manager.is_open
 
 
 func force_close_stall():
@@ -209,60 +187,41 @@ func _on_night_falling():
 func _on_period_changed(_period: String):
 	_update_background()
 
+
 func _create_player():
-	# 玩家角色 — CharacterBody2D
 	player = Player.new()
 	player.name = "Player"
-	player.position = Vector2(576, 324)  # 场景中央
+	player.position = Vector2(576, 324)
 	add_child(player)
 	
-	# 玩家精灵
 	var sprite = Sprite2D.new()
 	sprite.name = "PlayerSprite"
 	var tex = load("res://assets/img/characters/player_front.png")
 	if tex:
 		sprite.texture = tex
-		sprite.scale = Vector2(0.15, 0.15)  # 缩放到合适大小
+		sprite.scale = Vector2(0.15, 0.15)
 	player.add_child(sprite)
 	
-	# 碰撞体
 	var shape = CollisionShape2D.new()
 	var circle = CircleShape2D.new()
 	circle.radius = 12
 	shape.shape = circle
 	player.add_child(shape)
 
-func _create_interact_zones():
-	# 集市交互区 — 左侧
-	var market_zone = _make_zone("MarketZone", Vector2(150, 324), Vector2(80, 80), "🏪 集市 [按E]")
-	market_zone.on_interact = func():
-		if market_node and market_node.has_method("toggle"):
-			market_node.toggle()
-	
-	# 摊位交互区 — 中央
-	var stall_zone = _make_zone("StallZone", Vector2(576, 420), Vector2(100, 60), "🏷 摆摊 [按E]")
-	stall_zone.on_interact = func():
-		if stall_scene:
-			var mgr = stall_scene.get_node("StallManager")
-			if mgr:
-				if mgr.is_open:
-					mgr.close_stall()
-				elif DayCycle.can_stall(PlayerData.time_of_day):
-					mgr.open_stall()
-	
-	# 熔炉交互区 — 右侧
-	var furnace_zone = _make_zone("FurnaceZone", Vector2(950, 324), Vector2(80, 80), "🔥 熔炉 [按E]")
-	furnace_zone.on_interact = func():
-		if not PlayerData.is_furnace_unlocked():
-			var hud = PlayerData.get_meta("hud")
-			if hud and hud.has_method("show_toast"):
-				hud.show_toast("🔥 熔炉 Day5解锁", Color(1, 0.6, 0.2), 3.0)
-			return
-		if furnace_node and furnace_node.has_method("toggle"):
-			furnace_node.toggle()
+func _setup_camera():
+	var cam = Camera2D.new()
+	cam.name = "GameCamera"
+	cam.position_smoothing_enabled = true
+	cam.position_smoothing_speed = 5.0
+	cam.zoom = Vector2(1.0, 1.0)
+	cam.limit_left = 0
+	cam.limit_top = 0
+	cam.limit_right = 1152
+	cam.limit_bottom = 648
+	add_child(cam)
+	cam.make_current()
+	cam.reparent(player)
 
-## 交互点定义 {name, pos, radius, action}
-var interact_points: Array = []
 
 func _create_interact_points():
 	interact_points = [
@@ -278,6 +237,31 @@ func _create_interact_points():
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.visible = false
 	add_child(hint)
+
+func _get_nearest_interact() -> Dictionary:
+	if not player:
+		return {}
+	var best = {}
+	var best_dist = 9999.0
+	for pt in interact_points:
+		var d = player.position.distance_to(pt.pos)
+		if d < pt.radius and d < best_dist:
+			best = pt
+			best_dist = d
+	return best
+
+func _process_interact_hint(_delta):
+	var hint = find_child("InteractHint", false, false)
+	if not hint or not player:
+		return
+	var nearest = _get_nearest_interact()
+	if nearest.is_empty():
+		hint.visible = false
+	else:
+		hint.text = "🏷 按 E — %s" % nearest.name
+		hint.position = player.position + Vector2(-60, -50)
+		hint.size = Vector2(120, 30)
+		hint.visible = true
 
 func _do_interact(action: String):
 	match action:
@@ -298,39 +282,12 @@ func _do_interact(action: String):
 			elif furnace_node and furnace_node.has_method("toggle"):
 				furnace_node.toggle()
 
-func _get_nearest_interact() -> Dictionary:
-	if not player:
-		return {}
-	var best = {}
-	var best_dist = 9999.0
-	for pt in interact_points:
-		var d = player.position.distance_to(pt.pos)
-		if d < pt.radius and d < best_dist:
-			best = pt
-			best_dist = d
-	return best
-
-func _setup_camera():
-	var cam = Camera2D.new()
-	cam.name = "GameCamera"
-	cam.position_smoothing_enabled = true
-	cam.position_smoothing_speed = 5.0
-	cam.zoom = Vector2(1.0, 1.0)
-	cam.limit_left = 0
-	cam.limit_top = 0
-	cam.limit_right = 1152
-	cam.limit_bottom = 648
-	add_child(cam)
-	cam.make_current()
-	cam.reparent(player)
-
 
 func _input(event):
 	if event is InputEventMouseMotion or event is InputEventMouseButton:
 		return
 	
 	if event is InputEventKey and event.pressed and not event.echo:
-		# F5/F9 存档读档
 		if event.keycode == KEY_F5:
 			PlayerData.save_game()
 			get_viewport().set_input_as_handled()
@@ -353,7 +310,6 @@ func _input(event):
 			get_viewport().set_input_as_handled()
 			return
 		
-		# 面板打开时关闭
 		if is_any_panel_open():
 			match event.keycode:
 				KEY_ESCAPE, KEY_B, KEY_F, KEY_I, KEY_E:
@@ -365,14 +321,12 @@ func _input(event):
 			get_viewport().set_input_as_handled()
 			return
 		
-		# 快捷键
 		match event.keycode:
 			KEY_B:
 				if market_node and market_node.has_method("toggle"):
 					market_node.toggle()
 				get_viewport().set_input_as_handled()
 			KEY_E:
-				# 优先场景交互，否则开背包
 				var nearest = _get_nearest_interact()
 				if not nearest.is_empty():
 					_do_interact(nearest.action)
@@ -386,7 +340,6 @@ func _input(event):
 			KEY_F:
 				if furnace_node and furnace_node.has_method("toggle"):
 					if not PlayerData.is_furnace_unlocked():
-						print("熔炉 Day5解锁")
 						get_viewport().set_input_as_handled()
 						return
 					furnace_node.toggle()
