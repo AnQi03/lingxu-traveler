@@ -67,25 +67,17 @@ func start_haggle(player_offer: int) -> Dictionary:
 	
 	match result.result:
 		"accept":
-			# 交易成功
-			var item = current_customer.want_item
+			# 交易成功 — 已在议价前检查过库存，直接扣
 			var total_price = result.final_price
 			var count = current_customer.want_count
 			
-			# 检查库存
-			if PlayerData.find_item(item.id).get("count", 0) >= count:
-				PlayerData.remove_item(item.id, count)
-				PlayerData.earn_stones(total_price)
-				daily_income += total_price
-				today_customers += 1
-				PlayerData.update_customer_relation(current_customer.name, 2)
-				trade_completed.emit(item.id, count, total_price)
-				current_customer = {}
-			else:
-				result.result = "no_stock"
-				result.message = "你没有足够的%s" % item.name
-				trade_failed.emit(item.id, 0, "库存不足")
-				current_customer = {}
+			PlayerData.remove_item(item.id, count)
+			PlayerData.earn_stones(total_price)
+			daily_income += total_price
+			today_customers += 1
+			PlayerData.update_customer_relation(current_customer.name, 2)
+			trade_completed.emit(item.id, count, total_price)
+			current_customer = {}
 				
 		"walk_away":
 			# 顾客走了
