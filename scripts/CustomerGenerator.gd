@@ -172,34 +172,49 @@ static func handle_haggle(customer: Dictionary, player_offer: int) -> Dictionary
 		result_msg = _get_grudging_accept_msg(customer)
 		
 	elif customer.round >= customer.patience:
-		result_type = "walk_away"
-		result_msg = _get_walk_away_msg(customer)
+		# 偶尔给最后一次机会
+		if randf() < 0.35 and customer.round < customer.patience + 2:
+			customer.patience += 1
+			var new_offer = int(customer.offer_price + (customer.max_price - customer.offer_price) * 0.15)
+			customer.offer_price = clampi(new_offer, customer.offer_price + 1, customer.max_price)
+			result_type = "counter"
+			result_msg = "[😤 本想走了…] " + customer.name + "站住脚步：'最后一次——%d灵石！'" % customer.offer_price
+		else:
+			result_type = "walk_away"
+			result_msg = _get_walk_away_msg(customer)
 		
 	else:
-		# 让步递减：越往后让步越小，释放"没空间了"的信号
+		# 让步递减：越往后让步越小
 		var gap = customer.max_price - customer.offer_price
 		var concession = 0.0
 		match customer.round:
-			1: concession = 0.40
+			1: concession = 0.35
 			2: concession = 0.25
-			3: concession = 0.10
-			_: concession = 0.02
+			3: concession = 0.12
+			_: concession = 0.05
 		
-		# 性格调整让步幅度
+		# 性格调整
 		match customer.personality:
-			Personality.SHUANGZHI: concession += 0.05
-			Personality.JINGMING: concession -= 0.05
-			Personality.JIZAO: concession += 0.10
-			Personality.NAIXIN: concession -= 0.03
+			Personality.SHUANGZHI: concession += 0.08
+			Personality.JINGMING: concession -= 0.06
+			Personality.JIZAO: concession += 0.12
+			Personality.NAIXIN: concession -= 0.02
 			Personality.LINSE: concession -= 0.10
-			Personality.KANGKAI: concession += 0.08
-			Personality.DUOYI: concession -= 0.02
+			Personality.KANGKAI: concession += 0.10
+			Personality.DUOYI: concession -= 0.04
+		
+		# NPC接近上限时可能"松口"加速
+		var closeness = float(customer.offer_price) / float(customer.max_price)
+		if closeness > 0.8 and randf() < 0.3:
+			concession += 0.10  # 快了！突然松口
+			result_msg = "[✨ 口风松动] " + customer.name + "犹豫了一下：'要不你再让一步？差不多就成了。'"
 		
 		var new_offer = int(customer.offer_price + gap * concession)
 		new_offer = clampi(new_offer, customer.offer_price + 1, customer.max_price)
 		customer.offer_price = new_offer
 		result_type = "counter"
-		result_msg = _get_counter_msg(customer)
+		if result_msg == "":
+			result_msg = _get_counter_msg(customer)
 	
 	# 情绪提示附加到消息
 	if result_type == "counter" or result_type == "walk_away":
@@ -237,17 +252,17 @@ static func _get_offer_ratio(personality: int, urgent: bool) -> float:
 	return 0.75
 
 static func _get_max_ratio(personality: int, urgent: bool) -> float:
-	if urgent: return 1.40 + randf() * 0.25
+	if urgent: return 1.50 + randf() * 0.30
 	match personality:
-		Personality.SHUANGZHI: return 1.25 + randf() * 0.15
-		Personality.JINGMING: return 1.30 + randf() * 0.20
-		Personality.JIZAO: return 1.20 + randf() * 0.15
-		Personality.NAIXIN: return 1.30 + randf() * 0.20
-		Personality.LINSE: return 1.25 + randf() * 0.15
-		Personality.KANGKAI: return 1.40 + randf() * 0.25
-		Personality.DUOYI: return 1.25 + randf() * 0.20
-		Personality.QINGXIN: return 1.30 + randf() * 0.20
-	return 1.30
+		Personality.SHUANGZHI: return 1.35 + randf() * 0.20
+		Personality.JINGMING: return 1.40 + randf() * 0.25
+		Personality.JIZAO: return 1.25 + randf() * 0.20
+		Personality.NAIXIN: return 1.40 + randf() * 0.25
+		Personality.LINSE: return 1.35 + randf() * 0.20
+		Personality.KANGKAI: return 1.50 + randf() * 0.30
+		Personality.DUOYI: return 1.35 + randf() * 0.25
+		Personality.QINGXIN: return 1.40 + randf() * 0.25
+	return 1.35
 
 static func _get_patience(personality: int, urgent: bool) -> int:
 	if urgent: return 1
