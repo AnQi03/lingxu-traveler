@@ -54,6 +54,11 @@ func start_haggle(player_offer: int) -> Dictionary:
 	if current_customer.is_empty():
 		return { "result": "error", "message": "没有顾客" }
 	
+	# 先查库存，没货不扣灵识
+	var item = current_customer.want_item
+	if PlayerData.find_item(item.id).get("count", 0) < current_customer.want_count:
+		return { "result": "error", "message": "你没有足够的%s！" % item.name }
+	
 	if not PlayerData.spend_ling_shi(5):
 		return { "result": "error", "message": "灵识耗尽！今天你已经太累了，休息吧。" }
 	
