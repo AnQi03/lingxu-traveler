@@ -239,6 +239,23 @@ func calculate_assessment() -> Dictionary:
 var customer_relations: Dictionary = {}
 var loyalty_events_triggered: Array = []  # 已触发的常客事件 ["石老_3", "青儿_5", ...]
 
+## ---------- 顾客记忆 ----------
+# { "石老": {"last_price": 50, "last_result": "accept", "visit_count": 12, "last_day": 45} }
+var customer_memory: Dictionary = {}
+
+func remember_deal(customer_name: String, price: int, result: String) -> void:
+	if not customer_memory.has(customer_name):
+		customer_memory[customer_name] = {"visit_count": 0}
+	customer_memory[customer_name]["last_price"] = price
+	customer_memory[customer_name]["last_result"] = result
+	customer_memory[customer_name]["last_day"] = game_day
+	customer_memory[customer_name]["visit_count"] = customer_memory[customer_name].get("visit_count", 0) + 1
+
+func get_customer_memory(customer_name: String) -> Dictionary:
+	if customer_memory.has(customer_name):
+		return customer_memory[customer_name]
+	return {}
+
 
 # ============================================================
 # 灵石
@@ -440,7 +457,8 @@ func save_game() -> void:
 		"renxin_voice_heard": renxin_voice_heard,
 		"year_assessed": year_assessed,
 		"assessment_score": assessment_score,
-		"assessment_rating": assessment_rating
+		"assessment_rating": assessment_rating,
+		"customer_memory": customer_memory
 	}
 	var file = FileAccess.open("user://save.json", FileAccess.WRITE)
 	if file:
@@ -491,6 +509,7 @@ func load_game() -> bool:
 	year_assessed = data.get("year_assessed", false)
 	assessment_score = data.get("assessment_score", 0)
 	assessment_rating = data.get("assessment_rating", 0)
+	customer_memory = data.get("customer_memory", {})
 	
 	is_daytime = time_of_day >= 5.0 and time_of_day < 19.0
 	print("读档成功！第%d天" % game_day)

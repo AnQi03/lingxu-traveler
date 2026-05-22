@@ -141,11 +141,13 @@ func start_haggle(player_offer: int) -> Dictionary:
 				if hud and hud.has_method("show_toast"):
 					hud.show_toast("💎 %s 好感 Lv.%d！" % [current_customer.name, new_loyalty], Color(0.8, 0.4, 1.0), 5.0)
 			trade_completed.emit(item.id, count, total_price)
+			PlayerData.remember_deal(current_customer.name, total_price, "accept")
 			current_customer = {}
 				
 		"walk_away":
 			# 顾客走了
 			PlayerData.update_customer_relation(current_customer.name, -1)
+			PlayerData.remember_deal(current_customer.name, 0, "walk_away")
 			trade_failed.emit(current_customer.want_item.id, 0, result.message)
 			current_customer = {}
 			PlayerData.trade_streak = 0  # 连胜中断

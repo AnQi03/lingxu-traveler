@@ -107,6 +107,18 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	customer_name.text = "👤 %s" % customer.name
 	customer_mood.text = "状态: 😐  %s" % customer.mood
 	
+	# 显示顾客对话（有名字的顾客优先用对话池）
+	var greeting = ""
+	if customer.name in ["石老", "青儿", "霍老板", "冷面客", "金娘子"]:
+		greeting = CustomerGenerator.get_customer_greeting(customer.name, customer)
+	elif randf() < 0.3:
+		# 无名顾客偶尔也有话说
+		var pool = ["来看看。", "今天有什么好货？", "随便看看。", "这个怎么卖？"]
+		greeting = pool[randi() % pool.size()]
+	
+	if greeting != "":
+		customer_request.text = "💬 %s" % greeting
+	
 	# 商道提示：越高越能感知顾客底线
 	if PlayerData.shang_dao >= 50:
 		customer_mood.text += "\n💼 经验告诉你：这位顾客还有很大加价空间"
