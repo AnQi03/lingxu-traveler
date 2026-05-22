@@ -336,7 +336,7 @@ func _do_smelt():
 		return
 	
 	# 根据熔炉等级动态概率
-	var luck_table = PlayerData.get_furnace_luck(PlayerData.furnace_tier)
+	var luck_table = PlayerData.get_furnace_luck(PlayerData.furnace_tier).duplicate()
 	
 	# 天道加成：每10点天道提升2%升品概率
 	var tian_bonus = float(PlayerData.tian_dao) / 10.0 * 0.02
