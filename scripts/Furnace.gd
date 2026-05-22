@@ -63,7 +63,7 @@ func _build_ui():
 	title_bar.add_child(title)
 	
 	var close_btn = Button.new()
-	close_btn.text = "  关闭 [F]  "
+	close_btn.text = "  关闭 [ESC]  "
 	close_btn.add_theme_color_override("font_color", Color(1, 0.5, 0.5))
 	close_btn.add_theme_font_size_override("font_size", 16)
 	close_btn.pressed.connect(_on_close)

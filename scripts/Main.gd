@@ -43,7 +43,7 @@ func _ready():
 	if not PlayerData.has_seen_opening:
 		call_deferred("_show_opening")
 	
-	print("WASD 移动  |  E 交互  |  Tab/I 背包  |  B 集市  |  F 熔炉  |  空格 摆摊  |  ESC 关闭面板")
+	print("WASD 移动  |  E 场景交互/背包  |  Tab 背包  |  空格 摆摊  |  ESC 关闭面板")
 
 func _process(delta):
 	_process_interact_hint(delta)
@@ -390,13 +390,7 @@ func _input(event):
 		
 		# 有任何面板打开时：只处理该面板对应的关闭键
 		if is_any_panel_open():
-			if event.keycode == KEY_B and market_node and market_node.get("is_open"):
-				market_node.toggle()
-				get_viewport().set_input_as_handled()
-			elif event.keycode == KEY_F and furnace_node and furnace_node.get("is_open"):
-				furnace_node.toggle()
-				get_viewport().set_input_as_handled()
-			elif (event.keycode == KEY_I or event.keycode == KEY_TAB) and inventory_node and inventory_node.get("is_open"):
+			if (event.keycode == KEY_TAB) and inventory_node and inventory_node.get("is_open"):
 				inventory_node.toggle()
 				get_viewport().set_input_as_handled()
 			else:
@@ -405,29 +399,18 @@ func _input(event):
 		
 		# 无面板打开：正常按键映射
 		match event.keycode:
-			KEY_B:
-				if market_node and market_node.has_method("toggle"):
-					market_node.toggle()
-				get_viewport().set_input_as_handled()
 			KEY_E:
-				# E = 纯场景交互，不再打开背包
 				var nearest = _get_nearest_interact()
-				if not nearest.is_empty():
+				if nearest.is_empty():
+					# 附近无交互物 → 打开背包
+					if inventory_node and inventory_node.has_method("toggle"):
+						inventory_node.toggle()
+				else:
 					_do_interact(nearest.action)
 				get_viewport().set_input_as_handled()
-			KEY_I, KEY_TAB:
+			KEY_TAB:
 				if inventory_node and inventory_node.has_method("toggle"):
 					inventory_node.toggle()
-				get_viewport().set_input_as_handled()
-			KEY_F:
-				if not PlayerData.is_furnace_unlocked():
-					var hud = PlayerData.get_meta("hud")
-					if hud and hud.has_method("show_toast"):
-						hud.show_toast("🔒 Day5解锁熔炉", Color(0.9, 0.6, 0.2), 2.0)
-					get_viewport().set_input_as_handled()
-					return
-				if furnace_node and furnace_node.has_method("toggle"):
-					furnace_node.toggle()
 				get_viewport().set_input_as_handled()
 			KEY_SPACE:
 				if stall_scene:
