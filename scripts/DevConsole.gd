@@ -1,13 +1,7 @@
 extends CanvasLayer
 
-# ================================================================
-# 开发者控制台 - DevConsole.gd
-# 按 `~` 或 F12 打开，用于调试和测试
-# ================================================================
-
 var is_open: bool = false
 var dev_panel: Panel = null
-var settings: Dictionary = {}
 
 
 func _ready():
@@ -25,14 +19,12 @@ func _build_ui():
 	dev_panel.position = Vector2(100, 30)
 	dev_panel.size = Vector2(1100, 640)
 	
-	# 背景
 	var bg = ColorRect.new()
 	bg.color = Color(0.05, 0.08, 0.15, 0.97)
 	bg.size = dev_panel.size
 	bg.mouse_filter = 0
 	dev_panel.add_child(bg)
 	
-	# 标题
 	var title_bar = HBoxContainer.new()
 	title_bar.position = Vector2(0, 0)
 	title_bar.size = Vector2(1100, 36)
@@ -51,7 +43,6 @@ func _build_ui():
 	close_btn.pressed.connect(_on_close)
 	title_bar.add_child(close_btn)
 	
-	# 滚动区域
 	var scroll = ScrollContainer.new()
 	scroll.position = Vector2(15, 45)
 	scroll.size = Vector2(1070, 575)
@@ -63,38 +54,71 @@ func _build_ui():
 	vbox.add_theme_constant_override("separation", 12)
 	scroll.add_child(vbox)
 	
-	# ===== 灵石区块 =====
+	# 灵石区块
 	_add_section_header(vbox, "💎 灵石修改")
-	
 	_add_field_row(vbox, "下品灵石", "_set_spirit_stones", 30)
 	_add_field_row(vbox, "中品灵石", "_set_mid_stones", 0)
 	_add_field_row(vbox, "上品灵石", "_set_high_stones", 0)
 	
-	# ===== 时间区块 =====
+	# 时间区块
 	_add_section_header(vbox, "⏰ 时间修改")
-	
 	_add_field_row(vbox, "当前天数", "_set_day", 1)
 	_add_field_row(vbox, "当前时辰(0-23)", "_set_hour", 6)
 	
-	# ===== 灵材区块 =====
+	# 推进时间按钮
+	var advance_hbox = HBoxContainer.new()
+	advance_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	
+	var advance_label = Label.new()
+	advance_label.text = "时间推进:"
+	advance_label.add_theme_color_override("font_color", Color.WHITE)
+	advance_label.add_theme_font_size_override("font_size", 14)
+	advance_label.custom_minimum_size = Vector2(120, 0)
+	advance_hbox.add_child(advance_label)
+	
+	var advance_1h = Button.new()
+	advance_1h.text = "+1时辰"
+	advance_1h.pressed.connect(_advance_time.bind(2.0))
+	advance_hbox.add_child(advance_1h)
+	
+	var advance_6h = Button.new()
+	advance_6h.text = "+6时辰"
+	advance_6h.pressed.connect(_advance_time.bind(6.0))
+	advance_hbox.add_child(advance_6h)
+	
+	var advance_1d = Button.new()
+	advance_1d.text = "+1天"
+	advance_1d.pressed.connect(_advance_time.bind(24.0))
+	advance_hbox.add_child(advance_1d)
+	
+	var advance_7d = Button.new()
+	advance_7d.text = "+7天"
+	advance_7d.pressed.connect(_advance_time.bind(168.0))
+	advance_hbox.add_child(advance_7d)
+	
+	vbox.add_child(advance_hbox)
+	
+	# 灵材区块
 	_add_section_header(vbox, "🧪 添加灵材到背包")
 	
-	# 灵材下拉 + 数量
 	var item_hbox = HBoxContainer.new()
 	item_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	
-	item_hbox.add_child(_make_label("选择灵材:", 120))
+	var item_label = Label.new()
+	item_label.text = "选择灵材:"
+	item_label.add_theme_color_override("font_color", Color.WHITE)
+	item_label.add_theme_font_size_override("font_size", 14)
+	item_label.custom_minimum_size = Vector2(120, 0)
+	item_hbox.add_child(item_label)
 	
 	var item_option = OptionButton.new()
 	item_option.name = "item_selector"
 	item_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	item_option.custom_minimum_size = Vector2(350, 0)
 	
-	# 从 MaterialData 加载灵材列表
-	var all_market_items = MaterialData.get_market_items()
 	var tier_names = ["凡", "灵", "宝", "仙"]
 	var element_icons = ["金", "木", "水", "火", "土"]
-	for item_def in all_market_items:
+	for item_def in MaterialData.get_market_items():
 		var tier_str = tier_names[item_def.tier] if item_def.tier < tier_names.size() else "?"
 		var elem_str = element_icons[item_def.element] if item_def.element >= 0 and item_def.element < element_icons.size() else "?"
 		item_option.add_item("[%s][%s] %s (%d灵石)" % [tier_str, elem_str, item_def.name, item_def.base_price])
@@ -117,18 +141,17 @@ func _build_ui():
 	
 	vbox.add_child(item_hbox)
 	
-	# ===== 三道区块 =====
+	# 三道区块
 	_add_section_header(vbox, "📊 三道路径修改")
-	
 	_add_field_row(vbox, "商道", "_set_shang_dao", 0)
 	_add_field_row(vbox, "天道", "_set_tian_dao", 0)
 	_add_field_row(vbox, "人心", "_set_ren_xin", 0)
 	
-	# ===== 熔炼区块 =====
+	# 熔炼区块
 	_add_section_header(vbox, "🔥 熔炼修改")
 	_add_field_row(vbox, "今日熔炼次数", "_set_refine_count", 0)
 	
-	# ===== 快捷预设 =====
+	# 快捷预设
 	_add_section_header(vbox, "⚡ 快捷预设")
 	
 	var preset_hbox = HBoxContainer.new()
@@ -156,7 +179,7 @@ func _build_ui():
 	
 	vbox.add_child(preset_hbox)
 	
-	# ===== 状态显示 =====
+	# 状态显示
 	_add_section_header(vbox, "📋 当前状态")
 	
 	var status_label = Label.new()
@@ -167,39 +190,27 @@ func _build_ui():
 	status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.add_child(status_label)
 	
-	# 刷新状态
 	_refresh_status()
 
 
-# ================================================================
-# UI 辅助
-# ================================================================
-
-func _make_label(text: String, min_width: int = 0) -> Label:
-	var label = Label.new()
-	label.text = text
-	label.add_theme_color_override("font_color", Color.WHITE)
-	label.add_theme_font_size_override("font_size", 14)
-	if min_width > 0:
-		label.custom_minimum_size = Vector2(min_width, 0)
-	return label
-
-
 func _add_section_header(parent: VBoxContainer, title: String):
-	var hbox = HBoxContainer.new()
 	var label = Label.new()
 	label.text = title
 	label.add_theme_color_override("font_color", Color(0.3, 0.8, 1.0))
 	label.add_theme_font_size_override("font_size", 16)
-	hbox.add_child(label)
-	parent.add_child(hbox)
+	parent.add_child(label)
 
 
 func _add_field_row(parent: VBoxContainer, label_text: String, setter_method: String, default_value: int):
 	var hbox = HBoxContainer.new()
 	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	
-	hbox.add_child(_make_label(label_text, 120))
+	var label = Label.new()
+	label.text = label_text
+	label.add_theme_color_override("font_color", Color.WHITE)
+	label.add_theme_font_size_override("font_size", 14)
+	label.custom_minimum_size = Vector2(120, 0)
+	hbox.add_child(label)
 	
 	var line_edit = LineEdit.new()
 	line_edit.name = "input_" + setter_method
@@ -223,18 +234,14 @@ func _make_setter(method: String, line_edit: LineEdit) -> Callable:
 		_refresh_status()
 
 
-# ================================================================
-# 设置功能
-# ================================================================
-
 func _set_spirit_stones(val: int):
-	PlayerData.spirit_stones = val
+	PlayerData.spirit_stones = max(0, val)
 
 func _set_mid_stones(val: int):
-	PlayerData.mid_spirit_stones = val
+	PlayerData.mid_spirit_stones = max(0, val)
 
 func _set_high_stones(val: int):
-	PlayerData.high_spirit_stones = val
+	PlayerData.high_spirit_stones = max(0, val)
 
 func _set_day(val: int):
 	PlayerData.game_day = max(1, val)
@@ -243,16 +250,22 @@ func _set_hour(val: int):
 	PlayerData.time_of_day = float(clampi(val, 0, 23))
 
 func _set_shang_dao(val: int):
-	PlayerData.shang_dao = val
+	PlayerData.shang_dao = max(0, val)
 
 func _set_tian_dao(val: int):
-	PlayerData.tian_dao = val
+	PlayerData.tian_dao = max(0, val)
 
 func _set_ren_xin(val: int):
-	PlayerData.ren_xin = val
+	PlayerData.ren_xin = max(0, val)
 
 func _set_refine_count(val: int):
-	PlayerData.daily_refine_count = val
+	PlayerData.daily_refine_count = max(0, val)
+
+
+# 推进时间（会自动重置熔炼次数）
+func _advance_time(hours: float):
+	PlayerData.advance_time(hours)
+	_refresh_status()
 
 
 func _add_item_from_option(option_btn: OptionButton, spin: SpinBox):
@@ -275,10 +288,6 @@ func _add_item_from_option(option_btn: OptionButton, spin: SpinBox):
 	_refresh_status()
 
 
-# ================================================================
-# 快捷预设
-# ================================================================
-
 func _preset_default():
 	PlayerData.spirit_stones = 30
 	PlayerData.mid_spirit_stones = 0
@@ -294,14 +303,12 @@ func _preset_default():
 
 
 func _preset_stall_test():
-	# 5000 灵石 + 背包里装满物品
 	PlayerData.spirit_stones = 5000
 	PlayerData.mid_spirit_stones = 0
 	PlayerData.high_spirit_stones = 0
 	PlayerData.inventory.clear()
 	
-	var items = MaterialData.get_market_items()
-	for item_def in items:
+	for item_def in MaterialData.get_market_items():
 		PlayerData.add_item({
 			"id": item_def.id,
 			"name": item_def.name,
@@ -314,14 +321,12 @@ func _preset_stall_test():
 
 
 func _preset_furnace_test():
-	# 大量灵石 + 大量灵材（适合测试熔炉）
 	PlayerData.spirit_stones = 500
 	PlayerData.mid_spirit_stones = 5
 	PlayerData.high_spirit_stones = 2
 	PlayerData.inventory.clear()
 	
-	var items = MaterialData.get_market_items()
-	for item_def in items:
+	for item_def in MaterialData.get_market_items():
 		PlayerData.add_item({
 			"id": item_def.id,
 			"name": item_def.name,
@@ -334,14 +339,12 @@ func _preset_furnace_test():
 
 
 func _preset_full_test():
-	# 全属性拉满
 	PlayerData.spirit_stones = 9999
 	PlayerData.mid_spirit_stones = 99
 	PlayerData.high_spirit_stones = 99
 	PlayerData.inventory.clear()
 	
-	var items = MaterialData.get_market_items()
-	for item_def in items:
+	for item_def in MaterialData.get_market_items():
 		for _i in range(50):
 			PlayerData.add_item({
 				"id": item_def.id,
@@ -356,10 +359,6 @@ func _preset_full_test():
 	PlayerData.ren_xin = 999
 	_refresh_status()
 
-
-# ================================================================
-# 面板切换
-# ================================================================
 
 func toggle():
 	if is_open:
@@ -402,12 +401,12 @@ func _refresh_status():
 		inv_count += 1
 		total_items += item.get("count", 1)
 	
-	var text = "灵石: %d 下品 + %d 中品 + %d 上品 | 天数: %d · %s时 | 库存: %d 种 (%d件) | 商道:%d 天道:%d 人心:%d | 熔炼:%d/%d" % [
+	var text = "灵石: %d 下品 + %d 中品 + %d 上品 | 天数: %d · %d时 | 库存: %d 种 (%d件) | 商道:%d 天道:%d 人心:%d | 熔炼:%d/%d" % [
 		PlayerData.spirit_stones,
 		PlayerData.mid_spirit_stones,
 		PlayerData.high_spirit_stones,
 		PlayerData.game_day,
-		str(int(PlayerData.time_of_day)),
+		int(PlayerData.time_of_day),
 		inv_count,
 		total_items,
 		PlayerData.shang_dao,

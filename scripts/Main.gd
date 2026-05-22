@@ -3,6 +3,7 @@ extends Node2D
 var stall_scene: Node = null
 var market_node: Node = null
 var dev_console_node: Node = null
+var furnace_node: Node = null
 
 
 func _ready():
@@ -16,6 +17,7 @@ func _ready():
 	
 	_create_market()
 	_create_dev_console()
+	_create_furnace()
 	
 	var stall = preload("res://scenes/StallScene.tscn")
 	if stall:
@@ -71,11 +73,24 @@ func _create_dev_console():
 	dev_console_node = console_layer
 
 
+func _create_furnace():
+	var furnace_layer = CanvasLayer.new()
+	furnace_layer.name = "Furnace"
+	furnace_layer.layer = 4
+	furnace_layer.set_process_mode(PROCESS_MODE_WHEN_PAUSED)
+	add_child(furnace_layer)
+	
+	var script = load("res://scripts/Furnace.gd")
+	if script:
+		furnace_layer.set_script(script)
+	
+	furnace_node = furnace_layer
+
+
 func _input(event):
 	if event is InputEventMouseMotion or event is InputEventMouseButton:
 		return
 	
-	# 开发者控制台：`~` 键
 	if event.is_action_pressed("open_market"):
 		if market_node and market_node.has_method("toggle"):
 			market_node.toggle()
@@ -92,11 +107,12 @@ func _input(event):
 		get_viewport().set_input_as_handled()
 	
 	elif event.is_action_pressed("open_furnace"):
+		if furnace_node and furnace_node.has_method("toggle"):
+			furnace_node.toggle()
 		get_viewport().set_input_as_handled()
 	
-	# 开发者控制台: 用直接键码检测更可靠
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_GRAVE:
+		if event.keycode == KEY_QUOTELEFT:
 			if dev_console_node and dev_console_node.has_method("toggle"):
 				dev_console_node.toggle()
 			get_viewport().set_input_as_handled()
