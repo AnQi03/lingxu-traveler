@@ -172,6 +172,7 @@ func force_close_stall():
 
 
 func _on_night_falling():
+	SoundManager.sfx_day_transition()
 	force_close_stall()
 	var summary = load("res://scripts/DaySummary.gd")
 	if summary:

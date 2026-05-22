@@ -97,6 +97,7 @@ func _on_stall_closed() -> void:
 
 
 func _on_customer_arrived(customer: Dictionary) -> void:
+	SoundManager.sfx_customer_arrive()
 	is_trading = true
 	var item = customer.want_item
 	var tier_names = ["凡品", "灵品", "宝品", "仙品"]
@@ -134,6 +135,7 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 
 
 func _on_trade_completed(_item_id: String, _count: int, price: int) -> void:
+	SoundManager.sfx_deal()
 	haggle_result.text = "✅ 成交！获得 %d灵石" % price
 	is_trading = false
 	# 2秒后隐藏结果

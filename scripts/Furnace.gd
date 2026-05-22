@@ -386,7 +386,8 @@ func _do_smelt():
 		result_color = Color(0.5, 0.2, 0.2)
 		PlayerData.daily_refine_count += 1
 		PlayerData.smelt_streak = 0  # 连胜中断
-	
+		SoundManager.sfx_smelt_destroy()
+
 	elif roll < base_destroy + base_fail:
 		var nt = max(0, item.tier - 1)
 		var new_id = base_id + "_t" + str(nt) if nt > 0 else base_id
@@ -402,7 +403,8 @@ func _do_smelt():
 		result_color = Color(0.7, 0.5, 0.2)
 		PlayerData.daily_refine_count += 1
 		PlayerData.smelt_streak = 0  # 连胜中断
-	
+		SoundManager.sfx_smelt_normal()
+
 	elif roll < base_destroy + base_fail + base_same:
 		var keep_tier = max(0, item.tier)
 		var keep_id = base_id + "_t" + str(keep_tier) if keep_tier > 0 else base_id
@@ -418,7 +420,8 @@ func _do_smelt():
 		result_color = Color(0.6, 0.6, 0.6)
 		PlayerData.daily_refine_count += 1
 		PlayerData.smelt_streak = 0  # 连胜中断
-	
+		SoundManager.sfx_smelt_normal()
+
 	else:
 		var nt = min(3, item.tier + 1)
 		var new_id = base_id + "_t" + str(nt)
@@ -435,6 +438,7 @@ func _do_smelt():
 		PlayerData.daily_refine_count += 1
 		PlayerData.tian_dao += 1  # 天道成长
 		PlayerData.smelt_streak += 1  # 连胜
+		SoundManager.sfx_smelt_success()
 		if PlayerData.smelt_streak >= 5:
 			result_text += " 🔥天道眷顾！连升%d次！" % PlayerData.smelt_streak
 		elif PlayerData.smelt_streak >= 3:
