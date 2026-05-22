@@ -15,6 +15,15 @@ var shang_dao: int = 0
 var tian_dao: int = 0
 var ren_xin: int = 0
 
+## ---------- 主角身份 ----------
+var player_name: String = "安"           # 主角名
+var player_title: String = ""            # 称号（三道/成就决定）
+var player_motivation: String = "还债"   # 动机：还债/立足/寻父
+var has_seen_opening: bool = false       # 是否看过开场
+var shang_voice_heard: bool = false      # 商道第一次说话
+var tian_voice_heard: bool = false       # 天道第一次说话
+var renxin_voice_heard: bool = false     # 人心第一次说话
+
 ## ---------- 时间 ----------
 var game_day: int = 1
 var is_daytime: bool = true
@@ -313,7 +322,11 @@ func save_game() -> void:
 		"inventory": inventory,
 		"customer_relations": customer_relations,
 		"loyalty_events_triggered": loyalty_events_triggered,
-		"lingxu_fragments": lingxu_fragments
+		"lingxu_fragments": lingxu_fragments,
+		"has_seen_opening": has_seen_opening,
+		"shang_voice_heard": shang_voice_heard,
+		"tian_voice_heard": tian_voice_heard,
+		"renxin_voice_heard": renxin_voice_heard
 	}
 	var file = FileAccess.open("user://save.json", FileAccess.WRITE)
 	if file:
@@ -357,6 +370,10 @@ func load_game() -> bool:
 	customer_relations = data.get("customer_relations", {})
 	loyalty_events_triggered = data.get("loyalty_events_triggered", [])
 	lingxu_fragments = data.get("lingxu_fragments", 0)
+	has_seen_opening = data.get("has_seen_opening", false)
+	shang_voice_heard = data.get("shang_voice_heard", false)
+	tian_voice_heard = data.get("tian_voice_heard", false)
+	renxin_voice_heard = data.get("renxin_voice_heard", false)
 	
 	is_daytime = time_of_day >= 5.0 and time_of_day < 19.0
 	print("读档成功！第%d天" % game_day)

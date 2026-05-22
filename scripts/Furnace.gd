@@ -556,6 +556,13 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 	if PlayerData.daily_refine_count >= PlayerData.MAX_DAILY_REFINE:
 		if is_instance_valid(result_label):
 			result_label.text = "⚠️ 今日熔炼次数已用完！\n" + result_label.text
+	
+	# 天道初体验
+	if not PlayerData.tian_voice_heard and PlayerData.tian_dao >= 1:
+		PlayerData.tian_voice_heard = true
+		var hud = PlayerData.get_meta("hud")
+		if hud and hud.has_method("show_toast"):
+			hud.show_toast("💫 天道：「炉火在跳动…我能感觉到。这灵材在呼应你。」", Color(0.7, 0.45, 0.85), 6.0)
 
 
 func _refresh_history():

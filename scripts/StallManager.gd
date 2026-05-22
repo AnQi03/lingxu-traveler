@@ -117,6 +117,20 @@ func start_haggle(player_offer: int) -> Dictionary:
 			PlayerData.shang_dao += 1  # 商道成长：每次成功交易+1
 			PlayerData.has_stalled_today = true  # 连续出摊追踪
 			
+			# 商道初体验
+			if not PlayerData.shang_voice_heard and PlayerData.shang_dao >= 1:
+				PlayerData.shang_voice_heard = true
+				var hud = PlayerData.get_meta("hud")
+				if hud and hud.has_method("show_toast"):
+					hud.show_toast("💼 商道：「这人的绸缎料子不错——出得起价。记住，察言观色是第一课。」", Color(0.3, 0.85, 0.3), 6.0)
+			
+			# 人心初体验（有回头客时触发）
+			if not PlayerData.renxin_voice_heard and PlayerData.ren_xin >= 1:
+				PlayerData.renxin_voice_heard = true
+				var hud = PlayerData.get_meta("hud")
+				if hud and hud.has_method("show_toast"):
+					hud.show_toast("❤️ 人心：「他记得你。这灵墟里，真心比灵石更难得。」", Color(1, 0.6, 0.6), 6.0)
+			
 			# 常客心级事件
 			var new_loyalty = PlayerData.get_customer_loyalty(current_customer.name)
 			var event_data = CustomerGenerator.get_loyalty_event(current_customer.name, new_loyalty)

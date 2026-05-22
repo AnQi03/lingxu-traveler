@@ -39,10 +39,25 @@ func _ready():
 	DayCycle.night_falling.connect(_on_night_falling)
 	DayCycle.period_changed.connect(_on_period_changed)
 	
+	# 首次启动 → 开场叙事
+	if not PlayerData.has_seen_opening:
+		call_deferred("_show_opening")
+	
 	print("WASD 移动  |  E 交互  |  I 背包  |  B 集市  |  空格 摆摊")
 
 func _process(delta):
 	_process_interact_hint(delta)
+
+
+func _show_opening():
+	var opening = load("res://scripts/Opening.gd")
+	if opening:
+		var layer = CanvasLayer.new()
+		layer.name = "OpeningScene"
+		layer.layer = 30  # 最高层
+		layer.set_script(opening)
+		add_child(layer)
+		get_tree().paused = true  # 开场时暂停游戏
 
 func _create_scene_background():
 	scene_bg = TextureRect.new()
