@@ -28,7 +28,7 @@ func _ready():
 	DayCycle.start()
 	DayCycle.night_falling.connect(_on_night_falling)
 	
-	var key_hint = "B 集市  |  空格 摆摊  |  E 背包  |  ~ 控制台"
+	var key_hint = "B 集市  |  空格 摆摊  |  E 背包  |  ~ 控制台  |  F5存档 F9读档"
 	if PlayerData.is_furnace_unlocked():
 		key_hint += "  |  F 熔炉"
 	else:
@@ -136,6 +136,19 @@ func _input(event):
 		return
 	
 	if event is InputEventKey and event.pressed and not event.echo:
+		# F5 存档 / F9 读档
+		if event.keycode == KEY_F5:
+			PlayerData.save_game()
+			get_viewport().set_input_as_handled()
+			return
+		if event.keycode == KEY_F9:
+			if PlayerData.load_game():
+				var hud = PlayerData.get_meta("hud")
+				if hud and hud.has_method("show_toast"):
+					hud.show_toast("📂 读档成功！第%d天" % PlayerData.game_day, Color(0.5, 1.0, 0.7), 3.0)
+			get_viewport().set_input_as_handled()
+			return
+		
 		if event.keycode == KEY_QUOTELEFT:
 			if dev_console_node and dev_console_node.has_method("toggle"):
 				dev_console_node.toggle()

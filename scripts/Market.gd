@@ -10,29 +10,22 @@ func _ready():
 	_build_ui()
 	if is_instance_valid(market_ui):
 		market_ui.visible = false
-		print("Market.gd _ready() 完成，市场UI已创建")
-	else:
-		print("Market.gd _ready() 警告：_build_ui 未能创建 market_ui！")
 
 
 func _build_ui():
-	# 创建集市UI面板
 	market_ui = Panel.new()
 	market_ui.visible = false
 	add_child(market_ui)
 	
-	# 锚点设置
 	market_ui.position = Vector2(100, 40)
 	market_ui.size = Vector2(1080, 600)
 	
-	# 背景
 	var bg = ColorRect.new()
 	bg.color = Color(0.1, 0.15, 0.25, 0.95)
 	bg.size = market_ui.size
 	bg.mouse_filter = 0
 	market_ui.add_child(bg)
 	
-	# 标题栏
 	var title_bar = HBoxContainer.new()
 	title_bar.position = Vector2(0, 0)
 	title_bar.size = Vector2(1080, 40)
@@ -45,19 +38,17 @@ func _build_ui():
 	title_bar.add_child(title)
 	
 	var close_btn = Button.new()
-	close_btn.text = "  关闭 [M]  "
+	close_btn.text = "  关闭 [B]  "
 	close_btn.add_theme_color_override("font_color", Color(1, 0.5, 0.5))
 	close_btn.add_theme_font_size_override("font_size", 16)
 	close_btn.pressed.connect(_on_close)
 	title_bar.add_child(close_btn)
 	
-	# 滚动容器
 	var scroll = ScrollContainer.new()
 	scroll.position = Vector2(20, 50)
 	scroll.size = Vector2(1040, 530)
 	market_ui.add_child(scroll)
 	
-	# 物品网格
 	item_grid = GridContainer.new()
 	item_grid.columns = 2
 	item_grid.add_theme_constant_override("h_separation", 10)
@@ -65,9 +56,6 @@ func _build_ui():
 	item_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	item_grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.add_child(item_grid)
-
-
-# ===== 输入统一由 Main.gd 转发调用 toggle()，这里不设 _input =====
 
 
 func toggle():
@@ -78,15 +66,10 @@ func toggle():
 
 
 func open():
-	print("open() called, is_instance_valid(market_ui)=", is_instance_valid(market_ui), " is_open=", is_open)
-	
-	# 安全重建：如果market_ui没了就重建
 	if not is_instance_valid(market_ui):
-		print("market_ui 失效，执行重建...")
 		_build_ui()
 	
 	if not is_instance_valid(market_ui):
-		print("重建后 market_ui 依然无效！")
 		return
 	
 	is_open = true
@@ -96,12 +79,11 @@ func open():
 
 
 func close():
-	print("close() called, is_instance_valid(market_ui)=", is_instance_valid(market_ui))
+	is_open = false
 	
 	if is_instance_valid(market_ui):
 		market_ui.visible = false
 	
-	is_open = false
 	get_tree().paused = false
 
 
@@ -115,7 +97,7 @@ func _refresh_grid():
 	
 	var tier_names = ["凡品", "灵品", "宝品", "仙品"]
 	var element_icons = ["金", "木", "水", "火", "土"]
-	var items = MaterialData.get_market_items()
+	var items = MaterialData.get_daily_market_items()
 	
 	for item_def in items:
 		var inst = MaterialData.create_market_instance(item_def)
@@ -161,6 +143,9 @@ func _refresh_grid():
 
 
 func _buy(data):
+	if data.is_empty():
+		return
+	
 	if PlayerData.spend_stones(data.price):
 		PlayerData.add_item({
 			"id": data.id,
@@ -170,7 +155,4 @@ func _buy(data):
 			"price": data.price,
 			"count": 1
 		})
-		print("购买了 %s，花费 %d 灵石" % [data.name, data.price])
 		_refresh_grid()
-	else:
-		print("灵石不够！需要 %d 灵石" % data.price)

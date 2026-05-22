@@ -264,3 +264,76 @@ func advance_one_year() -> void:
 	game_year += 1
 	season_index = 0
 	season_day = 1
+
+# ============================================================
+# 存档系统 — JSON 序列化
+# ============================================================
+
+func save_game() -> void:
+	var data = {
+		"spirit_stones": spirit_stones,
+		"mid_spirit_stones": mid_spirit_stones,
+		"high_spirit_stones": high_spirit_stones,
+		"total_earned": total_earned,
+		"ling_shi": ling_shi,
+		"shang_dao": shang_dao,
+		"tian_dao": tian_dao,
+		"ren_xin": ren_xin,
+		"game_day": game_day,
+		"time_of_day": time_of_day,
+		"season_index": season_index,
+		"season_day": season_day,
+		"game_year": game_year,
+		"furnace_tier": furnace_tier,
+		"smelt_streak": smelt_streak,
+		"trade_streak": trade_streak,
+		"consecutive_stall_days": consecutive_stall_days,
+		"inventory": inventory,
+		"customer_relations": customer_relations,
+		"loyalty_events_triggered": loyalty_events_triggered
+	}
+	var file = FileAccess.open("user://save.json", FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data, "\t"))
+		file.close()
+		print("存档成功！")
+
+func load_game() -> bool:
+	if not FileAccess.file_exists("user://save.json"):
+		return false
+	var file = FileAccess.open("user://save.json", FileAccess.READ)
+	if not file:
+		return false
+	var json = JSON.new()
+	var error = json.parse(file.get_as_text())
+	file.close()
+	if error != OK:
+		return false
+	var data = json.get_data()
+	if not data is Dictionary:
+		return false
+	
+	spirit_stones = data.get("spirit_stones", 150)
+	mid_spirit_stones = data.get("mid_spirit_stones", 0)
+	high_spirit_stones = data.get("high_spirit_stones", 0)
+	total_earned = data.get("total_earned", 0)
+	ling_shi = data.get("ling_shi", 80)
+	shang_dao = data.get("shang_dao", 0)
+	tian_dao = data.get("tian_dao", 0)
+	ren_xin = data.get("ren_xin", 0)
+	game_day = data.get("game_day", 1)
+	time_of_day = data.get("time_of_day", 6.0)
+	season_index = data.get("season_index", 0)
+	season_day = data.get("season_day", 1)
+	game_year = data.get("game_year", 1)
+	furnace_tier = data.get("furnace_tier", 1)
+	smelt_streak = data.get("smelt_streak", 0)
+	trade_streak = data.get("trade_streak", 0)
+	consecutive_stall_days = data.get("consecutive_stall_days", 0)
+	inventory = data.get("inventory", [])
+	customer_relations = data.get("customer_relations", {})
+	loyalty_events_triggered = data.get("loyalty_events_triggered", [])
+	
+	is_daytime = time_of_day >= 5.0 and time_of_day < 19.0
+	print("读档成功！第%d天" % game_day)
+	return true

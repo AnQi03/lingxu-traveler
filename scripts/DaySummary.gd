@@ -246,6 +246,7 @@ func _get_goal_hint() -> String:
 func _dismiss():
 	is_showing = false
 	summary_panel.visible = false
+	PlayerData.save_game()  # 每日自动存档
 	queue_free()
 
 
