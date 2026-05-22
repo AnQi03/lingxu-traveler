@@ -149,15 +149,17 @@ static func handle_haggle(customer: Dictionary, player_offer: int) -> Dictionary
 	if player_offer < customer.min_accept:
 		var anger_chance = 0.4 - float(PlayerData.shang_dao) / 200.0
 		if randf() < anger_chance:
+			# 10%概率：假走真回——嘴上说走，又回头加价
+			if randf() < 0.15:
+				result_type = "counter"
+				customer.patience += 1
+				var comeback_offer = int(customer.offer_price + (customer.max_price - customer.offer_price) * 0.25)
+				customer.offer_price = clampi(comeback_offer, customer.offer_price + 1, customer.max_price)
+				result_msg = "[😤 转身欲走又回头] " + customer.name + "咬了咬牙：'……%d！真是最后价了！'" % customer.offer_price
+				return {"result": result_type, "message": result_msg, "final_price": 0, "customer": customer, "round_mood": round_mood}
 			result_type = "walk_away"
 			result_msg = "[💢 被激怒了] " + _get_walk_away_msg(customer)
-			return {
-				"result": result_type,
-				"message": result_msg,
-				"final_price": 0,
-				"customer": customer,
-				"round_mood": round_mood
-			}
+			return {"result": result_type, "message": result_msg, "final_price": 0, "customer": customer, "round_mood": round_mood}
 	
 	if player_offer <= customer.offer_price:
 		result_type = "accept"
@@ -235,17 +237,17 @@ static func _get_offer_ratio(personality: int, urgent: bool) -> float:
 	return 0.75
 
 static func _get_max_ratio(personality: int, urgent: bool) -> float:
-	if urgent: return 1.30 + randf() * 0.20
+	if urgent: return 1.40 + randf() * 0.25
 	match personality:
-		Personality.SHUANGZHI: return 1.10 + randf() * 0.10
-		Personality.JINGMING: return 1.15 + randf() * 0.15
-		Personality.JIZAO: return 1.05 + randf() * 0.10
-		Personality.NAIXIN: return 1.15 + randf() * 0.10
-		Personality.LINSE: return 1.05 + randf() * 0.10
-		Personality.KANGKAI: return 1.25 + randf() * 0.15
-		Personality.DUOYI: return 1.10 + randf() * 0.15
-		Personality.QINGXIN: return 1.15 + randf() * 0.10
-	return 1.10
+		Personality.SHUANGZHI: return 1.25 + randf() * 0.15
+		Personality.JINGMING: return 1.30 + randf() * 0.20
+		Personality.JIZAO: return 1.20 + randf() * 0.15
+		Personality.NAIXIN: return 1.30 + randf() * 0.20
+		Personality.LINSE: return 1.25 + randf() * 0.15
+		Personality.KANGKAI: return 1.40 + randf() * 0.25
+		Personality.DUOYI: return 1.25 + randf() * 0.20
+		Personality.QINGXIN: return 1.30 + randf() * 0.20
+	return 1.30
 
 static func _get_patience(personality: int, urgent: bool) -> int:
 	if urgent: return 1

@@ -128,7 +128,7 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	haggle_result.text = ""
 	# 滑块从顾客出价到市场价×1.3（给博弈空间）
 	haggle_slider.min_value = customer.offer_price
-	haggle_slider.max_value = max(customer.max_price, int(ref_total * 1.3))
+	haggle_slider.max_value = max(customer.max_price, int(ref_total * 1.6))
 	haggle_slider.value = customer.offer_price
 	_on_slider_changed(haggle_slider.value)
 
