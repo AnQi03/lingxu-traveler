@@ -166,8 +166,14 @@ func _on_counter_offer() -> void:
 		_on_trade_completed("", 0, result.final_price)
 	elif result.result == "counter":
 		haggle_result.text = result.message
-		# 更新顾客的出价
-		customer_price.text = "新出价: %d灵石" % result.customer.offer_price
+		# 保留完整价格信息
+		var c = result.customer
+		var item = c.want_item
+		customer_price.text = "新出价: %d灵石 | 参考价: %d灵石 | 集市价: %d/个×%d" % [c.offer_price, c.base_price, c.unit_price, c.want_count]
+		# 更新滑块范围
+		haggle_slider.min_value = c.offer_price
+		haggle_slider.value = c.offer_price
+		_on_slider_changed(haggle_slider.value)
 	elif result.result == "walk_away":
 		_on_trade_failed("", 0, result.message)
 

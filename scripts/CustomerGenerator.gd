@@ -152,7 +152,8 @@ static func handle_haggle(customer: Dictionary, player_offer: int) -> Dictionary
 		result_msg = _get_walk_away_msg(customer)
 		
 	else:
-		var new_offer = int(customer.offer_price + (customer.max_price - customer.offer_price) * 0.3)
+		# 顾客每次还价逐步接近心理上限
+		var new_offer = int(customer.offer_price + (customer.max_price - customer.offer_price) * 0.5)
 		new_offer = mini(new_offer, customer.max_price)
 		customer.offer_price = new_offer
 		result_type = "counter"
@@ -288,17 +289,19 @@ static func _get_walk_away_msg(c: Dictionary) -> String:
 static func _get_counter_msg(c: Dictionary) -> String:
 	var name = c.name
 	var msgs = {
-		Personality.SHUANGZHI: ["%s直说道：'不行不行，最多%d灵石。'" % [name, c.offer_price], "%s摸了摸下巴：'说实在的，%d灵石顶天了。'" % [name, c.offer_price]],
-		Personality.JINGMING: ["%s精打细算道：'我给你算过了，%d灵石才合理。'" % [name, c.offer_price], "%s伸出几根手指：'这个数——%d，多了没有。'" % [name, c.offer_price]],
-		Personality.JIZAO: ["%s不耐烦地敲着桌子：'快点！%d灵石，卖不卖？！'" % [name, c.offer_price], "%s吼道：'磨蹭什么！%d爱卖不卖！'" % [name, c.offer_price]],
-		Personality.NAIXIN: ["%s不急不缓：'再想想——%d灵石如何？'" % [name, c.offer_price], "%s温和地说：'不着急，你再考虑考虑，%d灵石。'" % [name, c.offer_price]],
-		Personality.LINSE: ["%s一脸肉疼：'%d……已经是我的极限了。'" % [name, c.offer_price], "%s咬着牙：'最多最多——%d！多了我真的买不起。'" % [name, c.offer_price]],
-		Personality.KANGKAI: ["%s笑道：'咱们各退一步，%d灵石，成不？'" % [name, c.offer_price], "%s豪爽道：'这样，我再加一点——%d灵石！'" % [name, c.offer_price]],
-		Personality.DUOYI: ["%s警惕地看着你：'我觉得你在宰我。最多%d。'" % [name, c.offer_price], "%s压低声音：'别唬我，我知道市价——%d。'" % [name, c.offer_price]],
-		Personality.QINGXIN: ["%s怯生生道：'%d灵石可不可以……'" % [name, c.offer_price], "%s试探着问：'那个……%d灵石行吗？'" % [name, c.offer_price]],
+		Personality.SHUANGZHI: ["%s直说道：'不行不行，最多%d灵石。'", "%s想了想：'说实在的，%d灵石顶天了。'"],
+		Personality.JINGMING: ["%s精打细算道：'我给你算过了，%d灵石才合理。'", "%s伸出几根手指：'这个数——%d，多了没有。'"],
+		Personality.JIZAO: ["%s不耐烦地敲着桌子：'快点！%d灵石，卖不卖？！'", "%s吼道：'磨蹭什么！%d爱卖不卖！'"],
+		Personality.NAIXIN: ["%s不急不缓：'再想想——%d灵石如何？'", "%s温和地说：'不着急，你再考虑考虑，%d灵石。'"],
+		Personality.LINSE: ["%s一脸肉疼：'%d……已经是我的极限了。'", "%s咬着牙：'最多最多——%d！多了我真的买不起。'"],
+		Personality.KANGKAI: ["%s笑道：'咱们各退一步，%d灵石，成不？'", "%s豪爽道：'这样，我再加一点——%d灵石！'"],
+		Personality.DUOYI: ["%s警惕地看着你：'我觉得你在宰我。最多%d。'", "%s压低声音：'别唬我，我知道市价——%d。'"],
+		Personality.QINGXIN: ["%s怯生生道：'%d灵石可不可以……'", "%s试探着问：'那个……%d灵石行吗？'"],
 	}
-	var pool = msgs.get(c.personality, ["%s还价道：'%d灵石。'" % [name, c.offer_price]])
-	return pool[randi() % pool.size()]
+	var pool = msgs.get(c.personality, ["%s还价道：'%d灵石。'"])
+	# 每轮换一句，不重复
+	var idx = (c.round - 1) % pool.size()
+	return pool[idx] % [name, c.offer_price]
 
 static func _get_dismiss_msg(c: Dictionary) -> String:
 	var name = c.name
