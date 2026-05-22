@@ -106,11 +106,11 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	customer_name.text = "👤 %s" % customer.name
 	customer_mood.text = "状态: %s" % customer.mood
 	
-	# 商道提示：足够高时显示顾客的议价区间
-	if PlayerData.shang_dao >= 30:
-		var hint_min = customer.get("min_accept", customer.offer_price)
-		var hint_max = customer.max_price
-		customer_mood.text += "\n💼 商道眼光：可谈区间 %d~%d灵石" % [hint_min, hint_max]
+	# 商道提示：越高越能感知顾客底线
+	if PlayerData.shang_dao >= 50:
+		customer_mood.text += "\n💼 经验告诉你：这位顾客还有很大加价空间"
+	elif PlayerData.shang_dao >= 30:
+		customer_mood.text += "\n💼 你感觉这位顾客还能再加一些"
 	elif PlayerData.shang_dao >= 10:
 		customer_mood.text += "\n💼 隐约感觉这位顾客还有议价空间"
 	
@@ -188,4 +188,25 @@ func _on_reject_customer() -> void:
 
 
 func _on_slider_changed(value: float) -> void:
-	haggle_value.text = "%d灵石" % int(value)
+	var val = int(value)
+	var risk_text = ""
+	var risk_color = Color(0.5, 0.5, 0.5)
+	
+	if stall_manager and stall_manager.current_customer:
+		var c = stall_manager.current_customer
+		var max_p = c.max_price
+		if val >= max_p * 0.95:
+			risk_text = "🟢 对方应该会接受"
+			risk_color = Color(0.3, 0.9, 0.3)
+		elif val >= max_p * 0.75:
+			risk_text = "🟡 很有可能成交"
+			risk_color = Color(0.8, 0.8, 0.3)
+		elif val >= max_p * 0.55:
+			risk_text = "🟠 有点悬……"
+			risk_color = Color(0.9, 0.6, 0.2)
+		else:
+			risk_text = "🔴 对方可能会生气！"
+			risk_color = Color(0.9, 0.2, 0.2)
+	
+	haggle_value.text = "%d灵石 %s" % [val, risk_text]
+	haggle_value.add_theme_color_override("font_color", risk_color)
