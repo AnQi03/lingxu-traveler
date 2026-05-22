@@ -83,9 +83,11 @@ static func create_market_instance(item_def: Dictionary) -> Dictionary:
 	return inst
 
 static func _get_all_game_items() -> Array:
-	var items = _get_all_game_items()
+	var items = get_market_items()
 	items.append_array(get_refine_only_items())
 	return items
+
+static func _get_seasonal_price_multiplier() -> float:
 	match PlayerData.season_index:
 		0: return 1.0   # 灵潮季：灵材丰产，正常价
 		1: return 1.2   # 炎阳季：酷暑难采，涨价
