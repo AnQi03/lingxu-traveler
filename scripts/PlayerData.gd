@@ -24,7 +24,7 @@ var season_index: int = 0
 var season_day: int = 1
 const SEASON_NAMES = ["灵潮季", "炎阳季", "丰收季", "静修季"]
 const SEASON_EMOJI = ["🌸", "☀️", "🍂", "❄️"]
-const DAYS_PER_SEASON: int = 7
+const DAYS_PER_SEASON: int = 30
 const FESTIVAL_INTERVAL: int = 10
 
 ## ---------- 库存 ----------
