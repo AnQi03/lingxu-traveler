@@ -171,6 +171,14 @@ func force_close_stall():
 			manager.close_stall()
 
 
+func get_stall_income() -> int:
+	if stall_scene:
+		var manager = stall_scene.get_node("StallManager")
+		if manager:
+			return manager.daily_income
+	return 0
+
+
 func _on_night_falling():
 	SoundManager.sfx_day_transition()
 	force_close_stall()
