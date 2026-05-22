@@ -195,17 +195,18 @@ func _on_slider_changed(value: float) -> void:
 	if stall_manager and stall_manager.current_customer:
 		var c = stall_manager.current_customer
 		var max_p = c.max_price
-		if val >= max_p * 0.95:
-			risk_text = "🟢 对方应该会接受"
+		# 玩家是卖家，要价越低顾客越高兴
+		if val <= c.offer_price:
+			risk_text = "🟢 顾客肯定接受"
 			risk_color = Color(0.3, 0.9, 0.3)
-		elif val >= max_p * 0.75:
-			risk_text = "🟡 很有可能成交"
+		elif val <= max_p * 0.7:
+			risk_text = "🟡 很大概率成交"
 			risk_color = Color(0.8, 0.8, 0.3)
-		elif val >= max_p * 0.55:
-			risk_text = "🟠 有点悬……"
+		elif val <= max_p:
+			risk_text = "🟠 对方可能犹豫"
 			risk_color = Color(0.9, 0.6, 0.2)
 		else:
-			risk_text = "🔴 对方可能会生气！"
+			risk_text = "🔴 对方很可能拒绝！"
 			risk_color = Color(0.9, 0.2, 0.2)
 	
 	haggle_value.text = "%d灵石 %s" % [val, risk_text]

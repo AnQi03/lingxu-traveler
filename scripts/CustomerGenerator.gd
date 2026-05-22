@@ -145,9 +145,9 @@ static func handle_haggle(customer: Dictionary, player_offer: int) -> Dictionary
 	# 察言观色：每轮顾客情绪变化
 	var round_mood = _get_round_mood(customer)
 	
-	# 出价太低可能直接激怒顾客
-	if player_offer < customer.min_accept:
-		var anger_chance = 0.4 - float(PlayerData.shang_dao) / 200.0
+	# 要价太高可能直接激怒顾客
+	if player_offer > customer.max_price * 1.3:
+		var anger_chance = 0.3 - float(PlayerData.shang_dao) / 200.0
 		if randf() < anger_chance:
 			# 10%概率：假走真回——嘴上说走，又回头加价
 			if randf() < 0.15:
