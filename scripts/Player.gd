@@ -16,8 +16,13 @@ func _physics_process(_delta):
 	if not can_move:
 		return
 	
-	var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	velocity = input_dir * move_speed
+	var input_dir = Vector2.ZERO
+	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT): input_dir.x -= 1
+	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT): input_dir.x += 1
+	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP): input_dir.y -= 1
+	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN): input_dir.y += 1
+	
+	velocity = input_dir.normalized() * move_speed
 	move_and_slide()
 	
 	if input_dir != Vector2.ZERO:
