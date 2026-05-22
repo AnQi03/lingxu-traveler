@@ -4,7 +4,7 @@ signal day_started(game_day: int)
 signal period_changed(period: String)
 signal night_falling()
 
-const REAL_SECONDS_PER_TICK: float = 25.0
+const REAL_SECONDS_PER_TICK: float = 60.0
 const GAME_HOURS_PER_TICK: float = 1.0
 
 var is_running: bool = false
