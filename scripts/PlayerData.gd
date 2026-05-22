@@ -61,6 +61,8 @@ func upgrade_furnace() -> bool:
 	var cost = get_furnace_upgrade_cost()
 	if cost < 0:
 		return false
+	if get_total_stones() < cost:
+		return false
 	if not spend_stones(cost):
 		return false
 	furnace_tier += 1

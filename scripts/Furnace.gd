@@ -409,9 +409,13 @@ func _do_upgrade():
 		_show_result("熔炉已达最高等级！", Color(1, 0.8, 0.3))
 		return
 	
+	if PlayerData.get_total_stones() < cost:
+		_show_result("灵石不足！升级需要 %d 灵石（当前 %d）。" % [cost, PlayerData.get_total_stones()], Color(1, 0.3, 0.3))
+		return
+	
 	var success = PlayerData.upgrade_furnace()
 	if not success:
-		_show_result("灵石不足！升级需要 %d 灵石。" % cost, Color(1, 0.3, 0.3))
+		_show_result("升级失败！", Color(1, 0.3, 0.3))
 		return
 	
 	_show_result("✨ 熔炉升级成功！当前等级 Lv.%d" % PlayerData.furnace_tier, Color(1, 0.8, 0.3))
