@@ -459,17 +459,5 @@ func _refresh_status():
 		PlayerData.MAX_DAILY_REFINE,
 		PlayerData.ling_shi
 	]
-		PlayerData.mid_spirit_stones,
-		PlayerData.high_spirit_stones,
-		PlayerData.game_day,
-		int(PlayerData.time_of_day),
-		inv_count,
-		total_items,
-		PlayerData.shang_dao,
-		PlayerData.tian_dao,
-		PlayerData.ren_xin,
-		PlayerData.daily_refine_count,
-		PlayerData.MAX_DAILY_REFINE
-	]
 	
 	status_node.text = text
