@@ -40,6 +40,10 @@ const MAX_DAILY_REFINE: int = 5
 var consecutive_stall_days: int = 0
 var has_stalled_today: bool = false
 
+## ---------- 连胜系统 ----------
+var smelt_streak: int = 0      # 熔炼升品连胜
+var trade_streak: int = 0      # 交易成功连胜
+
 ## ---------- 灵识 ----------
 var ling_shi: int = 80
 const MAX_LING_SHI: int = 100

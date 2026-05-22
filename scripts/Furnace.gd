@@ -323,9 +323,19 @@ func _do_smelt():
 	
 	# 天道加成：每10点天道提升2%升品概率
 	var tian_bonus = float(PlayerData.tian_dao) / 10.0 * 0.02
-	luck_table[0] += tian_bonus
-	luck_table[1] += tian_bonus
-	luck_table[2] += tian_bonus
+	
+	# 连胜加成：连续升品越来越顺手
+	var streak_bonus = 0.0
+	if PlayerData.smelt_streak >= 5:
+		streak_bonus = 0.15
+	elif PlayerData.smelt_streak >= 3:
+		streak_bonus = 0.10
+	elif PlayerData.smelt_streak >= 2:
+		streak_bonus = 0.05
+	
+	luck_table[0] += tian_bonus + streak_bonus
+	luck_table[1] += tian_bonus + streak_bonus
+	luck_table[2] += tian_bonus + streak_bonus
 	
 	var base_luck = luck_table[0]
 	var base_fail = 0.25
@@ -358,6 +368,7 @@ func _do_smelt():
 		result_text = "💀 熔炼失败！灵材化为灰烬……"
 		result_color = Color(0.5, 0.2, 0.2)
 		PlayerData.daily_refine_count += 1
+		PlayerData.smelt_streak = 0  # 连胜中断
 	
 	elif roll < base_destroy + base_fail:
 		var nt = max(0, item.tier - 1)
@@ -373,6 +384,7 @@ func _do_smelt():
 		result_text = "⚠️ 品阶下降：[%s] %s → [%s]" % [tier_names[item.tier], item.name, tier_names[nt]]
 		result_color = Color(0.7, 0.5, 0.2)
 		PlayerData.daily_refine_count += 1
+		PlayerData.smelt_streak = 0  # 连胜中断
 	
 	elif roll < base_destroy + base_fail + base_same:
 		var keep_tier = max(0, item.tier)
@@ -388,6 +400,7 @@ func _do_smelt():
 		result_text = "  熔炼完成，品阶不变：[%s] %s" % [tier_names[item.tier], item.name]
 		result_color = Color(0.6, 0.6, 0.6)
 		PlayerData.daily_refine_count += 1
+		PlayerData.smelt_streak = 0  # 连胜中断
 	
 	else:
 		var nt = min(3, item.tier + 1)
@@ -403,7 +416,14 @@ func _do_smelt():
 		result_text = "✨ 升品成功！[%s] %s → [%s]！" % [tier_names[item.tier], item.name, tier_names[nt]]
 		result_color = Color(1, 0.8, 0.3)
 		PlayerData.daily_refine_count += 1
-		PlayerData.tian_dao += 1  # 天道成长：每次升品+1
+		PlayerData.tian_dao += 1  # 天道成长
+		PlayerData.smelt_streak += 1  # 连胜
+		if PlayerData.smelt_streak >= 5:
+			result_text += " 🔥天道眷顾！连升%d次！" % PlayerData.smelt_streak
+		elif PlayerData.smelt_streak >= 3:
+			result_text += " ✨如有神助！连升%d次！" % PlayerData.smelt_streak
+		elif PlayerData.smelt_streak >= 2:
+			result_text += " 🔥手感正热！连升%d次！" % PlayerData.smelt_streak
 	
 	if is_instance_valid(result_label):
 		result_label.text = result_text

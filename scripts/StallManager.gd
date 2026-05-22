@@ -92,13 +92,26 @@ func start_haggle(player_offer: int) -> Dictionary:
 	
 	match result.result:
 		"accept":
-			# 交易成功 — 已在议价前检查过库存，直接扣
+			# 交易成功
 			var total_price = result.final_price
 			var count = current_customer.want_count
 			
+			# 交易连胜加成（3/5/7连）
+			PlayerData.trade_streak += 1
+			var streak_bonus = 0
+			if PlayerData.trade_streak >= 7:
+				streak_bonus = int(total_price * 0.12)
+				result.message += "\n💎 财源滚滚！连成%d单，+%d灵石！" % [PlayerData.trade_streak, streak_bonus]
+			elif PlayerData.trade_streak >= 5:
+				streak_bonus = int(total_price * 0.07)
+				result.message += "\n✨ 生意兴隆！连成%d单，+%d灵石！" % [PlayerData.trade_streak, streak_bonus]
+			elif PlayerData.trade_streak >= 3:
+				streak_bonus = int(total_price * 0.03)
+				result.message += "\n🔥 手感正热！连成%d单，+%d灵石！" % [PlayerData.trade_streak, streak_bonus]
+			
 			PlayerData.remove_item(item.id, count)
-			PlayerData.earn_stones(total_price)
-			daily_income += total_price
+			PlayerData.earn_stones(total_price + streak_bonus)
+			daily_income += total_price + streak_bonus
 			today_customers += 1
 			PlayerData.update_customer_relation(current_customer.name, 2)
 			PlayerData.shang_dao += 1  # 商道成长：每次成功交易+1
@@ -106,9 +119,10 @@ func start_haggle(player_offer: int) -> Dictionary:
 			
 			# 常客心级事件
 			var new_loyalty = PlayerData.get_customer_loyalty(current_customer.name)
-			var event_msg = CustomerGenerator.get_loyalty_event(current_customer.name, new_loyalty)
-			if event_msg != "":
-				result.message = event_msg + "\n\n" + result.message
+			var event_data = CustomerGenerator.get_loyalty_event(current_customer.name, new_loyalty)
+			if event_data.message != "":
+				result.message = event_data.message + "\n\n" + result.message
+				_apply_loyalty_reward(event_data.reward, result.final_price + streak_bonus)
 				var hud = PlayerData.get_meta("hud")
 				if hud and hud.has_method("show_toast"):
 					hud.show_toast("💎 %s 好感 Lv.%d！" % [current_customer.name, new_loyalty], Color(0.8, 0.4, 1.0), 5.0)
@@ -120,6 +134,7 @@ func start_haggle(player_offer: int) -> Dictionary:
 			PlayerData.update_customer_relation(current_customer.name, -1)
 			trade_failed.emit(current_customer.want_item.id, 0, result.message)
 			current_customer = {}
+			PlayerData.trade_streak = 0  # 连胜中断
 			
 		"counter":
 			# 顾客还价——保留current_customer等待下一轮
@@ -132,6 +147,7 @@ func start_haggle(player_offer: int) -> Dictionary:
 func dismiss_customer() -> void:
 	if not current_customer.is_empty():
 		PlayerData.update_customer_relation(current_customer.name, -2)
+		PlayerData.trade_streak = 0  # 连胜中断
 		var msg = CustomerGenerator._get_dismiss_msg(current_customer)
 		trade_failed.emit(current_customer.want_item.id, 0, msg)
 		current_customer = {}
@@ -142,3 +158,40 @@ func _spawn_customer() -> void:
 	customer_queue.append(customer)
 	current_customer = customer
 	customer_arrived.emit(customer)
+
+func _apply_loyalty_reward(reward: String, trade_price: int) -> void:
+	match reward:
+		"blessing_shangdao_3":
+			PlayerData.shang_dao += 3
+		"blessing_shangdao_5":
+			PlayerData.shang_dao += 5
+		"blessing_tiandao_3":
+			PlayerData.tian_dao += 3
+		"blessing_tiandao_5":
+			PlayerData.tian_dao += 5
+		"blessing_renxin_3":
+			PlayerData.ren_xin += 3
+		"blessing_renxin_5":
+			PlayerData.ren_xin += 5
+		"blessing_all_3":
+			PlayerData.shang_dao += 3
+			PlayerData.tian_dao += 3
+			PlayerData.ren_xin += 3
+		"blessing_all_5":
+			PlayerData.shang_dao += 5
+			PlayerData.tian_dao += 5
+			PlayerData.ren_xin += 5
+		"gift_stones_50":
+			PlayerData.earn_stones(50)
+			daily_income += 50
+		"gift_extra_loyalty":
+			PlayerData.update_customer_relation(current_customer.name, 1)
+		"refund_ling_shi":
+			PlayerData.ling_shi = mini(PlayerData.ling_shi + 3, PlayerData.MAX_LING_SHI)
+		"price_boost_20":
+			PlayerData.earn_stones(int(trade_price * 0.2))
+			daily_income += int(trade_price * 0.2)
+		"gift_item_shui":
+			PlayerData.add_item({"id":"bingjingkuang_fan","name":"冰晶矿","tier":0,"element":2,"price":6,"count":1})
+		"stone_earth":
+			PlayerData.add_item({"id":"jinlingsha_fan","name":"金灵砂","tier":0,"element":0,"price":8,"count":1})
