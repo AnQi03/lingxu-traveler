@@ -11,7 +11,7 @@ enum Element { JIN = 0, MU = 1, SHUI = 2, HUO = 3, TU = 4 }
 
 static func get_market_items() -> Array:
 	return [
-		# ===== 凡品（10种）=====
+		# ===== 凡品（10种）— 市场主力 =====
 		{ "id": "chiyancao_fan", "name": "赤炎草", "tier": Tier.FAN, "element": Element.HUO, "base_price": 10, "desc": "火系灵草，散修日常消耗", "origin": "炎狱域" },
 		{ "id": "hanlucao_fan", "name": "寒露草", "tier": Tier.FAN, "element": Element.SHUI, "base_price": 8, "desc": "喜阴湿的灵草，清心丹主料", "origin": "玄冰域" },
 		{ "id": "cuilingmu_fan", "name": "翠灵木", "tier": Tier.FAN, "element": Element.MU, "base_price": 12, "desc": "灵木嫩枝，温和的木系灵气", "origin": "苍木域" },
@@ -22,44 +22,50 @@ static func get_market_items() -> Array:
 		{ "id": "jiditai_fan", "name": "极地苔", "tier": Tier.FAN, "element": Element.SHUI, "base_price": 4, "desc": "最基础的消耗品", "origin": "玄冰域" },
 		{ "id": "tengluomu_fan", "name": "藤萝木", "tier": Tier.FAN, "element": Element.MU, "base_price": 7, "desc": "柔韧的灵木纤维，制符常用", "origin": "苍木域" },
 		{ "id": "tiexingshi_fan", "name": "铁星石", "tier": Tier.FAN, "element": Element.JIN, "base_price": 9, "desc": "含微量星辰铁的矿石", "origin": "金戈域" },
-		# ===== 灵品（5种）=====
-		{ "id": "chiyancao_ling", "name": "赤炎草·灵", "tier": Tier.LING, "element": Element.HUO, "base_price": 30, "desc": "百年火候的灵草，炼丹师最爱", "origin": "炎狱域" },
-		{ "id": "cuilingmu_ling", "name": "翠灵木·灵", "tier": Tier.LING, "element": Element.MU, "base_price": 35, "desc": "千年灵木的嫩枝，灵气充沛", "origin": "苍木域" },
-		{ "id": "jinlingshi_ling", "name": "金灵石", "tier": Tier.LING, "element": Element.JIN, "base_price": 28, "desc": "蕴含锐金之气的矿石", "origin": "金戈域" },
-		{ "id": "hanluyu_ling", "name": "寒露玉", "tier": Tier.LING, "element": Element.SHUI, "base_price": 32, "desc": "万载寒露凝成的灵玉", "origin": "玄冰域" },
-		{ "id": "dilinggu_ling", "name": "地灵菇", "tier": Tier.LING, "element": Element.TU, "base_price": 26, "desc": "吸取地脉灵气的奇菌", "origin": "中央荒原" },
-		# ===== 宝品（4种）=====
-		{ "id": "tianhuoshi_bao", "name": "天火石", "tier": Tier.BAO, "element": Element.HUO, "base_price": 80, "desc": "从天而降的陨铁，火系至宝", "origin": "炎狱域" },
-		{ "id": "xuanbingjing_bao", "name": "玄冰晶", "tier": Tier.BAO, "element": Element.SHUI, "base_price": 75, "desc": "万载玄冰之心，炼器圣品", "origin": "玄冰域" },
-		{ "id": "jinwusha_bao", "name": "金乌砂", "tier": Tier.BAO, "element": Element.JIN, "base_price": 88, "desc": "传说中的金乌陨落处产出的神砂", "origin": "金戈域" },
-		{ "id": "shenmuye_bao", "name": "神木液", "tier": Tier.BAO, "element": Element.MU, "base_price": 72, "desc": "千年神木分泌的灵液，一滴值千金", "origin": "苍木域" },
-		# ===== 仙品（1种）=====
-		{ "id": "wuxinglingzhu_xian", "name": "五行灵珠", "tier": Tier.XIAN, "element": Element.TU, "base_price": 200, "desc": "蕴含五行平衡之力的灵珠，传说为古神遗物", "origin": "中央荒原" },
+		# ===== 灵品（5种）— 偶尔出现，熔炼起始目标 =====
+		{ "id": "chiyancao_ling", "name": "赤炎草·灵", "tier": Tier.LING, "element": Element.HUO, "base_price": 50, "desc": "百年火候的灵草，炼丹师最爱", "origin": "炎狱域", "market_rare": true },
+		{ "id": "cuilingmu_ling", "name": "翠灵木·灵", "tier": Tier.LING, "element": Element.MU, "base_price": 55, "desc": "千年灵木的嫩枝，灵气充沛", "origin": "苍木域", "market_rare": true },
+		{ "id": "jinlingshi_ling", "name": "金灵石", "tier": Tier.LING, "element": Element.JIN, "base_price": 48, "desc": "蕴含锐金之气的矿石", "origin": "金戈域", "market_rare": true },
+		{ "id": "hanluyu_ling", "name": "寒露玉", "tier": Tier.LING, "element": Element.SHUI, "base_price": 52, "desc": "万载寒露凝成的灵玉", "origin": "玄冰域", "market_rare": true },
+		{ "id": "dilinggu_ling", "name": "地灵菇", "tier": Tier.LING, "element": Element.TU, "base_price": 45, "desc": "吸取地脉灵气的奇菌", "origin": "中央荒原", "market_rare": true },
 	]
 
-## 每日随机刷新——从全池中按种子选取8-14种
+## 宝品/仙品（熔炼专属，不在市场售卖）
+static func get_refine_only_items() -> Array:
+	return [
+		# ===== 宝品（4种）— 只有熔炼能获得 =====
+		{ "id": "tianhuoshi_bao", "name": "天火石", "tier": Tier.BAO, "element": Element.HUO, "base_price": 180, "desc": "从天而降的陨铁，火系至宝", "origin": "炎狱域" },
+		{ "id": "xuanbingjing_bao", "name": "玄冰晶", "tier": Tier.BAO, "element": Element.SHUI, "base_price": 170, "desc": "万载玄冰之心，炼器圣品", "origin": "玄冰域" },
+		{ "id": "jinwusha_bao", "name": "金乌砂", "tier": Tier.BAO, "element": Element.JIN, "base_price": 195, "desc": "传说中的金乌陨落处产出的神砂", "origin": "金戈域" },
+		{ "id": "shenmuye_bao", "name": "神木液", "tier": Tier.BAO, "element": Element.MU, "base_price": 165, "desc": "千年神木分泌的灵液，一滴值千金", "origin": "苍木域" },
+		# ===== 仙品（1种）— 熔炼终极目标 =====
+		{ "id": "wuxinglingzhu_xian", "name": "五行灵珠", "tier": Tier.XIAN, "element": Element.TU, "base_price": 500, "desc": "蕴含五行平衡之力的灵珠，传说为古神遗物", "origin": "中央荒原" },
+	]
+
+## 每日随机刷新——凡品全上 + 少量灵品偶尔出现（宝品/仙品只能靠熔炼）
 static func get_daily_market_items() -> Array:
-	var all = get_market_items()
+	var all_fan = []
+	var all_ling = []
+	for it in get_market_items():
+		if it.tier == Tier.FAN:
+			all_fan.append(it)
+		elif it.tier == Tier.LING:
+			all_ling.append(it)
+	
 	var rng = RandomNumberGenerator.new()
 	rng.set_seed(PlayerData.game_day * 73)
 	
-	var count = rng.randi_range(8, min(14, all.size()))
-	var pool = all.duplicate()
-	pool.shuffle()
+	var result: Array = []
+	result.append_array(all_fan)  # 凡品全部出现
 	
-	var result = pool.slice(0, count)
-	
-	# 总是至少包含3种凡品
-	var fan_count = 0
-	for it in result:
-		if it.tier == Tier.FAN:
-			fan_count += 1
-	if fan_count < 3:
-		for it in all:
-			if it.tier == Tier.FAN and not result.has(it):
-				result.append(it)
-				if result.size() >= count + (3 - fan_count):
-					break
+	# 灵品：每个20%概率出现，至少出1个
+	var ling_count = 0
+	for it in all_ling:
+		if rng.randf() < 0.20:
+			result.append(it)
+			ling_count += 1
+	if ling_count == 0 and not all_ling.is_empty():
+		result.append(all_ling[rng.randi() % all_ling.size()])
 	
 	result.sort_custom(func(a, b): return a.tier < b.tier if a.tier != b.tier else a.base_price < b.base_price)
 	return result
@@ -76,7 +82,10 @@ static func create_market_instance(item_def: Dictionary) -> Dictionary:
 	inst.count = 1
 	return inst
 
-static func _get_seasonal_price_multiplier() -> float:
+static func _get_all_game_items() -> Array:
+	var items = _get_all_game_items()
+	items.append_array(get_refine_only_items())
+	return items
 	match PlayerData.season_index:
 		0: return 1.0   # 灵潮季：灵材丰产，正常价
 		1: return 1.2   # 炎阳季：酷暑难采，涨价
@@ -86,7 +95,7 @@ static func _get_seasonal_price_multiplier() -> float:
 
 ## 每日热门灵材——需求±30%波动
 static func get_daily_hot_items() -> Array:
-	var items = get_market_items()
+	var items = _get_all_game_items()
 	var rng = RandomNumberGenerator.new()
 	rng.set_seed(PlayerData.game_day * 107)
 	

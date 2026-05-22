@@ -27,7 +27,7 @@ const REGULARS = [
 ]
 
 static func generate_customer() -> Dictionary:
-	var items = MaterialData.get_market_items()
+	var items = MaterialData._get_all_game_items()
 	var target_item = items[randi() % items.size()]
 	
 	var personality = randi() % 8
