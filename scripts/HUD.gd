@@ -10,18 +10,18 @@ var season_label: Label = null
 var current_period: String = ""
 
 var period_colors = {
-	"morning": Color(0, 0, 0, 0.35),
-	"afternoon": Color(0, 0, 0, 0.30),
-	"evening": Color(0.15, 0.08, 0.02, 0.50),
-	"night": Color(0.05, 0.02, 0.10, 0.65)
+	"morning": Color(0.06, 0.04, 0.03, 0.40),
+	"afternoon": Color(0.06, 0.04, 0.02, 0.35),
+	"evening": Color(0.10, 0.05, 0.04, 0.55),
+	"night": Color(0.04, 0.02, 0.06, 0.70)
 }
 
 ## 语义颜色体系
-const COLOR_SUCCESS = Color(0.3, 1.0, 0.4)    # 绿 — 成交/升品
-const COLOR_WARNING = Color(1.0, 0.7, 0.25)   # 黄 — 灵识低/快没耐心
-const COLOR_DANGER = Color(1.0, 0.25, 0.25)   # 红 — 被拒/销毁
-const COLOR_INFO = Color(0.4, 0.7, 1.0)       # 蓝 — 信息提示
-const COLOR_RARE = Color(0.8, 0.4, 1.0)       # 紫 — 稀有/仙品
+const COLOR_SUCCESS = Color(0.4, 0.85, 0.35)    # 青木绿 — 成交/升品
+const COLOR_WARNING = Color(0.9, 0.55, 0.15)    # 烛火橙 — 灵识低/快没耐心
+const COLOR_DANGER = Color(0.85, 0.25, 0.20)    # 丹砂红 — 被拒/销毁
+const COLOR_INFO = Color(0.4, 0.65, 0.85)       # 灵气蓝 — 信息提示
+const COLOR_RARE = Color(0.7, 0.45, 0.85)       # 仙品紫 — 稀有
 
 var toast_label: Label = null
 var toast_timer: float = 0.0
@@ -29,6 +29,11 @@ var last_stone_count: int = 0
 
 
 func _ready() -> void:
+	# 暖色调HUD
+	time_label.add_theme_color_override("font_color", Color(0.9, 0.82, 0.65))
+	stone_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.5))
+	hud_bg.color = Color(0.06, 0.04, 0.03, 0.7)  # 暖暗底HUD背景
+	
 	period_label = Label.new()
 	period_label.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
 	period_label.add_theme_font_size_override("font_size", 14)

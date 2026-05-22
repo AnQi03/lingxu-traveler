@@ -64,34 +64,51 @@ func _update_background():
 	var t = PlayerData.time_of_day
 	var period = DayCycle.get_period_name(t)
 	
-	var color: Color
+	var sky_color: Color
+	var ground_color: Color
 	var atm_text: String
+	var text_alpha: float = 0.5
 	
 	if t >= 5.0 and t < 7.0:
-		color = Color(0.15, 0.12, 0.28)  # 拂晓深蓝紫
-		atm_text = "晨雾未散，灵墟集市的灯火刚刚亮起……"
+		sky_color = Color(0.08, 0.06, 0.20)      # 拂晓深蓝紫
+		ground_color = Color(0.04, 0.03, 0.06)
+		atm_text = "晨雾未散，灵墟集市灯火渐明……"
 	elif t >= 7.0 and t < 10.0:
-		color = Color(0.25, 0.20, 0.15)  # 早晨暖棕
-		atm_text = "晨光透过薄云洒在荒原上，修士们陆续出摊。"
+		sky_color = Color(0.18, 0.13, 0.10)       # 晨光暖棕
+		ground_color = Color(0.08, 0.06, 0.04)
+		atm_text = "晨光照进荒原，修士们陆续出摊。"
 	elif t >= 10.0 and t < 15.0:
-		color = Color(0.30, 0.25, 0.15)  # 上午明亮
-		atm_text = "灵墟集市热闹非凡——讨价还价声此起彼伏。"
+		sky_color = Color(0.22, 0.16, 0.10)       # 上午明亮
+		ground_color = Color(0.10, 0.07, 0.04)
+		atm_text = "灵墟集市热闹非凡，讨价还价此起彼伏。"
 	elif t >= 15.0 and t < 18.0:
-		color = Color(0.28, 0.22, 0.12)  # 下午温暖
-		atm_text = "午后阳光慵懒，几个老顾客在摊前慢悠悠地挑着灵材。"
+		sky_color = Color(0.20, 0.14, 0.08)       # 下午温暖
+		ground_color = Color(0.09, 0.06, 0.04)
+		atm_text = "午后阳光慵懒，老顾客们慢悠悠地挑着灵材。"
 	elif t >= 18.0 and t < 19.0:
-		color = Color(0.22, 0.15, 0.18)  # 黄昏橙紫
-		atm_text = "夕照将天空染成金紫色，集市里传来收摊的吆喝声。"
+		sky_color = Color(0.18, 0.10, 0.14)       # 黄昏金紫
+		ground_color = Color(0.06, 0.04, 0.05)
+		atm_text = "夕照染金天空，集市收摊的吆喝声渐起。"
 	elif t >= 19.0 and t < 21.0:
-		color = Color(0.10, 0.06, 0.15)  # 入夜深紫
-		atm_text = "夜幕低垂，远处偶尔传来炉火噼啪和修士夜话。"
+		sky_color = Color(0.06, 0.04, 0.12)       # 入夜深紫
+		ground_color = Color(0.03, 0.02, 0.04)
+		atm_text = "夜幕低垂，远处炉火噼啪、修士夜话。"
+		text_alpha = 0.35
 	else:
-		color = Color(0.05, 0.03, 0.12)  # 深夜暗紫
-		atm_text = "夜深了。灵墟沉入寂静，只有天道的脉动在黑暗中流淌。"
+		sky_color = Color(0.03, 0.02, 0.08)       # 深夜暗紫
+		ground_color = Color(0.02, 0.01, 0.03)
+		atm_text = "夜深。灵墟沉入寂静，天道脉动在黑暗中流淌。"
+		text_alpha = 0.25
 	
-	scene_bg.color = color
+	# 天空→地面渐变
+	var gradient = Gradient.new()
+	gradient.add_point(0.0, sky_color)
+	gradient.add_point(0.7, sky_color.lerp(ground_color, 0.5))
+	gradient.add_point(1.0, ground_color)
+	
+	scene_bg.color = sky_color  # 基础色
 	atmosphere_label.text = atm_text
-	atmosphere_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.35))
+	atmosphere_label.add_theme_color_override("font_color", Color(1, 1, 1, text_alpha))
 
 
 func _create_market():

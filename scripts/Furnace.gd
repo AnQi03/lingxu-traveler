@@ -25,10 +25,19 @@ func _build_ui():
 	furnace_panel.size = Vector2(900, 580)
 	
 	var bg = ColorRect.new()
-	bg.color = Color(0.08, 0.05, 0.12, 0.97)
+	bg.color = Color(0.10, 0.06, 0.04, 0.97)  # 暖暗底，比集市更深 — 熔炉氛围
 	bg.size = furnace_panel.size
 	bg.mouse_filter = 0
 	furnace_panel.add_child(bg)
+	
+	# 像素金+橙边框角标 — 熔炉用更暖的橙金
+	for pos in [Vector2(0,0), Vector2(892,0), Vector2(0,572), Vector2(892,572)]:
+		var c = ColorRect.new()
+		c.position = pos
+		c.size = Vector2(9, 9)
+		c.color = Color(0.9, 0.55, 0.15, 0.85)
+		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		furnace_panel.add_child(c)
 	
 	var title_bar = HBoxContainer.new()
 	title_bar.position = Vector2(0, 0)

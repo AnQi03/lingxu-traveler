@@ -21,10 +21,20 @@ func _build_ui():
 	market_ui.size = Vector2(1080, 600)
 	
 	var bg = ColorRect.new()
-	bg.color = Color(0.1, 0.15, 0.25, 0.95)
+	bg.color = Color(0.14, 0.10, 0.06, 0.95)  # 暖暗底，仿羊皮纸暗面
 	bg.size = market_ui.size
 	bg.mouse_filter = 0
 	market_ui.add_child(bg)
+	
+	# 像素金边框 — 四角装饰
+	var tl = _make_pixel_corner(Vector2(0,0), true)
+	market_ui.add_child(tl)
+	var tr = _make_pixel_corner(Vector2(1080-8, 0), false)
+	market_ui.add_child(tr)
+	var bl = _make_pixel_corner(Vector2(0, 600-8), false)
+	market_ui.add_child(bl)
+	var br = _make_pixel_corner(Vector2(1080-8, 600-8), false)
+	market_ui.add_child(br)
 	
 	var title_bar = HBoxContainer.new()
 	title_bar.position = Vector2(0, 0)
@@ -33,13 +43,13 @@ func _build_ui():
 	
 	var title = Label.new()
 	title.text = "  中央荒原 · 集市"
-	title.add_theme_color_override("font_color", Color.WHITE)
+	title.add_theme_color_override("font_color", Color(0.9, 0.7, 0.3))  # 琥珀金
 	title.add_theme_font_size_override("font_size", 20)
 	title_bar.add_child(title)
 	
 	var close_btn = Button.new()
 	close_btn.text = "  关闭 [B]  "
-	close_btn.add_theme_color_override("font_color", Color(1, 0.5, 0.5))
+	close_btn.add_theme_color_override("font_color", Color(0.8, 0.4, 0.3))  # 丹砂红
 	close_btn.add_theme_font_size_override("font_size", 16)
 	close_btn.pressed.connect(_on_close)
 	title_bar.add_child(close_btn)
@@ -158,3 +168,12 @@ func _buy(data):
 			"count": 1
 		})
 		_refresh_grid()
+
+## 像素角标 — 3×3金点装饰面板四角
+func _make_pixel_corner(pos: Vector2, is_topleft: bool) -> ColorRect:
+	var c = ColorRect.new()
+	c.position = pos
+	c.size = Vector2(9, 9)
+	c.color = Color(0.78, 0.66, 0.31, 0.8)  # 像素金
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return c
