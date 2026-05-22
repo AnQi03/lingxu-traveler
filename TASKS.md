@@ -61,8 +61,9 @@
 | 日期 | 任务 | commit |
 |------|------|--------|
 | 05-23 | **DaySummary全面升级** — 进度条+明日预告+随机事件+动态目标 | 6da9aea |
-| 05-23 | **议价微反馈升级** — 滑块6级表情+8性格阈值+成交失败特效 | e18da9e |
-| 05-23 | **sim-management-core-loops 技能入库** — 50款模拟经营游戏核心循环+经营改造矩阵 | — |
+| 05-23 | **game-npc-design 入库** — NPC四维分析(对话/日程/关系/视觉) 60+款标杆 | — |
+| 05-23 | **game-feel-juiciness + probability + qol 三技能入库** | — |
+| 05-23 | **game-economy-difficulty-curves 技能入库** — 50款游戏货币经济6类型+难度曲线6类型 | — |
 | 05-23 | **灵墟碎片系统** — 熔炼失败不再纯惩罚（销毁+3碎片/降品+1碎片+天道+1） | c738780 |
 | 05-23 | 三大调研技能入库：game-core-loop-design / ai-assisted-game-dev / ai-game-dev-prompting | — |
 | 05-22 | 场景全面重制（像素场景+建筑+NPC+玩家精灵） | c689ac7 |
