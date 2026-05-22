@@ -187,6 +187,9 @@ func open():
 	
 	is_open = true
 	furnace_panel.visible = true
+	furnace_panel.modulate.a = 0.0
+	var tw = create_tween()
+	tw.tween_property(furnace_panel, "modulate:a", 1.0, 0.2)
 	_refresh_tier()
 	_refresh_items()
 	_refresh_history()
@@ -196,6 +199,8 @@ func open():
 func close():
 	is_open = false
 	if is_instance_valid(furnace_panel):
+		var tw = create_tween()
+		tw.tween_property(furnace_panel, "modulate:a", 0.0, 0.15)
 		furnace_panel.visible = false
 	get_tree().paused = false
 
@@ -496,6 +501,16 @@ func _show_result(text: String, color: Color):
 	if is_instance_valid(result_label):
 		result_label.text = text
 		result_label.add_theme_color_override("font_color", color)
+	_flash_result(color)
+
+func _flash_result(flash_color: Color):
+	var bg = find_child("result_bg", true, false)
+	if not bg:
+		return
+	var orig = bg.color
+	bg.color = Color(flash_color.r, flash_color.g, flash_color.b, 0.3)
+	var tw = create_tween()
+	tw.tween_property(bg, "color", orig, 0.6)
 
 
 func _do_slice():

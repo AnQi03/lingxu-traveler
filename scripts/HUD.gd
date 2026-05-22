@@ -25,6 +25,7 @@ const COLOR_RARE = Color(0.8, 0.4, 1.0)       # 紫 — 稀有/仙品
 
 var toast_label: Label = null
 var toast_timer: float = 0.0
+var last_stone_count: int = 0
 
 
 func _ready() -> void:
@@ -151,3 +152,14 @@ func _update_display() -> void:
 	if highs > 0:
 		text += " + %d上品" % highs
 	stone_label.text = text
+	
+	# 灵石跳动动画
+	var current = PlayerData.get_total_stones()
+	if current != last_stone_count:
+		if current > last_stone_count:
+			stone_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
+			var tw = create_tween()
+			tw.tween_property(stone_label, "scale", Vector2(1.2, 1.2), 0.1)
+			tw.tween_property(stone_label, "scale", Vector2(1.0, 1.0), 0.2)
+			tw.tween_callback(func(): stone_label.add_theme_color_override("font_color", Color.WHITE))
+		last_stone_count = current

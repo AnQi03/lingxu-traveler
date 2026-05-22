@@ -68,22 +68,24 @@ func toggle():
 func open():
 	if not is_instance_valid(market_ui):
 		_build_ui()
-	
 	if not is_instance_valid(market_ui):
 		return
 	
 	is_open = true
 	market_ui.visible = true
+	market_ui.modulate.a = 0.0
+	var tw = create_tween()
+	tw.tween_property(market_ui, "modulate:a", 1.0, 0.2)
 	_refresh_grid()
 	get_tree().paused = true
 
 
 func close():
 	is_open = false
-	
 	if is_instance_valid(market_ui):
+		var tw = create_tween()
+		tw.tween_property(market_ui, "modulate:a", 0.0, 0.15)
 		market_ui.visible = false
-	
 	get_tree().paused = false
 
 
