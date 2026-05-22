@@ -414,12 +414,6 @@ static func get_loyalty_event(customer_name: String, loyalty: int) -> Dictionary
 			match loyalty:
 				2:
 					result.message = "石老慢悠悠地从袖中取出一枚旧玉简：'年轻人，老夫观察你许久了。你对灵材的感知，不一般。'"
-					result.reward = "stone_earth"
-				2->4, etc changes needed
-		"石老":
-			match loyalty:
-				2:
-					result.message = "石老慢悠悠地从袖中取出一枚旧玉简：'年轻人，老夫观察你许久了。你对灵材的感知，不一般。'"
 					result.reward = "blessing_shangdao_3"
 				4:
 					result.message = "石老难得地露出笑容：'老夫年轻时也曾在散修联盟闯荡……看到你，就像看到当年的自己。'"
