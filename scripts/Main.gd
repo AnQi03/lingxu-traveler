@@ -6,7 +6,7 @@ var dev_console_node: Node = null
 var furnace_node: Node = null
 var inventory_node: Node = null
 var day_summary_node: Node = null
-var scene_bg: ColorRect = null
+var scene_bg: Control = null  # TextureRect
 var atmosphere_label: Label = null
 
 
@@ -76,7 +76,7 @@ func _update_background():
 	
 	var tex_path = "res://assets/img/ui/bg/night_scene.png" if is_night else "res://assets/img/ui/bg/market_scene.png"
 	var tex = load(tex_path)
-	if tex and scene_bg is TextureRect:
+	if tex:
 		scene_bg.texture = tex
 	
 	# 暗色遮罩随时段变化
