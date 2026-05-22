@@ -30,6 +30,42 @@ const MAX_DAILY_REFINE: int = 5
 var ling_shi: int = 100
 const MAX_LING_SHI: int = 100
 
+## ---------- 熔炉升级 ----------
+var furnace_tier: int = 1
+const FURNACE_UPGRADE_COST = {
+	2: 200,
+	3: 800,
+	4: 3000,
+	5: 15000
+}
+const FURNACE_UPGRADE_LUCK = {
+	1: [0.35, 0.20, 0.007],
+	2: [0.50, 0.25, 0.01],
+	3: [0.65, 0.35, 0.03],
+	4: [0.80, 0.50, 0.08],
+	5: [0.90, 0.65, 0.15]
+}
+
+func get_furnace_luck(tier: int) -> Array:
+	if FURNACE_UPGRADE_LUCK.has(tier):
+		return FURNACE_UPGRADE_LUCK[tier]
+	return FURNACE_UPGRADE_LUCK[1]
+
+func get_furnace_upgrade_cost() -> int:
+	var next = furnace_tier + 1
+	if FURNACE_UPGRADE_COST.has(next):
+		return FURNACE_UPGRADE_COST[next]
+	return -1
+
+func upgrade_furnace() -> bool:
+	var cost = get_furnace_upgrade_cost()
+	if cost < 0:
+		return false
+	if not spend_stones(cost):
+		return false
+	furnace_tier += 1
+	return true
+
 ## ---------- 顾客关系 ----------
 var customer_relations: Dictionary = {}
 

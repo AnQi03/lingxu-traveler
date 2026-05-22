@@ -113,6 +113,22 @@ func _build_ui():
 	smelt_btn.pressed.connect(_do_smelt)
 	furnace_panel.add_child(smelt_btn)
 	
+	var upgrade_btn = Button.new()
+	upgrade_btn.name = "upgrade_btn"
+	upgrade_btn.text = "⬆ 升级熔炉"
+	upgrade_btn.position = Vector2(465, 200)
+	upgrade_btn.size = Vector2(140, 50)
+	upgrade_btn.pressed.connect(_do_upgrade)
+	furnace_panel.add_child(upgrade_btn)
+	
+	var tier_label = Label.new()
+	tier_label.name = "tier_label"
+	tier_label.position = Vector2(465, 260)
+	tier_label.size = Vector2(400, 25)
+	tier_label.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
+	tier_label.add_theme_font_size_override("font_size", 12)
+	furnace_panel.add_child(tier_label)
+	
 	var result_bg = ColorRect.new()
 	result_bg.name = "result_bg"
 	result_bg.position = Vector2(465, 280)
@@ -162,6 +178,7 @@ func open():
 	
 	is_open = true
 	furnace_panel.visible = true
+	_refresh_tier()
 	_refresh_items()
 	_refresh_history()
 	get_tree().paused = true
@@ -280,22 +297,23 @@ func _do_smelt():
 	if not success:
 		return
 	
-	var base_luck = 0.35
+	# 根据熔炉等级动态概率
+	var luck_table = PlayerData.get_furnace_luck(PlayerData.furnace_tier)
+	var base_luck = luck_table[0]
 	var base_fail = 0.25
 	var base_destroy = 0.1
 	
-	# 品阶越高升品越难，降品/报废风险越大
 	match item.tier:
 		0:  # 凡品 → 灵品
-			base_luck = 0.35
+			base_luck = luck_table[0]
 			base_fail = 0.25
 			base_destroy = 0.08
 		1:  # 灵品 → 宝品
-			base_luck = 0.20
+			base_luck = luck_table[1]
 			base_fail = 0.30
 			base_destroy = 0.12
 		2:  # 宝品 → 仙品
-			base_luck = 0.007
+			base_luck = luck_table[2]
 			base_fail = 0.35
 			base_destroy = 0.25
 		_:  # 仙品无法再升品
@@ -383,3 +401,45 @@ func _refresh_history():
 	help.add_theme_color_override("font_color", Color(0.4, 0.4, 0.5))
 	help.add_theme_font_size_override("font_size", 12)
 	history_box.add_child(help)
+
+
+func _do_upgrade():
+	var cost = PlayerData.get_furnace_upgrade_cost()
+	if cost < 0:
+		_show_result("熔炉已达最高等级！", Color(1, 0.8, 0.3))
+		return
+	
+	var success = PlayerData.upgrade_furnace()
+	if not success:
+		_show_result("灵石不足！升级需要 %d 灵石。" % cost, Color(1, 0.3, 0.3))
+		return
+	
+	_show_result("✨ 熔炉升级成功！当前等级 Lv.%d" % PlayerData.furnace_tier, Color(1, 0.8, 0.3))
+	_refresh_tier()
+	_refresh_items()
+
+
+func _refresh_tier():
+	var tier_label = find_child("tier_label", true, false)
+	if tier_label:
+		var t = PlayerData.furnace_tier
+		var luck = PlayerData.get_furnace_luck(t)
+		var next_cost = PlayerData.get_furnace_upgrade_cost()
+		var cost_text = "升级需要 %d灵石" % next_cost if next_cost > 0 else "已满级"
+		tier_label.text = "  熔炉 Lv.%d | 凡→灵 %.0f%% | 灵→宝 %.0f%% | %s" % [t, luck[0]*100, luck[1]*100, cost_text]
+	
+	var upgrade_btn = find_child("upgrade_btn", true, false)
+	if upgrade_btn:
+		var next_cost = PlayerData.get_furnace_upgrade_cost()
+		if next_cost < 0:
+			upgrade_btn.text = "已满级"
+			upgrade_btn.disabled = true
+		else:
+			upgrade_btn.text = "⬆ 升级 (%d灵石)" % next_cost
+			upgrade_btn.disabled = false
+
+
+func _show_result(text: String, color: Color):
+	if is_instance_valid(result_label):
+		result_label.text = text
+		result_label.add_theme_color_override("font_color", color)
