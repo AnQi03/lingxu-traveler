@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-const DISPLAY_DURATION: float = 4.0
+const DISPLAY_DURATION: float = 10.0
 
 var summary_panel: Panel = null
 var timer: float = 0.0
@@ -49,13 +49,15 @@ func _build_ui():
 	
 	var hint = Label.new()
 	hint.name = "hint_label"
-	hint.text = "（片刻后将进入新的一天……）"
+	hint.text = "（点击任意位置关闭，或10秒后自动消失……）"
 	hint.position = Vector2(0, 245)
 	hint.size = Vector2(600, 30)
 	hint.add_theme_color_override("font_color", Color(0.4, 0.4, 0.5))
 	hint.add_theme_font_size_override("font_size", 12)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	summary_panel.add_child(hint)
+	
+	bg.gui_input.connect(_on_bg_clicked)
 
 
 func _process(delta):
@@ -92,3 +94,8 @@ func _dismiss():
 	is_showing = false
 	summary_panel.visible = false
 	queue_free()
+
+
+func _on_bg_clicked(event: InputEvent):
+	if event is InputEventMouseButton and event.pressed:
+		_dismiss()

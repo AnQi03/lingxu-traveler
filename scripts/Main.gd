@@ -121,9 +121,8 @@ func _on_night_falling():
 		var layer = CanvasLayer.new()
 		layer.name = "DaySummary"
 		layer.layer = 20
-		layer.set_process_mode(PROCESS_MODE_WHEN_PAUSED)
-		add_child(layer)
 		layer.set_script(summary)
+		add_child(layer)
 		day_summary_node = layer
 		if layer.has_method("show_summary"):
 			layer.show_summary()
