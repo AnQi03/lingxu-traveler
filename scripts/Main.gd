@@ -41,13 +41,23 @@ func _ready():
 	print(key_hint)
 
 func _create_scene_background():
-	scene_bg = ColorRect.new()
+	# 场景背景 — 使用像素场景图
+	scene_bg = TextureRect.new()
 	scene_bg.name = "SceneBackground"
 	scene_bg.size = Vector2(1152, 648)
-	scene_bg.color = Color(0.12, 0.15, 0.25)  # 初始晨色
+	scene_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	scene_bg.stretch_mode = TextureRect.STRETCH_SCALE
 	scene_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(scene_bg)
-	move_child(scene_bg, 0)  # 放到最底层
+	move_child(scene_bg, 0)
+	
+	# 暗色遮罩覆盖
+	var overlay = ColorRect.new()
+	overlay.name = "SceneOverlay"
+	overlay.size = Vector2(1152, 648)
+	overlay.color = Color(0, 0, 0, 0.35)
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	scene_bg.add_child(overlay)
 	
 	atmosphere_label = Label.new()
 	atmosphere_label.name = "Atmosphere"
@@ -62,53 +72,39 @@ func _create_scene_background():
 
 func _update_background():
 	var t = PlayerData.time_of_day
-	var period = DayCycle.get_period_name(t)
+	var is_night = t >= 19.0 or t < 5.0
 	
-	var sky_color: Color
-	var ground_color: Color
-	var atm_text: String
-	var text_alpha: float = 0.5
+	var tex_path = "res://assets/img/ui/bg/night_scene.png" if is_night else "res://assets/img/ui/bg/market_scene.png"
+	var tex = load(tex_path)
+	if tex and scene_bg is TextureRect:
+		scene_bg.texture = tex
 	
+	# 暗色遮罩随时段变化
+	var overlay = scene_bg.find_child("SceneOverlay", false, false)
+	if overlay:
+		if t >= 19.0 and t < 21.0:
+			overlay.color = Color(0.05, 0.05, 0.15, 0.45)
+		elif t >= 21.0 or t < 5.0:
+			overlay.color = Color(0.02, 0.02, 0.08, 0.55)
+		else:
+			overlay.color = Color(0, 0, 0, 0.30)
+	
+	var atm_text = ""
 	if t >= 5.0 and t < 7.0:
-		sky_color = Color(0.08, 0.06, 0.20)      # 拂晓深蓝紫
-		ground_color = Color(0.04, 0.03, 0.06)
 		atm_text = "晨雾未散，灵墟集市灯火渐明……"
-	elif t >= 7.0 and t < 10.0:
-		sky_color = Color(0.18, 0.13, 0.10)       # 晨光暖棕
-		ground_color = Color(0.08, 0.06, 0.04)
-		atm_text = "晨光照进荒原，修士们陆续出摊。"
-	elif t >= 10.0 and t < 15.0:
-		sky_color = Color(0.22, 0.16, 0.10)       # 上午明亮
-		ground_color = Color(0.10, 0.07, 0.04)
+	elif t >= 7.0 and t < 12.0:
 		atm_text = "灵墟集市热闹非凡，讨价还价此起彼伏。"
-	elif t >= 15.0 and t < 18.0:
-		sky_color = Color(0.20, 0.14, 0.08)       # 下午温暖
-		ground_color = Color(0.09, 0.06, 0.04)
+	elif t >= 12.0 and t < 18.0:
 		atm_text = "午后阳光慵懒，老顾客们慢悠悠地挑着灵材。"
 	elif t >= 18.0 and t < 19.0:
-		sky_color = Color(0.18, 0.10, 0.14)       # 黄昏金紫
-		ground_color = Color(0.06, 0.04, 0.05)
 		atm_text = "夕照染金天空，集市收摊的吆喝声渐起。"
 	elif t >= 19.0 and t < 21.0:
-		sky_color = Color(0.06, 0.04, 0.12)       # 入夜深紫
-		ground_color = Color(0.03, 0.02, 0.04)
 		atm_text = "夜幕低垂，远处炉火噼啪、修士夜话。"
-		text_alpha = 0.35
 	else:
-		sky_color = Color(0.03, 0.02, 0.08)       # 深夜暗紫
-		ground_color = Color(0.02, 0.01, 0.03)
 		atm_text = "夜深。灵墟沉入寂静，天道脉动在黑暗中流淌。"
-		text_alpha = 0.25
 	
-	# 天空→地面渐变
-	var gradient = Gradient.new()
-	gradient.add_point(0.0, sky_color)
-	gradient.add_point(0.7, sky_color.lerp(ground_color, 0.5))
-	gradient.add_point(1.0, ground_color)
-	
-	scene_bg.color = sky_color  # 基础色
 	atmosphere_label.text = atm_text
-	atmosphere_label.add_theme_color_override("font_color", Color(1, 1, 1, text_alpha))
+	atmosphere_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.4))
 
 
 func _create_market():

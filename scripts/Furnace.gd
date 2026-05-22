@@ -30,14 +30,17 @@ func _build_ui():
 	bg.mouse_filter = 0
 	furnace_panel.add_child(bg)
 	
-	# 像素金+橙边框角标 — 熔炉用更暖的橙金
-	for pos in [Vector2(0,0), Vector2(892,0), Vector2(0,572), Vector2(892,572)]:
-		var c = ColorRect.new()
-		c.position = pos
-		c.size = Vector2(9, 9)
-		c.color = Color(0.9, 0.55, 0.15, 0.85)
-		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		furnace_panel.add_child(c)
+	# 像素面板边框纹理
+	var border_tex = load("res://assets/img/ui/ui/panel_border.png")
+	if border_tex:
+		var border = TextureRect.new()
+		border.texture = border_tex
+		border.size = furnace_panel.size
+		border.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		border.stretch_mode = TextureRect.STRETCH_SCALE
+		border.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		furnace_panel.add_child(border)
+		furnace_panel.move_child(border, 1)
 	
 	var title_bar = HBoxContainer.new()
 	title_bar.position = Vector2(0, 0)

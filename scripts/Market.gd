@@ -26,15 +26,17 @@ func _build_ui():
 	bg.mouse_filter = 0
 	market_ui.add_child(bg)
 	
-	# 像素金边框 — 四角装饰
-	var tl = _make_pixel_corner(Vector2(0,0), true)
-	market_ui.add_child(tl)
-	var tr = _make_pixel_corner(Vector2(1080-8, 0), false)
-	market_ui.add_child(tr)
-	var bl = _make_pixel_corner(Vector2(0, 600-8), false)
-	market_ui.add_child(bl)
-	var br = _make_pixel_corner(Vector2(1080-8, 600-8), false)
-	market_ui.add_child(br)
+	# 像素面板边框纹理覆盖
+	var border_tex = load("res://assets/img/ui/ui/panel_border.png")
+	if border_tex:
+		var border = TextureRect.new()
+		border.texture = border_tex
+		border.size = market_ui.size
+		border.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		border.stretch_mode = TextureRect.STRETCH_SCALE
+		border.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		market_ui.add_child(border)
+		market_ui.move_child(border, 1)  # 放在bg上面，内容下面
 	
 	var title_bar = HBoxContainer.new()
 	title_bar.position = Vector2(0, 0)
@@ -169,11 +171,4 @@ func _buy(data):
 		})
 		_refresh_grid()
 
-## 像素角标 — 3×3金点装饰面板四角
-func _make_pixel_corner(pos: Vector2, is_topleft: bool) -> ColorRect:
-	var c = ColorRect.new()
-	c.position = pos
-	c.size = Vector2(9, 9)
-	c.color = Color(0.78, 0.66, 0.31, 0.8)  # 像素金
-	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return c
+## 像素角标 — 已替换为面板纹理

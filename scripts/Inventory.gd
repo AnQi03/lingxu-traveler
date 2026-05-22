@@ -1,23 +1,18 @@
 extends CanvasLayer
 
-# ================================================================
-# 背包界面 - Inventory.gd
-# 按 I 键打开，查看和管理背包中的灵材
-# ================================================================
-
 var is_open: bool = false
 var inv_panel: Panel = null
 var item_grid: GridContainer = null
 var tier_names = ["凡品", "灵品", "宝品", "仙品"]
 var element_icons = ["金", "木", "水", "火", "土"]
 var element_colors = [
-	Color(1, 0.84, 0.2),   # 金
-	Color(0.3, 0.8, 0.3),  # 木
-	Color(0.3, 0.6, 1.0),  # 水
-	Color(1, 0.4, 0.2),    # 火
-	Color(0.6, 0.4, 0.2)   # 土
+	Color(1, 0.84, 0.2),
+	Color(0.3, 0.8, 0.3),
+	Color(0.3, 0.6, 1.0),
+	Color(1, 0.4, 0.2),
+	Color(0.6, 0.4, 0.2)
 ]
-var filter_tier: int = -1  # -1 = 全部
+var filter_tier: int = -1
 
 
 func _ready():
@@ -41,7 +36,6 @@ func _build_ui():
 	bg.mouse_filter = 0
 	inv_panel.add_child(bg)
 	
-	# 标题栏
 	var title_bar = HBoxContainer.new()
 	title_bar.position = Vector2(0, 0)
 	title_bar.size = Vector2(1050, 36)
@@ -54,13 +48,12 @@ func _build_ui():
 	title_bar.add_child(title)
 	
 	var close_btn = Button.new()
-	close_btn.text = "  关闭 [I]  "
+	close_btn.text = "  关闭 [E]  "
 	close_btn.add_theme_color_override("font_color", Color(1, 0.5, 0.5))
 	close_btn.add_theme_font_size_override("font_size", 16)
 	close_btn.pressed.connect(_on_close)
 	title_bar.add_child(close_btn)
 	
-	# 筛选栏
 	var filter_hbox = HBoxContainer.new()
 	filter_hbox.position = Vector2(15, 42)
 	filter_hbox.size = Vector2(1020, 30)
@@ -92,7 +85,6 @@ func _build_ui():
 	count_label.add_theme_font_size_override("font_size", 12)
 	filter_hbox.add_child(count_label)
 	
-	# 物品网格
 	var scroll = ScrollContainer.new()
 	scroll.position = Vector2(15, 78)
 	scroll.size = Vector2(1020, 555)
@@ -147,7 +139,6 @@ func _refresh_items():
 	for child in item_grid.get_children():
 		child.queue_free()
 	
-	# 统计
 	var total_kinds = 0
 	var total_count = 0
 	var tier_counts = [0, 0, 0, 0]
@@ -163,7 +154,6 @@ func _refresh_items():
 	if count_label:
 		count_label.text = "共 %d 种 / %d 件  [凡:%d 灵:%d 宝:%d 仙:%d]" % [total_kinds, total_count, tier_counts[0], tier_counts[1], tier_counts[2], tier_counts[3]]
 	
-	# 筛选
 	var display_items = []
 	for item in PlayerData.inventory:
 		if filter_tier < 0 or item.tier == filter_tier:
@@ -182,25 +172,22 @@ func _refresh_items():
 		var elem_str = element_icons[item.element] if item.element >= 0 and item.element < element_icons.size() else "?"
 		var elem_col = element_colors[item.element] if item.element >= 0 and item.element < element_colors.size() else Color.WHITE
 		
-		# 根据品阶给不同底色
 		var card_color = Color(0.12, 0.12, 0.18, 0.9)
 		match item.tier:
-			0: card_color = Color(0.12, 0.12, 0.18, 0.9)  # 凡品 - 灰
-			1: card_color = Color(0.12, 0.18, 0.25, 0.9)  # 灵品 - 蓝
-			2: card_color = Color(0.2, 0.15, 0.08, 0.9)   # 宝品 - 金
-			3: card_color = Color(0.2, 0.08, 0.2, 0.9)    # 仙品 - 紫
+			0: card_color = Color(0.12, 0.12, 0.18, 0.9)
+			1: card_color = Color(0.12, 0.18, 0.25, 0.9)
+			2: card_color = Color(0.2, 0.15, 0.08, 0.9)
+			3: card_color = Color(0.2, 0.08, 0.2, 0.9)
 		
 		var card = ColorRect.new()
 		card.color = card_color
 		card.custom_minimum_size = Vector2(330, 70)
 		
-		# 五行色条
 		var elem_bar = ColorRect.new()
 		elem_bar.color = elem_col
 		elem_bar.size = Vector2(4, 70)
 		card.add_child(elem_bar)
 		
-		# 名称
 		var name_label = Label.new()
 		name_label.text = "[%s] %s" % [tier_str, item.name]
 		name_label.position = Vector2(12, 6)
@@ -208,7 +195,6 @@ func _refresh_items():
 		name_label.add_theme_font_size_override("font_size", 15)
 		card.add_child(name_label)
 		
-		# 五行+数量
 		var info_label = Label.new()
 		info_label.text = "五行: %s  |  数量: ×%d" % [elem_str, item.get("count", 1)]
 		info_label.position = Vector2(12, 28)
@@ -216,7 +202,6 @@ func _refresh_items():
 		info_label.add_theme_font_size_override("font_size", 12)
 		card.add_child(info_label)
 		
-		# 价格
 		var price_label = Label.new()
 		price_label.text = "%d灵石/个" % item.get("price", 0)
 		price_label.position = Vector2(12, 46)
@@ -224,7 +209,6 @@ func _refresh_items():
 		price_label.add_theme_font_size_override("font_size", 12)
 		card.add_child(price_label)
 		
-		# 来源
 		if item.has("origin") and item.origin != "":
 			var origin_label = Label.new()
 			origin_label.text = "来源: %s" % item.origin
