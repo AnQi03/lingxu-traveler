@@ -2,10 +2,11 @@ extends Node2D
 
 var stall_scene: Node = null
 var market_node: Node = null
+var dev_console_node: Node = null
 
 
 func _ready():
-	set_process_mode(PROCESS_MODE_WHEN_PAUSED)
+	set_process_mode(PROCESS_MODE_ALWAYS)
 	
 	_setup_actions()
 	
@@ -14,13 +15,14 @@ func _ready():
 	print("时间: %s" % PlayerData.get_time_label())
 	
 	_create_market()
+	_create_dev_console()
 	
 	var stall = preload("res://scenes/StallScene.tscn")
 	if stall:
 		stall_scene = stall.instantiate()
 		add_child(stall_scene)
 	
-	print("按 M 打开集市  |  按 S 开张收摊  |  按 F 熔炉")
+	print("按 M 打开集市  |  按 S 开张收摊  |  按 F 熔炉  |  按 ~ 开发者控制台")
 
 
 func _setup_actions():
@@ -55,10 +57,25 @@ func _create_market():
 	market_node = market_layer
 
 
+func _create_dev_console():
+	var console_layer = CanvasLayer.new()
+	console_layer.name = "DevConsole"
+	console_layer.layer = 10
+	console_layer.set_process_mode(PROCESS_MODE_WHEN_PAUSED)
+	add_child(console_layer)
+	
+	var script = load("res://scripts/DevConsole.gd")
+	if script:
+		console_layer.set_script(script)
+	
+	dev_console_node = console_layer
+
+
 func _input(event):
 	if event is InputEventMouseMotion or event is InputEventMouseButton:
 		return
 	
+	# 开发者控制台：`~` 键
 	if event.is_action_pressed("open_market"):
 		if market_node and market_node.has_method("toggle"):
 			market_node.toggle()
@@ -76,3 +93,10 @@ func _input(event):
 	
 	elif event.is_action_pressed("open_furnace"):
 		get_viewport().set_input_as_handled()
+	
+	# 开发者控制台: 用直接键码检测更可靠
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_GRAVE:
+			if dev_console_node and dev_console_node.has_method("toggle"):
+				dev_console_node.toggle()
+			get_viewport().set_input_as_handled()
