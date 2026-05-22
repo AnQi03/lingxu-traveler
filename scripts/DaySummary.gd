@@ -115,14 +115,18 @@ func show_summary():
 
 
 func _get_tomorrow_hint(day: int) -> String:
+	var season = PlayerData.SEASON_EMOJI[PlayerData.season_index] + PlayerData.SEASON_NAMES[PlayerData.season_index]
+	var hint = "📅 %s 第%d天" % [season, PlayerData.season_day]
+	if PlayerData.is_festival_day():
+		hint += " | 🎪 明天是集市大日！灵材打折！"
 	if day <= 7:
-		return "📅 明天：灵材市场照常开市，多囤点凡品灵材吧。"
+		return hint + " — 灵材市场照常开市，多囤点凡品灵材吧。"
 	elif day <= 14:
-		return "📅 明天：有传言说灵材需求要涨，抓住机会！"
+		return hint + " — 有传言说灵材需求要涨，抓住机会！"
 	elif day <= 21:
-		return "📅 明天：集市可能上新货，记得去看看。"
+		return hint + " — 集市可能上新货，记得去看看。"
 	else:
-		return "📅 明天：老顾客会越来越多，稳住口碑。"
+		return hint + " — 老顾客会越来越多，稳住口碑。"
 
 
 func _get_goal_hint() -> String:

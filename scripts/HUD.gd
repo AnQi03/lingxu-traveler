@@ -6,9 +6,9 @@ extends CanvasLayer
 
 var period_label: Label = null
 var pause_label: Label = null
+var season_label: Label = null
 var current_period: String = ""
 
-# 各时段的 HUD 背景色（带透明度）
 var period_colors = {
 	"morning": Color(0, 0, 0, 0.35),
 	"afternoon": Color(0, 0, 0, 0.30),
@@ -18,7 +18,6 @@ var period_colors = {
 
 
 func _ready() -> void:
-	# 时段标签
 	period_label = Label.new()
 	period_label.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
 	period_label.add_theme_font_size_override("font_size", 14)
@@ -27,7 +26,6 @@ func _ready() -> void:
 	$HUD_Background/TopBar.add_child(period_label)
 	$HUD_Background/TopBar.move_child(period_label, 1)
 	
-	# 时间暂停提示
 	pause_label = Label.new()
 	pause_label.text = "⏸ 暂停"
 	pause_label.add_theme_color_override("font_color", Color(1, 0.8, 0.3))
@@ -40,6 +38,14 @@ func _ready() -> void:
 	$HUD_Background/TopBar.add_child(pause_label)
 	$HUD_Background/TopBar.move_child(pause_label, 2)
 	
+	season_label = Label.new()
+	season_label.add_theme_color_override("font_color", Color(0.9, 0.85, 0.6))
+	season_label.add_theme_font_size_override("font_size", 13)
+	season_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	season_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	$HUD_Background/TopBar.add_child(season_label)
+	$HUD_Background/TopBar.move_child(season_label, 3)
+	
 	_update_display()
 
 
@@ -51,22 +57,18 @@ func _update_display() -> void:
 	if not is_inside_tree():
 		return
 	
-	# 更新时间
 	time_label.text = PlayerData.get_time_label()
 	
-	# 更新时段标签
 	var p = DayCycle.get_period_label(PlayerData.time_of_day)
 	if period_label:
 		period_label.text = p
 	
-	# 更新背景色（根据时段变化）
 	var period_name = DayCycle.get_period_name(PlayerData.time_of_day)
 	if period_name != current_period:
 		current_period = period_name
 		if period_colors.has(period_name):
 			hud_bg.color = period_colors[period_name]
 	
-	# 时间暂停提示
 	var main = get_node("/root/Main")
 	var is_paused = false
 	if main and main.has_method("is_any_panel_open"):
@@ -75,7 +77,12 @@ func _update_display() -> void:
 	if pause_label:
 		pause_label.visible = is_paused
 	
-	# 更新灵石
+	if season_label:
+		var s_text = PlayerData.get_season_label()
+		if PlayerData.is_festival_day():
+			s_text += " 🎪集市大日"
+		season_label.text = s_text
+	
 	var stones = PlayerData.spirit_stones
 	var mids = PlayerData.mid_spirit_stones
 	var highs = PlayerData.high_spirit_stones

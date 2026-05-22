@@ -19,6 +19,14 @@ var game_day: int = 1
 var is_daytime: bool = true
 var time_of_day: float = 6.0
 
+## ---------- 季节 ----------
+var season_index: int = 0
+var season_day: int = 1
+const SEASON_NAMES = ["灵潮季", "炎阳季", "丰收季", "静修季"]
+const SEASON_EMOJI = ["🌸", "☀️", "🍂", "❄️"]
+const DAYS_PER_SEASON: int = 7
+const FESTIVAL_INTERVAL: int = 10
+
 ## ---------- 库存 ----------
 var inventory: Array = []
 
@@ -185,6 +193,10 @@ func advance_time(hours: float) -> void:
 		game_day += 1
 		daily_refine_count = 0
 		reset_ling_shi()
+		season_day += 1
+		if season_day > DAYS_PER_SEASON:
+			season_day = 1
+			season_index = (season_index + 1) % 4
 	is_daytime = time_of_day >= 5.0 and time_of_day < 19.0
 
 func get_time_label() -> String:
@@ -192,3 +204,9 @@ func get_time_label() -> String:
 	var period = "上午" if hour < 12 else "下午"
 	var hour_str = str(hour) if hour <= 12 else str(hour - 12)
 	return "第%d天 · %s%s时" % [game_day, period, hour_str]
+
+func get_season_label() -> String:
+	return "%s%s 第%d天" % [SEASON_EMOJI[season_index], SEASON_NAMES[season_index], season_day]
+
+func is_festival_day() -> bool:
+	return game_day % FESTIVAL_INTERVAL == 0
