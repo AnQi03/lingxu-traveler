@@ -19,8 +19,8 @@ func _build_ui():
 	summary_panel.visible = false
 	add_child(summary_panel)
 	
-	summary_panel.position = Vector2(340, 160)
-	summary_panel.size = Vector2(600, 360)
+	summary_panel.position = Vector2(340, 130)
+	summary_panel.size = Vector2(600, 400)
 	
 	var bg = ColorRect.new()
 	bg.color = Color(0.05, 0.08, 0.18, 0.95)
@@ -63,10 +63,20 @@ func _build_ui():
 	goal_label.add_theme_font_size_override("font_size", 14)
 	summary_panel.add_child(goal_label)
 	
+	var butler_label = Label.new()
+	butler_label.name = "butler_label"
+	butler_label.position = Vector2(30, 260)
+	butler_label.size = Vector2(540, 50)
+	butler_label.add_theme_color_override("font_color", Color(0.5, 1.0, 0.7))
+	butler_label.add_theme_font_size_override("font_size", 13)
+	butler_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	butler_label.visible = false
+	summary_panel.add_child(butler_label)
+	
 	var hint = Label.new()
 	hint.name = "hint_label"
 	hint.text = "（点击任意位置关闭，或10秒后自动消失……）"
-	hint.position = Vector2(0, 320)
+	hint.position = Vector2(0, 360)
 	hint.size = Vector2(600, 30)
 	hint.add_theme_color_override("font_color", Color(0.4, 0.4, 0.5))
 	hint.add_theme_font_size_override("font_size", 12)
@@ -112,6 +122,27 @@ func show_summary():
 	var goal = find_child("goal_label", true, false)
 	if goal:
 		goal.text = _get_goal_hint()
+	
+	var butler = find_child("butler_label", true, false)
+	if butler:
+		var msg = _get_butler_msg(PlayerData.game_day)
+		if msg != "":
+			butler.text = msg
+			butler.visible = true
+		else:
+			butler.visible = false
+
+
+func _get_butler_msg(day: int) -> String:
+	match day:
+		3: return "📜 管家来信：'少爷，攒够100灵石才有本钱做下一笔生意。多摆摊，少乱花。'"
+		7: return "📜 管家来信：'听说东市有人卖耐火砖——该给炉子升个级了。'"
+		14: return "📜 管家来信：'北街有个空铺面在招租。不急，但可以先去看看。'"
+		21: return "📜 管家来信：'灵墟最近有拍卖会——入场费100灵石。想不想去开开眼？'"
+		30: return "📜 管家来信：'第一季过去了。少爷在灵墟已经不是新人了。老仆甚慰。'"
+		60: return "📜 管家来信：'听说暗市开张了——不过那里水深，少爷多留个心眼。'"
+		90: return "📜 管家来信：'半年了。少爷的摊子——不，该叫店铺了——真是越来越像样了。'"
+		_: return ""
 
 
 func _get_tomorrow_hint(day: int) -> String:
