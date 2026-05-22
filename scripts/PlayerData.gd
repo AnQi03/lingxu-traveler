@@ -44,6 +44,11 @@ var has_stalled_today: bool = false
 var smelt_streak: int = 0      # 熔炼升品连胜
 var trade_streak: int = 0      # 交易成功连胜
 
+## ---------- 灵墟碎片 ----------
+var lingxu_fragments: int = 0  # 熔炼失败时获得，积累解锁隐藏配方
+const FRAGMENT_SECRET: int = 10   # 10碎片→解锁隐藏熔炼配方
+const FRAGMENT_DISCOUNT: int = 30  # 30碎片→熔炉升级8折
+
 ## ---------- 灵识 ----------
 var ling_shi: int = 80
 const MAX_LING_SHI: int = 100
@@ -92,6 +97,23 @@ func upgrade_furnace() -> bool:
 		return false
 	furnace_tier += 1
 	return true
+
+## ---------- 灵墟碎片 ----------
+func add_fragments(count: int) -> void:
+	lingxu_fragments += count
+	var hud = get_meta("hud", null)
+	if hud and hud.has_method("show_toast"):
+		hud.show_toast("🔮 获得 %d 灵墟碎片！（共 %d）" % [count, lingxu_fragments], Color(0.7, 0.45, 0.85), 2.5)
+	
+	if lingxu_fragments >= FRAGMENT_SECRET and not has_meta("fragment_secret_triggered"):
+		set_meta("fragment_secret_triggered", true)
+		if hud and hud.has_method("show_toast"):
+			hud.show_toast("✨ 灵墟碎片共鸣！解锁隐藏熔炼配方！去熔炉看看吧~", Color(1, 0.8, 0.3), 5.0)
+	
+	if lingxu_fragments >= FRAGMENT_DISCOUNT and not has_meta("fragment_discount_triggered"):
+		set_meta("fragment_discount_triggered", true)
+		if hud and hud.has_method("show_toast"):
+			hud.show_toast("🏷️ 碎片之力汇聚！下次熔炉升级享受8折优惠！", Color(1, 0.8, 0.3), 5.0)
 
 ## ---------- 顾客关系 ----------
 var customer_relations: Dictionary = {}
@@ -290,7 +312,8 @@ func save_game() -> void:
 		"consecutive_stall_days": consecutive_stall_days,
 		"inventory": inventory,
 		"customer_relations": customer_relations,
-		"loyalty_events_triggered": loyalty_events_triggered
+		"loyalty_events_triggered": loyalty_events_triggered,
+		"lingxu_fragments": lingxu_fragments
 	}
 	var file = FileAccess.open("user://save.json", FileAccess.WRITE)
 	if file:
@@ -333,6 +356,7 @@ func load_game() -> bool:
 	inventory = data.get("inventory", [])
 	customer_relations = data.get("customer_relations", {})
 	loyalty_events_triggered = data.get("loyalty_events_triggered", [])
+	lingxu_fragments = data.get("lingxu_fragments", 0)
 	
 	is_daytime = time_of_day >= 5.0 and time_of_day < 19.0
 	print("读档成功！第%d天" % game_day)

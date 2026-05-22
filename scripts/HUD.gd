@@ -158,6 +158,11 @@ func _update_display() -> void:
 		text += " + %d上品" % highs
 	stone_label.text = text
 	
+	# 灵墟碎片计数
+	var fragments = PlayerData.lingxu_fragments
+	if fragments > 0:
+		stone_label.text += "  |  🔮 ×%d" % fragments
+	
 	# 灵石跳动动画
 	var current = PlayerData.get_total_stones()
 	if current != last_stone_count:

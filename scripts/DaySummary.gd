@@ -121,8 +121,8 @@ func show_summary():
 			inv_count += 1
 			total_items += item.get("count", 1)
 		
-		info.text = "第%d天营业结束\n\n当前灵石：%d 下品\n库存：%d 种（%d 件）\n熔炼次数：%d/5" % [
-			day - 1, players, inv_count, total_items, PlayerData.daily_refine_count
+		info.text = "第%d天营业结束\n\n当前灵石：%d 下品\n库存：%d 种（%d 件）\n熔炼次数：%d/5\n灵墟碎片：🔮 ×%d" % [
+			day - 1, players, inv_count, total_items, PlayerData.daily_refine_count, PlayerData.lingxu_fragments
 		]
 	
 	var tomorrow = find_child("tomorrow_label", true, false)

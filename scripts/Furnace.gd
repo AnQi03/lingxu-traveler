@@ -382,9 +382,11 @@ func _do_smelt():
 	var result_color = Color(0.6, 0.6, 0.6)
 	
 	if roll < base_destroy:
-		result_text = "💀 熔炼失败！灵材化为灰烬……"
+		result_text = "💀 熔炼失败！灵材化为灰烬……\n🔮 但天道留下了灵墟碎片（+3）"
 		result_color = Color(0.5, 0.2, 0.2)
 		PlayerData.daily_refine_count += 1
+		PlayerData.tian_dao += 1  # 失败亦有天道感悟
+		PlayerData.add_fragments(3)  # 灵墟碎片
 		PlayerData.smelt_streak = 0  # 连胜中断
 		SoundManager.sfx_smelt_destroy()
 
@@ -399,9 +401,11 @@ func _do_smelt():
 			"price": max(1, item.price / 3),
 			"count": 1
 		})
-		result_text = "⚠️ 品阶下降：[%s] %s → [%s]" % [tier_names[item.tier], item.name, tier_names[nt]]
+		result_text = "⚠️ 品阶下降：[%s] %s → [%s]\n🔮 残留了一丝灵墟碎片（+1）" % [tier_names[item.tier], item.name, tier_names[nt]]
 		result_color = Color(0.7, 0.5, 0.2)
 		PlayerData.daily_refine_count += 1
+		PlayerData.tian_dao += 1  # 失败亦有天道感悟
+		PlayerData.add_fragments(1)
 		PlayerData.smelt_streak = 0  # 连胜中断
 		SoundManager.sfx_smelt_normal()
 
