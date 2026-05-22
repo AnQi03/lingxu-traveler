@@ -129,6 +129,10 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	
 	customer_request.text = "想要: [%s][%s] %s × %d" % [tier_names[item.tier], elem_str, item.name, customer.want_count]
 	
+	# 对话气泡附在需求下方
+	if greeting != "":
+		customer_request.text += "\n💬 %s" % greeting
+	
 	# 显示市场参考价和顾客出价
 	var ref_total = customer.base_price  # 市场价总额
 	var price_text = "出价: %d灵石 | 市场价: %d灵石（%d/个×%d）" % [customer.offer_price, ref_total, customer.unit_price, customer.want_count]

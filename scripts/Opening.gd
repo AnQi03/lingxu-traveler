@@ -96,4 +96,5 @@ func _input(event):
 
 
 func _dismiss():
+	get_tree().paused = false
 	queue_free()
