@@ -14,14 +14,8 @@ var player: Player = null
 func _ready():
 	set_process_mode(PROCESS_MODE_ALWAYS)
 	
-	_create_scene_background()
-	_create_player()
-	_create_interact_zones()
-	_setup_camera()
-	
 	print("灵墟旅商 loaded!")
 	print("初始灵石: %d" % PlayerData.spirit_stones)
-	print("时间: %s" % PlayerData.get_time_label())
 	
 	_create_market()
 	_create_dev_console()
@@ -33,16 +27,22 @@ func _ready():
 		stall_scene = stall.instantiate()
 		add_child(stall_scene)
 	
+	# 场景背景（简化版——先跳过玩家测试）
+	_create_scene_background()
+	
+	# 玩家角色
+	_create_player()
+	_setup_camera()
+	_create_interact_points()
+	
 	DayCycle.start()
 	DayCycle.night_falling.connect(_on_night_falling)
 	DayCycle.period_changed.connect(_on_period_changed)
 	
-	var key_hint = "WASD 移动  |  E 交互  |  I 背包  |  B 集市  |  空格 摆摊  |  F5存档 F9读档"
-	if PlayerData.is_furnace_unlocked():
-		key_hint += "  |  F 熔炉"
-	else:
-		key_hint += "  |  F 熔炉(Day5解锁)"
-	print(key_hint)
+	print("WASD 移动  |  E 交互  |  I 背包  |  B 集市  |  空格 摆摊")
+
+func _process(delta):
+	_process_interact_hint(delta)
 
 func _create_scene_background():
 	# 场景背景 — 使用像素场景图
@@ -261,18 +261,54 @@ func _create_interact_zones():
 		if furnace_node and furnace_node.has_method("toggle"):
 			furnace_node.toggle()
 
-func _make_zone(zname: String, pos: Vector2, size: Vector2, prompt: String) -> InteractZone:
-	var zone = InteractZone.new()
-	zone.name = zname
-	zone.position = pos
-	zone.prompt_text = prompt
-	var col = CollisionShape2D.new()
-	var rect = RectangleShape2D.new()
-	rect.size = size
-	col.shape = rect
-	zone.add_child(col)
-	add_child(zone)
-	return zone
+## 交互点定义 {name, pos, radius, action}
+var interact_points: Array = []
+
+func _create_interact_points():
+	interact_points = [
+		{"name": "集市", "pos": Vector2(150, 324), "radius": 100, "action": "market"},
+		{"name": "摊位", "pos": Vector2(576, 420), "radius": 100, "action": "stall"},
+		{"name": "熔炉", "pos": Vector2(950, 324), "radius": 100, "action": "furnace"},
+	]
+	
+	var hint = Label.new()
+	hint.name = "InteractHint"
+	hint.add_theme_font_size_override("font_size", 16)
+	hint.add_theme_color_override("font_color", Color(1, 0.9, 0.4))
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.visible = false
+	add_child(hint)
+
+func _do_interact(action: String):
+	match action:
+		"market":
+			if market_node and market_node.has_method("toggle"):
+				market_node.toggle()
+		"stall":
+			if stall_scene:
+				var mgr = stall_scene.get_node("StallManager")
+				if mgr:
+					if mgr.is_open: mgr.close_stall()
+					elif DayCycle.can_stall(PlayerData.time_of_day): mgr.open_stall()
+		"furnace":
+			if not PlayerData.is_furnace_unlocked():
+				var hud = PlayerData.get_meta("hud")
+				if hud and hud.has_method("show_toast"):
+					hud.show_toast("🔥 熔炉 Day5解锁", Color(1, 0.6, 0.2), 3.0)
+			elif furnace_node and furnace_node.has_method("toggle"):
+				furnace_node.toggle()
+
+func _get_nearest_interact() -> Dictionary:
+	if not player:
+		return {}
+	var best = {}
+	var best_dist = 9999.0
+	for pt in interact_points:
+		var d = player.position.distance_to(pt.pos)
+		if d < pt.radius and d < best_dist:
+			best = pt
+			best_dist = d
+	return best
 
 func _setup_camera():
 	var cam = Camera2D.new()
@@ -294,37 +330,6 @@ func _input(event):
 		return
 	
 	if event is InputEventKey and event.pressed and not event.echo:
-		# 面板打开时优先关闭
-		if is_any_panel_open():
-			match event.keycode:
-				KEY_ESCAPE, KEY_B, KEY_F, KEY_I, KEY_E:
-					_close_all_panels()
-					get_viewport().set_input_as_handled()
-					return
-			get_viewport().set_input_as_handled()
-			return
-		
-		if day_summary_node and is_instance_valid(day_summary_node) and day_summary_node.get("is_showing"):
-			get_viewport().set_input_as_handled()
-			return
-		
-		# E 键 — 场景交互（优先）或背包
-		if event.keycode == KEY_E:
-			if player and player.current_interactable:
-				player.try_interact()
-			else:
-				if inventory_node and inventory_node.has_method("toggle"):
-					inventory_node.toggle()
-			get_viewport().set_input_as_handled()
-			return
-		
-		# I 键 — 背包
-		if event.keycode == KEY_I:
-			if inventory_node and inventory_node.has_method("toggle"):
-				inventory_node.toggle()
-			get_viewport().set_input_as_handled()
-			return
-		
 		# F5/F9 存档读档
 		if event.keycode == KEY_F5:
 			PlayerData.save_game()
@@ -344,38 +349,56 @@ func _input(event):
 			get_viewport().set_input_as_handled()
 			return
 		
-		# 快捷键盘（备选）— B集市 F熔炉 空格摆摊
-		if event.keycode == KEY_B:
-			if market_node and market_node.has_method("toggle"):
-				market_node.toggle()
+		if day_summary_node and is_instance_valid(day_summary_node) and day_summary_node.get("is_showing"):
 			get_viewport().set_input_as_handled()
 			return
-		if event.keycode == KEY_F:
-			if furnace_node and furnace_node.has_method("toggle"):
-				if not PlayerData.is_furnace_unlocked():
-					print("熔炉 Day5解锁")
+		
+		# 面板打开时关闭
+		if is_any_panel_open():
+			match event.keycode:
+				KEY_ESCAPE, KEY_B, KEY_F, KEY_I, KEY_E:
+					if market_node and market_node.get("is_open"): market_node.toggle()
+					if furnace_node and furnace_node.get("is_open"): furnace_node.toggle()
+					if inventory_node and inventory_node.get("is_open"): inventory_node.toggle()
 					get_viewport().set_input_as_handled()
 					return
-				furnace_node.toggle()
 			get_viewport().set_input_as_handled()
 			return
-		if event.keycode == KEY_SPACE:
-			if stall_scene:
-				var manager = stall_scene.get_node("StallManager")
-				if manager:
-					if not DayCycle.can_stall(PlayerData.time_of_day) and not manager.is_open:
+		
+		# 快捷键
+		match event.keycode:
+			KEY_B:
+				if market_node and market_node.has_method("toggle"):
+					market_node.toggle()
+				get_viewport().set_input_as_handled()
+			KEY_E:
+				# 优先场景交互，否则开背包
+				var nearest = _get_nearest_interact()
+				if not nearest.is_empty():
+					_do_interact(nearest.action)
+				elif inventory_node and inventory_node.has_method("toggle"):
+					inventory_node.toggle()
+				get_viewport().set_input_as_handled()
+			KEY_I:
+				if inventory_node and inventory_node.has_method("toggle"):
+					inventory_node.toggle()
+				get_viewport().set_input_as_handled()
+			KEY_F:
+				if furnace_node and furnace_node.has_method("toggle"):
+					if not PlayerData.is_furnace_unlocked():
+						print("熔炉 Day5解锁")
+						get_viewport().set_input_as_handled()
 						return
-					if manager.is_open:
-						manager.close_stall()
-					else:
-						manager.open_stall()
-			get_viewport().set_input_as_handled()
-			return
-
-func _close_all_panels():
-	if market_node and market_node.get("is_open"):
-		market_node.toggle()
-	if furnace_node and furnace_node.get("is_open"):
-		furnace_node.toggle()
-	if inventory_node and inventory_node.get("is_open"):
-		inventory_node.toggle()
+					furnace_node.toggle()
+				get_viewport().set_input_as_handled()
+			KEY_SPACE:
+				if stall_scene:
+					var manager = stall_scene.get_node("StallManager")
+					if manager:
+						if not DayCycle.can_stall(PlayerData.time_of_day) and not manager.is_open:
+							return
+						if manager.is_open:
+							manager.close_stall()
+						else:
+							manager.open_stall()
+				get_viewport().set_input_as_handled()

@@ -8,3 +8,26 @@ script = ExtResource("1_main")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("2_hud")
+
+[node name="HUD_Background" type="ColorRect" parent="HUD"]
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 40.0
+color = Color(0.06, 0.04, 0.03, 0.7)
+
+[node name="TopBar" type="HBoxContainer" parent="HUD/HUD_Background"]
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 40.0
+
+[node name="TimeLabel" type="Label" parent="HUD/HUD_Background/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "第1天 · 上午6时"
+horizontal_alignment = 2
+
+[node name="StoneLabel" type="Label" parent="HUD/HUD_Background/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "灵石：0"
+horizontal_alignment = 2
