@@ -201,11 +201,11 @@ func _input(event):
 				if inventory_node and inventory_node.has_method("toggle"):
 					inventory_node.toggle()
 				get_viewport().set_input_as_handled()
-		KEY_F:
-			if furnace_node and furnace_node.has_method("toggle"):
-				if not PlayerData.is_furnace_unlocked():
-					print("熔炉 Day5解锁")
-					get_viewport().set_input_as_handled()
-					return
-				furnace_node.toggle()
-			get_viewport().set_input_as_handled()
+			KEY_F:
+				if furnace_node and furnace_node.has_method("toggle"):
+					if not PlayerData.is_furnace_unlocked():
+						print("熔炉 Day5解锁")
+						get_viewport().set_input_as_handled()
+						return
+					furnace_node.toggle()
+				get_viewport().set_input_as_handled()
