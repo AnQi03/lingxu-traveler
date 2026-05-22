@@ -8,6 +8,7 @@ class_name StallManager
 signal customer_arrived(customer_data: Dictionary)
 signal trade_completed(item_id: String, count: int, price: int)
 signal trade_failed(item_id: String, reason: String)
+signal stall_closed()
 
 var is_open: bool = false          # 摊位是否开张
 var customer_queue: Array = []      # 等待中的顾客
@@ -44,6 +45,7 @@ func open_stall() -> void:
 func close_stall() -> void:
 	is_open = false
 	current_customer = {}
+	stall_closed.emit()
 	print("收摊了。今日收入: %d灵石" % daily_income)
 
 

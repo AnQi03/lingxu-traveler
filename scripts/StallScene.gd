@@ -41,6 +41,7 @@ func _ready() -> void:
 	stall_manager.customer_arrived.connect(_on_customer_arrived)
 	stall_manager.trade_completed.connect(_on_trade_completed)
 	stall_manager.trade_failed.connect(_on_trade_failed)
+	stall_manager.stall_closed.connect(_on_stall_closed)
 	
 	# 连接按钮
 	open_btn.pressed.connect(_on_open_stall)
@@ -89,6 +90,12 @@ func _on_close_stall() -> void:
 	haggle_panel.hide()
 
 
+func _on_stall_closed() -> void:
+	is_trading = false
+	customer_panel.hide()
+	haggle_panel.hide()
+
+
 func _on_customer_arrived(customer: Dictionary) -> void:
 	is_trading = true
 	var item = customer.want_item
@@ -99,12 +106,15 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	customer_name.text = "👤 %s" % customer.name
 	customer_mood.text = "状态: %s" % customer.mood
 	customer_request.text = "想要: [%s][%s] %s × %d" % [tier_names[item.tier], elem_str, item.name, customer.want_count]
-	customer_price.text = "出价: %d灵石 (参考价: %d)" % [customer.offer_price, customer.base_price]
+	
+	# 显示参考价（集市单价）和顾客出价
+	var cost_text = "集市价: %d灵石/个 × %d" % [customer.get("unit_price", item.base_price), customer.want_count]
+	customer_price.text = "出价: %d灵石 | 参考价: %d灵石 | %s" % [customer.offer_price, customer.base_price, cost_text]
 	
 	customer_panel.show()
 	haggle_panel.show()
 	haggle_result.text = ""
-	haggle_slider.min_value = 1
+	haggle_slider.min_value = customer.offer_price
 	haggle_slider.max_value = int(customer.base_price * 1.5)
 	haggle_slider.value = customer.offer_price
 	_on_slider_changed(haggle_slider.value)
