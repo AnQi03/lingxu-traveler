@@ -57,7 +57,9 @@ func start_haggle(player_offer: int) -> Dictionary:
 	# 先查库存，没货不扣灵识
 	var item = current_customer.want_item
 	if PlayerData.find_item(item.id).get("count", 0) < current_customer.want_count:
-		return { "result": "error", "message": "你没有足够的%s！" % item.name }
+		var msg = CustomerGenerator._get_no_stock_msg(current_customer)
+		trade_failed.emit(item.id, 0, msg)
+		return { "result": "error", "message": msg }
 	
 	if not PlayerData.spend_ling_shi(5):
 		return { "result": "error", "message": "灵识耗尽！今天你已经太累了，休息吧。" }
@@ -82,7 +84,7 @@ func start_haggle(player_offer: int) -> Dictionary:
 		"walk_away":
 			# 顾客走了
 			PlayerData.update_customer_relation(current_customer.name, -1)
-			trade_failed.emit(current_customer.want_item.id, 0, "顾客走了")
+			trade_failed.emit(current_customer.want_item.id, 0, result.message)
 			current_customer = {}
 			
 		"counter":
@@ -96,7 +98,8 @@ func start_haggle(player_offer: int) -> Dictionary:
 func dismiss_customer() -> void:
 	if not current_customer.is_empty():
 		PlayerData.update_customer_relation(current_customer.name, -2)
-		trade_failed.emit(current_customer.want_item.id, 0, "玩家拒绝交易")
+		var msg = CustomerGenerator._get_dismiss_msg(current_customer)
+		trade_failed.emit(current_customer.want_item.id, 0, msg)
 		current_customer = {}
 
 

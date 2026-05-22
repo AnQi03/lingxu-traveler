@@ -233,13 +233,67 @@ static func _get_mood(personality: int, urgent: bool) -> String:
 	return "神色如常"
 
 static func _get_accept_msg(c: Dictionary) -> String:
-	return "%s爽快地付了灵石：'成交！'" % c.name
+	var msgs = ["%s爽快地付了灵石：'成交！'" % c.name, "%s点点头：'行，就这么定了。'" % c.name, "%s笑了：'老板爽快！'" % c.name]
+	return msgs[randi() % msgs.size()]
 
-static func _get_grudging_accept_msg(c: Dictionary) -> String:
-	return "%s犹豫了一下：'……好吧，就这个价。'" % c.name
+static func _get_no_stock_msg(c: Dictionary) -> String:
+	var item = c.want_item
+	var name = c.name
+	var bg = c.get("bg", "")
+	# 常客有特殊台词
+	if bg != "":
+		match name:
+			"石老": return "石老慢悠悠地看了你一眼：'小友，没有货就不要浪费老朽的时间。'"
+			"青儿": return "青儿噘起嘴：'啊？没有啊……那你还摆什么摊嘛！'"
+			"霍老板": return "霍老板皱了皱眉：'没货？这可不像做生意的样子。'"
+			"冷面客": return "冷面客一言不发，转身就走。"
+			"金娘子": return "金娘子哼了一声：'什么也没有出来摆什么摊。'"
+	
+	var msgs = [
+		"%s瞪了你一眼：'没有还摆什么摊？'" % name,
+		"%s一脸失望：'……什么都没有啊。'" % name,
+		"%s摆摆手：'没货就别耽误工夫了。'" % name,
+		"%s讥讽道：'光摆个空摊子？'" % name,
+	]
+	return msgs[randi() % msgs.size()]
 
 static func _get_walk_away_msg(c: Dictionary) -> String:
-	return "%s摇了摇头：'太贵了太贵了，我去别家看看。'说完转身走了。" % c.name
+	var name = c.name
+	var msgs = [
+		"%s摇了摇头：'太贵了，我去别家看看。'" % name,
+		"%s叹了口气：'算了吧……'" % name,
+		"%s转身就走，嘴里嘟囔着什么。" % name,
+		"%s摆摆手：'这价谈不拢，走了。'" % name,
+	]
+	return msgs[randi() % msgs.size()]
 
 static func _get_counter_msg(c: Dictionary) -> String:
-	return "%s皱了皱眉：'这个价不行。最多……%d灵石。'" % [c.name, c.offer_price]
+	var name = c.name
+	var msgs = [
+		"%s皱了皱眉：'这个价不行。最多……%d灵石。'" % [name, c.offer_price],
+		"%s犹豫了一下：'再低点嘛——%d灵石怎么样？'" % [name, c.offer_price],
+		"%s摇头：'不行不行，%d灵石最多了。'" % [name, c.offer_price],
+	]
+	return msgs[randi() % msgs.size()]
+
+static func _get_dismiss_msg(c: Dictionary) -> String:
+	var name = c.name
+	var bg = c.get("bg", "")
+	if bg != "":
+		match name:
+			"石老": return "石老叹了口气：'年轻人，这么没耐心可不行。'"
+			"青儿": return "青儿气鼓鼓地走了：'再也不来你这了！'"
+			"霍老板": return "霍老板冷笑：'这就是你的待客之道？'"
+	var msgs = [
+		"%s一甩袖子：'不卖了？那我走！'" % name,
+		"%s瞪了你一眼，头也不回地走了。" % name,
+	]
+	return msgs[randi() % msgs.size()
+
+static func _get_grudging_accept_msg(c: Dictionary) -> String:
+	var name = c.name
+	var msgs = [
+		"%s犹豫了一下：'……好吧，就这个价。'" % name,
+		"%s咬了咬牙：'行吧行吧，成交！'" % name,
+	]
+	return msgs[randi() % msgs.size()
