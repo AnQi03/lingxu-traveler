@@ -59,6 +59,7 @@ func start_haggle(player_offer: int) -> Dictionary:
 	if PlayerData.find_item(item.id).get("count", 0) < current_customer.want_count:
 		var msg = CustomerGenerator._get_no_stock_msg(current_customer)
 		trade_failed.emit(item.id, 0, msg)
+		current_customer = {}
 		return { "result": "error", "message": msg }
 	
 	if not PlayerData.spend_ling_shi(5):
