@@ -124,7 +124,7 @@ func _build_ui():
 	var slice_btn = Button.new()
 	slice_btn.name = "slice_btn"
 	slice_btn.text = "🔪 切片加工"
-	slice_btn.position = Vector2(465, 135)
+	slice_btn.position = Vector2(610, 135)
 	slice_btn.size = Vector2(140, 50)
 	slice_btn.disabled = true
 	slice_btn.pressed.connect(_do_slice)

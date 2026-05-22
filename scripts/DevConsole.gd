@@ -54,18 +54,15 @@ func _build_ui():
 	vbox.add_theme_constant_override("separation", 12)
 	scroll.add_child(vbox)
 	
-	# 灵石区块
 	_add_section_header(vbox, "💎 灵石修改")
 	_add_field_row(vbox, "下品灵石", "_set_spirit_stones", 30)
 	_add_field_row(vbox, "中品灵石", "_set_mid_stones", 0)
 	_add_field_row(vbox, "上品灵石", "_set_high_stones", 0)
 	
-	# 时间区块
 	_add_section_header(vbox, "⏰ 时间修改")
 	_add_field_row(vbox, "当前天数", "_set_day", 1)
 	_add_field_row(vbox, "当前时辰(0-23)", "_set_hour", 6)
 	
-	# 推进时间按钮
 	var advance_hbox = HBoxContainer.new()
 	advance_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	
@@ -96,9 +93,18 @@ func _build_ui():
 	advance_7d.pressed.connect(_advance_time.bind(168.0))
 	advance_hbox.add_child(advance_7d)
 	
+	var advance_1season = Button.new()
+	advance_1season.text = "+一季"
+	advance_1season.pressed.connect(_advance_one_season)
+	advance_hbox.add_child(advance_1season)
+	
+	var advance_1year = Button.new()
+	advance_1year.text = "+一年"
+	advance_1year.pressed.connect(_advance_one_year)
+	advance_hbox.add_child(advance_1year)
+	
 	vbox.add_child(advance_hbox)
 	
-	# 灵材区块
 	_add_section_header(vbox, "🧪 添加灵材到背包")
 	
 	var item_hbox = HBoxContainer.new()
@@ -141,17 +147,14 @@ func _build_ui():
 	
 	vbox.add_child(item_hbox)
 	
-	# 三道区块
 	_add_section_header(vbox, "📊 三道路径修改")
 	_add_field_row(vbox, "商道", "_set_shang_dao", 0)
 	_add_field_row(vbox, "天道", "_set_tian_dao", 0)
 	_add_field_row(vbox, "人心", "_set_ren_xin", 0)
 	
-	# 熔炼区块
 	_add_section_header(vbox, "🔥 熔炼修改")
 	_add_field_row(vbox, "今日熔炼次数", "_set_refine_count", 0)
 	
-	# 快捷预设
 	_add_section_header(vbox, "⚡ 快捷预设")
 	
 	var preset_hbox = HBoxContainer.new()
@@ -188,7 +191,6 @@ func _build_ui():
 	vbox.add_child(preset_hbox)
 	vbox.add_child(preset_hbox2)
 	
-	# 状态显示
 	_add_section_header(vbox, "📋 当前状态")
 	
 	var status_label = Label.new()
@@ -271,9 +273,16 @@ func _set_refine_count(val: int):
 	PlayerData.daily_refine_count = max(0, val)
 
 
-# 推进时间（会自动重置熔炼次数）
 func _advance_time(hours: float):
 	PlayerData.advance_time(hours)
+	_refresh_status()
+
+func _advance_one_season():
+	PlayerData.advance_one_season()
+	_refresh_status()
+
+func _advance_one_year():
+	PlayerData.advance_one_year()
 	_refresh_status()
 
 
@@ -379,7 +388,6 @@ func _preset_high_tier():
 	var items = MaterialData.get_market_items()
 	
 	for item_def in items:
-		# 每种灵材各给灵品、宝品、仙品各3个
 		for tier in [1, 2, 3]:
 			var tid = item_def.id + "_t" + str(tier)
 			PlayerData.add_item({
@@ -434,8 +442,23 @@ func _refresh_status():
 		inv_count += 1
 		total_items += item.get("count", 1)
 	
-	var text = "灵石: %d 下品 + %d 中品 + %d 上品 | 天数: %d · %d时 | 库存: %d 种 (%d件) | 商道:%d 天道:%d 人心:%d | 熔炼:%d/%d" % [
+	var text = "第%d年 %s | 灵石: %d 下品 + %d 中品 + %d 上品 | 天数: %d · %d时 | 库存: %d 种 (%d件) | 商道:%d 天道:%d 人心:%d | 熔炼:%d/%d | 灵识:%d" % [
+		PlayerData.game_year,
+		PlayerData.get_season_label(),
 		PlayerData.spirit_stones,
+		PlayerData.mid_spirit_stones,
+		PlayerData.high_spirit_stones,
+		PlayerData.game_day,
+		int(PlayerData.time_of_day),
+		inv_count,
+		total_items,
+		PlayerData.shang_dao,
+		PlayerData.tian_dao,
+		PlayerData.ren_xin,
+		PlayerData.daily_refine_count,
+		PlayerData.MAX_DAILY_REFINE,
+		PlayerData.ling_shi
+	]
 		PlayerData.mid_spirit_stones,
 		PlayerData.high_spirit_stones,
 		PlayerData.game_day,

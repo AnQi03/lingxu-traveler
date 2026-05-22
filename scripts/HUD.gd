@@ -46,6 +46,15 @@ func _ready() -> void:
 	$HUD_Background/TopBar.add_child(season_label)
 	$HUD_Background/TopBar.move_child(season_label, 3)
 	
+	var ling_label = Label.new()
+	ling_label.name = "ling_label"
+	ling_label.add_theme_color_override("font_color", Color(0.5, 1.0, 0.7))
+	ling_label.add_theme_font_size_override("font_size", 12)
+	ling_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ling_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	$HUD_Background/TopBar.add_child(ling_label)
+	$HUD_Background/TopBar.move_child(ling_label, 4)
+	
 	_update_display()
 
 
@@ -82,6 +91,17 @@ func _update_display() -> void:
 		if PlayerData.is_festival_day():
 			s_text += " 🎪集市大日"
 		season_label.text = s_text
+	
+	var ling_label = find_child("ling_label", true, false)
+	if ling_label:
+		var l = PlayerData.ling_shi
+		var bar = ""
+		for i in range(0, 100, 10):
+			if l > i:
+				bar += "█"
+			else:
+				bar += "░"
+		ling_label.text = "灵识 [%s] %d" % [bar, l]
 	
 	var stones = PlayerData.spirit_stones
 	var mids = PlayerData.mid_spirit_stones
