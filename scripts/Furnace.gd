@@ -8,6 +8,15 @@ var result_label: Label = null
 var tier_names = ["凡品", "灵品", "宝品", "仙品"]
 var element_icons = ["金", "木", "水", "火", "土"]
 
+# 熔炼策略
+enum SmeltStrategy { SAFE = 0, NORMAL = 1, RISKY = 2 }
+const STRATEGY_NAMES = ["稳扎稳打", "标准熔炼", "孤注一掷"]
+const STRATEGY_COSTS = [8, 10, 12]      # 灵识消耗
+const STRATEGY_LUCK_MOD = [0.15, 0.0, -0.20]   # 成功率修正
+const STRATEGY_UPGRADE_MOD = [-0.20, 0.0, 0.30] # 升品率修正
+var strategy_panel: Panel = null    # 策略选择面板
+var pending_item_id: String = ""    # 待熔炼灵材的base_id
+
 
 func _ready():
 	set_process_mode(PROCESS_MODE_WHEN_PAUSED)
@@ -182,6 +191,65 @@ func _build_ui():
 	history_box.name = "history_box"
 	history_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	history_scroll.add_child(history_box)
+	
+	# ---- 策略选择面板（默认隐藏） ----
+	strategy_panel = Panel.new()
+	strategy_panel.visible = false
+	strategy_panel.position = Vector2(200, 100)
+	strategy_panel.size = Vector2(520, 280)
+	furnace_panel.add_child(strategy_panel)
+	
+	var s_bg = ColorRect.new()
+	s_bg.color = Color(0.08, 0.04, 0.12, 0.97)
+	s_bg.size = strategy_panel.size
+	s_bg.mouse_filter = 0
+	strategy_panel.add_child(s_bg)
+	
+	var s_title = Label.new()
+	s_title.text = "⚡ 选择熔炼策略"
+	s_title.position = Vector2(0, 5)
+	s_title.size = Vector2(520, 30)
+	s_title.add_theme_color_override("font_color", Color(1, 0.7, 0.2))
+	s_title.add_theme_font_size_override("font_size", 20)
+	s_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	strategy_panel.add_child(s_title)
+	
+	var s_info = Label.new()
+	s_info.name = "strategy_info"
+	s_info.position = Vector2(30, 40)
+	s_info.size = Vector2(460, 30)
+	s_info.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+	s_info.add_theme_font_size_override("font_size", 13)
+	s_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	strategy_panel.add_child(s_info)
+	
+	# 三个策略按钮
+	var strategies = [
+		{"name": "🛡 稳扎稳打", "desc": "成功率+15% | 升品率-20% | 灵识-8\n稳妥的选择，适合练手和保本", "color": Color(0.3, 0.8, 0.3)},
+		{"name": "⚖ 标准熔炼", "desc": "默认概率 | 灵识-10\n不疾不徐，随天道流转", "color": Color(0.7, 0.7, 0.7)},
+		{"name": "🔥 孤注一掷", "desc": "成功率-20% | 升品率+30% | 灵识-12\n高风险高回报，赌徒之选", "color": Color(1, 0.4, 0.2)},
+	]
+	
+	for i in range(3):
+		var s = strategies[i]
+		var y = 80 + i * 60
+		
+		var btn = Button.new()
+		btn.text = s.name
+		btn.position = Vector2(40, y)
+		btn.size = Vector2(140, 50)
+		btn.add_theme_font_size_override("font_size", 15)
+		btn.pressed.connect(_on_strategy_picked.bind(i))
+		strategy_panel.add_child(btn)
+		
+		var desc = Label.new()
+		desc.text = s.desc
+		desc.position = Vector2(195, y)
+		desc.size = Vector2(290, 50)
+		desc.add_theme_color_override("font_color", s.color)
+		desc.add_theme_font_size_override("font_size", 12)
+		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		strategy_panel.add_child(desc)
 
 
 func toggle():
@@ -199,6 +267,8 @@ func open():
 	
 	is_open = true
 	furnace_panel.visible = true
+	if is_instance_valid(strategy_panel):
+		strategy_panel.visible = false
 	furnace_panel.modulate.a = 0.0
 	var tw = create_tween()
 	tw.tween_property(furnace_panel, "modulate:a", 1.0, 0.2)
@@ -322,26 +392,57 @@ func _do_smelt():
 			result_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
 		return
 	
-	if not PlayerData.spend_ling_shi(10):
+	var item = PlayerData.inventory[selected_item_idx]
+	pending_item_id = _get_base_id(item.id)
+	
+	# 灵识检查移到策略选择后（不同策略消耗不同）
+	var min_cost = STRATEGY_COSTS[0]
+	if PlayerData.ling_shi < min_cost:
+		if is_instance_valid(result_label):
+			result_label.text = "灵识不足！至少需要%d灵识。今天休息吧。" % min_cost
+			result_label.add_theme_color_override("font_color", Color(1, 0.5, 0.2))
+		return
+	
+	# 显示策略面板
+	if is_instance_valid(strategy_panel):
+		var info = strategy_panel.find_child("strategy_info", true, false)
+		if info:
+			var tier_str = tier_names[item.tier] if item.tier < tier_names.size() else "?"
+			info.text = "正在熔炼：[%s] %s  |  当前天道：%d  |  灵识：%d" % [tier_str, item.name, PlayerData.tian_dao, PlayerData.ling_shi]
+		strategy_panel.visible = true
+
+
+func _on_strategy_picked(strategy: int):
+	strategy_panel.visible = false
+	
+	var cost = STRATEGY_COSTS[strategy]
+	if not PlayerData.spend_ling_shi(cost):
 		if is_instance_valid(result_label):
 			result_label.text = "灵识耗尽！今天你已经太累了，休息吧。"
 			result_label.add_theme_color_override("font_color", Color(1, 0.5, 0.2))
 		return
 	
-	var item = PlayerData.inventory[selected_item_idx]
-	var base_id = _get_base_id(item.id)
-	
-	var success = PlayerData.remove_item(item.id, 1)
-	if not success:
+	if selected_item_idx < 0 or selected_item_idx >= PlayerData.inventory.size():
 		return
+	
+	var item = PlayerData.inventory[selected_item_idx]
+	if not PlayerData.remove_item(item.id, 1):
+		return
+	
+	_do_smelt_with_strategy(item, strategy)
+
+
+func _do_smelt_with_strategy(item: Dictionary, strategy: int):
+	var base_id = _get_base_id(item.id)
+	var feat_name = STRATEGY_NAMES[strategy]
 	
 	# 根据熔炉等级动态概率
 	var luck_table = PlayerData.get_furnace_luck(PlayerData.furnace_tier).duplicate()
 	
-	# 天道加成：每10点天道提升2%升品概率
+	# 天道加成
 	var tian_bonus = float(PlayerData.tian_dao) / 10.0 * 0.02
 	
-	# 连胜加成：连续升品越来越顺手
+	# 连胜加成
 	var streak_bonus = 0.0
 	if PlayerData.smelt_streak >= 5:
 		streak_bonus = 0.15
@@ -350,98 +451,93 @@ func _do_smelt():
 	elif PlayerData.smelt_streak >= 2:
 		streak_bonus = 0.05
 	
-	luck_table[0] += tian_bonus + streak_bonus
-	luck_table[1] += tian_bonus + streak_bonus
-	luck_table[2] += tian_bonus + streak_bonus
+	# 策略修正
+	var luck_mod = STRATEGY_LUCK_MOD[strategy]
+	var upgrade_mod = STRATEGY_UPGRADE_MOD[strategy]
+	
+	luck_table[0] += tian_bonus + streak_bonus + luck_mod
+	luck_table[1] += tian_bonus + streak_bonus + luck_mod
+	luck_table[2] += tian_bonus + streak_bonus + luck_mod
 	
 	var base_luck = luck_table[0]
 	var base_fail = 0.25
 	var base_destroy = 0.1
 	
 	match item.tier:
-		0:  # 凡品 → 灵品
+		0:
 			base_luck = luck_table[0]
 			base_fail = 0.25
 			base_destroy = 0.08
-		1:  # 灵品 → 宝品
+		1:
 			base_luck = luck_table[1]
 			base_fail = 0.30
 			base_destroy = 0.12
-		2:  # 宝品 → 仙品
+		2:
 			base_luck = luck_table[2]
 			base_fail = 0.35
 			base_destroy = 0.25
-		_:  # 仙品无法再升品
+		_:
 			base_luck = 0.0
 			base_fail = 0.40
 			base_destroy = 0.30
-	var base_same = 1.0 - base_luck - base_fail - base_destroy
+	
+	# 应用升品率修正
+	base_luck = clamp(base_luck + upgrade_mod, 0.02, 0.95)
+	var base_same = clamp(1.0 - base_luck - base_fail - base_destroy, 0.0, 1.0)
 	
 	var roll = randf()
-	var result_text = ""
+	var result_text = "[%s] " % feat_name
 	var result_color = Color(0.6, 0.6, 0.6)
 	
 	if roll < base_destroy:
-		result_text = "💀 熔炼失败！灵材化为灰烬……\n🔮 但天道留下了灵墟碎片（+3）"
+		result_text += "💀 熔炼失败！灵材化为灰烬……\n🔮 但天道留下了灵墟碎片（+3）"
 		result_color = Color(0.5, 0.2, 0.2)
 		PlayerData.daily_refine_count += 1
-		PlayerData.tian_dao += 1  # 失败亦有天道感悟
-		PlayerData.add_fragments(3)  # 灵墟碎片
-		PlayerData.smelt_streak = 0  # 连胜中断
+		PlayerData.tian_dao += 1
+		PlayerData.add_fragments(3)
+		PlayerData.smelt_streak = 0
 		SoundManager.sfx_smelt_destroy()
 
 	elif roll < base_destroy + base_fail:
 		var nt = max(0, item.tier - 1)
 		var new_id = base_id + "_t" + str(nt) if nt > 0 else base_id
 		PlayerData.add_item({
-			"id": new_id,
-			"name": item.name,
-			"tier": nt,
-			"element": item.element,
-			"price": max(1, item.price / 3),
-			"count": 1
+			"id": new_id, "name": item.name, "tier": nt,
+			"element": item.element, "price": max(1, item.price / 3), "count": 1
 		})
-		result_text = "⚠️ 品阶下降：[%s] %s → [%s]\n🔮 残留了一丝灵墟碎片（+1）" % [tier_names[item.tier], item.name, tier_names[nt]]
+		result_text += "⚠️ 品阶下降：[%s] → [%s]\n🔮 残留了一丝灵墟碎片（+1）" % [tier_names[item.tier], tier_names[nt]]
 		result_color = Color(0.7, 0.5, 0.2)
 		PlayerData.daily_refine_count += 1
-		PlayerData.tian_dao += 1  # 失败亦有天道感悟
+		PlayerData.tian_dao += 1
 		PlayerData.add_fragments(1)
-		PlayerData.smelt_streak = 0  # 连胜中断
+		PlayerData.smelt_streak = 0
 		SoundManager.sfx_smelt_normal()
 
 	elif roll < base_destroy + base_fail + base_same:
 		var keep_tier = max(0, item.tier)
 		var keep_id = base_id + "_t" + str(keep_tier) if keep_tier > 0 else base_id
 		PlayerData.add_item({
-			"id": keep_id,
-			"name": item.name,
-			"tier": keep_tier,
-			"element": item.element,
-			"price": item.get("base_price", item.price),
-			"count": 1
+			"id": keep_id, "name": item.name, "tier": keep_tier,
+			"element": item.element, "price": item.get("base_price", item.price), "count": 1
 		})
-		result_text = "  熔炼完成，品阶不变：[%s] %s" % [tier_names[item.tier], item.name]
+		result_text += "  品阶不变：[%s]" % tier_names[item.tier]
 		result_color = Color(0.6, 0.6, 0.6)
 		PlayerData.daily_refine_count += 1
-		PlayerData.smelt_streak = 0  # 连胜中断
+		PlayerData.smelt_streak = 0
 		SoundManager.sfx_smelt_normal()
 
 	else:
 		var nt = min(3, item.tier + 1)
 		var new_id = base_id + "_t" + str(nt)
 		PlayerData.add_item({
-			"id": new_id,
-			"name": item.name,
-			"tier": nt,
-			"element": item.element,
-			"price": item.price * 3,
-			"count": 1
+			"id": new_id, "name": item.name, "tier": nt,
+			"element": item.element, "price": item.price * 3, "count": 1
 		})
-		result_text = "✨ 升品成功！[%s] %s → [%s]！" % [tier_names[item.tier], item.name, tier_names[nt]]
+		result_text += "✨ 升品成功！[%s] → [%s]！" % [tier_names[item.tier], tier_names[nt]]
 		result_color = Color(1, 0.8, 0.3)
 		PlayerData.daily_refine_count += 1
-		PlayerData.tian_dao += 1  # 天道成长
-		PlayerData.smelt_streak += 1  # 连胜
+		PlayerData.tian_dao += 1
+		PlayerData.smelt_streak += 1
 		SoundManager.sfx_smelt_success()
 		if PlayerData.smelt_streak >= 5:
 			result_text += " 🔥天道眷顾！连升%d次！" % PlayerData.smelt_streak
