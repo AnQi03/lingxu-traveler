@@ -24,7 +24,19 @@ static func get_market_items() -> Array:
 
 static func create_market_instance(item_def: Dictionary) -> Dictionary:
 	var inst = item_def.duplicate()
-	var variation = randi_range(-2, 3)
-	inst.price = maxi(1, inst.base_price + variation)
-	inst.count = randi_range(1, 5)
+	var seed_val = inst.base_price * 31 + PlayerData.game_day * 17
+	var rng = RandomNumberGenerator.new()
+	rng.set_seed(seed_val)
+	var variation = rng.randi_range(-2, 3)
+	var season_mult = _get_seasonal_price_multiplier()
+	inst.price = maxi(1, int((inst.base_price + variation) * season_mult))
+	inst.count = 1
 	return inst
+
+static func _get_seasonal_price_multiplier() -> float:
+	match PlayerData.season_index:
+		0: return 1.0   # 灵潮季：灵材丰产，正常价
+		1: return 1.2   # 炎阳季：酷暑难采，涨价
+		2: return 0.85  # 丰收季：万物成熟，降价
+		3: return 1.4   # 静修季：灵材枯竭，暴涨
+	return 1.0

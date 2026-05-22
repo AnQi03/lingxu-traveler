@@ -117,8 +117,16 @@ func show_summary():
 func _get_tomorrow_hint(day: int) -> String:
 	var season = PlayerData.SEASON_EMOJI[PlayerData.season_index] + PlayerData.SEASON_NAMES[PlayerData.season_index]
 	var hint = "📅 %s 第%d天" % [season, PlayerData.season_day]
+	
+	# 季节价格提示
+	match PlayerData.season_index:
+		0: hint += " | 灵材丰产，价格平稳"
+		1: hint += " | 酷暑涨价，精打细算"
+		2: hint += " | 丰收降价，多进货！"
+		3: hint += " | 灵材枯竭，价格暴涨"
+	
 	if PlayerData.is_festival_day():
-		hint += " | 🎪 明天是集市大日！灵材打折！"
+		hint += " | 🎪 集市大日！"
 	if day <= 7:
 		return hint + " — 灵材市场照常开市，多囤点凡品灵材吧。"
 	elif day <= 14:
