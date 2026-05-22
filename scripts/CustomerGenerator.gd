@@ -253,30 +253,30 @@ static func _get_round_mood(customer: Dictionary) -> String:
 
 
 static func _get_offer_ratio(personality: int, urgent: bool) -> float:
-	if urgent: return 1.05 + randf() * 0.15
+	if urgent: return 1.10 + randf() * 0.15
 	match personality:
-		Personality.SHUANGZHI: return 0.85 + randf() * 0.10
-		Personality.JINGMING: return 0.65 + randf() * 0.15
-		Personality.JIZAO: return 0.75 + randf() * 0.15
-		Personality.NAIXIN: return 0.70 + randf() * 0.15
-		Personality.LINSE: return 0.55 + randf() * 0.15
-		Personality.KANGKAI: return 0.95 + randf() * 0.15
-		Personality.DUOYI: return 0.65 + randf() * 0.15
-		Personality.QINGXIN: return 0.80 + randf() * 0.15
-	return 0.75
+		Personality.SHUANGZHI: return 0.90 + randf() * 0.10
+		Personality.JINGMING: return 0.72 + randf() * 0.13
+		Personality.JIZAO: return 0.80 + randf() * 0.15
+		Personality.NAIXIN: return 0.78 + randf() * 0.12
+		Personality.LINSE: return 0.68 + randf() * 0.12
+		Personality.KANGKAI: return 1.00 + randf() * 0.15
+		Personality.DUOYI: return 0.72 + randf() * 0.13
+		Personality.QINGXIN: return 0.85 + randf() * 0.15
+	return 0.80
 
 static func _get_max_ratio(personality: int, urgent: bool) -> float:
-	if urgent: return 1.50 + randf() * 0.30
+	if urgent: return 1.70 + randf() * 0.30
 	match personality:
-		Personality.SHUANGZHI: return 1.35 + randf() * 0.20
-		Personality.JINGMING: return 1.40 + randf() * 0.25
-		Personality.JIZAO: return 1.25 + randf() * 0.20
-		Personality.NAIXIN: return 1.40 + randf() * 0.25
-		Personality.LINSE: return 1.35 + randf() * 0.20
-		Personality.KANGKAI: return 1.50 + randf() * 0.30
-		Personality.DUOYI: return 1.35 + randf() * 0.25
-		Personality.QINGXIN: return 1.40 + randf() * 0.25
-	return 1.35
+		Personality.SHUANGZHI: return 1.45 + randf() * 0.20
+		Personality.JINGMING: return 1.50 + randf() * 0.25
+		Personality.JIZAO: return 1.35 + randf() * 0.20
+		Personality.NAIXIN: return 1.50 + randf() * 0.25
+		Personality.LINSE: return 1.40 + randf() * 0.20
+		Personality.KANGKAI: return 1.65 + randf() * 0.30
+		Personality.DUOYI: return 1.45 + randf() * 0.25
+		Personality.QINGXIN: return 1.50 + randf() * 0.25
+	return 1.45
 
 static func _get_patience(personality: int, urgent: bool) -> int:
 	if urgent: return 1

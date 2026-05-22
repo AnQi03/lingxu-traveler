@@ -300,7 +300,7 @@ func _do_smelt():
 			result_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
 		return
 	
-	if not PlayerData.spend_ling_shi(15):
+	if not PlayerData.spend_ling_shi(10):
 		if is_instance_valid(result_label):
 			result_label.text = "灵识耗尽！今天你已经太累了，休息吧。"
 			result_label.add_theme_color_override("font_color", Color(1, 0.5, 0.2))
@@ -476,7 +476,7 @@ func _do_slice():
 	if selected_item_idx < 0 or selected_item_idx >= PlayerData.inventory.size():
 		return
 	
-	if not PlayerData.spend_ling_shi(5):
+	if not PlayerData.spend_ling_shi(3):
 		_show_result("灵识耗尽！切片需要 5 灵识。", Color(1, 0.5, 0.2))
 		return
 	

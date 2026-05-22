@@ -5,7 +5,7 @@
 extends Node
 
 ## ---------- 灵石 ----------
-var spirit_stones: int = 100          # 下品灵石
+var spirit_stones: int = 150          # 下品灵石
 var mid_spirit_stones: int = 0       # 中品灵石
 var high_spirit_stones: int = 0      # 上品灵石
 var total_earned: int = 0            # 累计收入
@@ -37,22 +37,22 @@ var daily_refine_count: int = 0
 const MAX_DAILY_REFINE: int = 5
 
 ## ---------- 灵识 ----------
-var ling_shi: int = 100
+var ling_shi: int = 80
 const MAX_LING_SHI: int = 100
 
 ## ---------- 熔炉升级 ----------
 var furnace_tier: int = 1
 const FURNACE_UPGRADE_COST = {
-	2: 200,
-	3: 800,
-	4: 3000,
-	5: 15000
+	2: 180,
+	3: 600,
+	4: 2000,
+	5: 8000
 }
 const FURNACE_UPGRADE_LUCK = {
-	1: [0.35, 0.20, 0.007],
-	2: [0.50, 0.25, 0.01],
-	3: [0.65, 0.35, 0.03],
-	4: [0.80, 0.50, 0.08],
+	1: [0.40, 0.22, 0.007],
+	2: [0.55, 0.28, 0.01],
+	3: [0.70, 0.38, 0.03],
+	4: [0.82, 0.52, 0.08],
 	5: [0.90, 0.65, 0.15]
 }
 

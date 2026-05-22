@@ -18,7 +18,14 @@ static func get_market_items() -> Array:
 		{ "id": "ronghuoshi_fan", "name": "熔火石", "tier": Tier.FAN, "element": Element.HUO, "base_price": 5, "desc": "最简单的火系矿石", "origin": "炎狱域" },
 		{ "id": "bingjingkuang_fan", "name": "冰晶矿", "tier": Tier.FAN, "element": Element.SHUI, "base_price": 6, "desc": "基础炼器材料，冷却用", "origin": "玄冰域" },
 		{ "id": "huotongkuang_fan", "name": "火铜矿", "tier": Tier.FAN, "element": Element.HUO, "base_price": 8, "desc": "带火属性的铜铁矿", "origin": "炎狱域" },
-		{ "id": "jiditai_fan", "name": "极地苔", "tier": Tier.FAN, "element": Element.SHUI, "base_price": 3, "desc": "最基础的消耗品", "origin": "玄冰域" },
+		{ "id": "jiditai_fan", "name": "极地苔", "tier": Tier.FAN, "element": Element.SHUI, "base_price": 4, "desc": "最基础的消耗品", "origin": "玄冰域" },
+		# 灵品——稀有灵材，价格高于凡品
+		{ "id": "chiyancao_ling", "name": "赤炎草·灵", "tier": Tier.LING, "element": Element.HUO, "base_price": 30, "desc": "百年火候的灵草，炼丹师最爱", "origin": "炎狱域" },
+		{ "id": "cuilingmu_ling", "name": "翠灵木·灵", "tier": Tier.LING, "element": Element.MU, "base_price": 35, "desc": "千年灵木的嫩枝，灵气充沛", "origin": "苍木域" },
+		{ "id": "jinlingshi_ling", "name": "金灵石", "tier": Tier.LING, "element": Element.JIN, "base_price": 28, "desc": "蕴含锐金之气的矿石", "origin": "金戈域" },
+		# 宝品——罕见，价格高
+		{ "id": "tianhuoshi_bao", "name": "天火石", "tier": Tier.BAO, "element": Element.HUO, "base_price": 80, "desc": "从天而降的陨铁，火系至宝", "origin": "炎狱域" },
+		{ "id": "xuanbingjing_bao", "name": "玄冰晶", "tier": Tier.BAO, "element": Element.SHUI, "base_price": 75, "desc": "万载玄冰之心，炼器圣品", "origin": "玄冰域" },
 	]
 
 
