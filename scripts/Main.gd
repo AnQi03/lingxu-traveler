@@ -5,6 +5,7 @@ var market_node: Node = null
 var dev_console_node: Node = null
 var furnace_node: Node = null
 var inventory_node: Node = null
+var day_summary_node: Node = null
 
 
 func _ready():
@@ -24,8 +25,8 @@ func _ready():
 		stall_scene = stall.instantiate()
 		add_child(stall_scene)
 	
-	# 启动昼夜循环
 	DayCycle.start()
+	DayCycle.night_falling.connect(_on_night_falling)
 	
 	print("B 集市  |  空格 摆摊  |  F 熔炉  |  E 背包  |  ~ 控制台")
 
@@ -86,16 +87,16 @@ func _create_inventory():
 	inventory_node = inv_layer
 
 
-# === 面板互斥检查（供 DayCycle 调用）===
-
 func is_any_panel_open() -> bool:
+	if _is_stall_open():
+		return true
+	if day_summary_node and is_instance_valid(day_summary_node) and day_summary_node.get("is_showing"):
+		return true
 	if market_node and market_node.get("is_open"):
 		return true
 	if furnace_node and furnace_node.get("is_open"):
 		return true
 	if inventory_node and inventory_node.get("is_open"):
-		return true
-	if _is_stall_open():
 		return true
 	return false
 
@@ -112,31 +113,45 @@ func force_close_stall():
 		var manager = stall_scene.get_node("StallManager")
 		if manager and manager.is_open:
 			manager.close_stall()
-			print("DayCycle: 已强制收摊")
 
 
-# === 输入处理 ===
+func _on_night_falling():
+	var summary = load("res://scripts/DaySummary.gd")
+	if summary:
+		var layer = CanvasLayer.new()
+		layer.name = "DaySummary"
+		layer.layer = 20
+		layer.set_process_mode(PROCESS_MODE_WHEN_PAUSED)
+		add_child(layer)
+		layer.set_script(summary)
+		day_summary_node = layer
+		if layer.has_method("show_summary"):
+			layer.show_summary()
+
 
 func _input(event):
 	if event is InputEventMouseMotion or event is InputEventMouseButton:
 		return
 	
 	if event is InputEventKey and event.pressed and not event.echo:
-		# 开发者控制台总是可用
 		if event.keycode == KEY_QUOTELEFT:
 			if dev_console_node and dev_console_node.has_method("toggle"):
 				dev_console_node.toggle()
 			get_viewport().set_input_as_handled()
 			return
 		
-		# 空格：切换摆摊
+		if day_summary_node and is_instance_valid(day_summary_node) and day_summary_node.get("is_showing"):
+			get_viewport().set_input_as_handled()
+			return
+		
 		if event.keycode == KEY_SPACE:
 			if stall_scene:
 				var manager = stall_scene.get_node("StallManager")
 				if manager:
-					# 夜间不能摆摊
 					if not DayCycle.can_stall(PlayerData.time_of_day) and not manager.is_open:
-						print("夜间不能摆摊")
+						get_viewport().set_input_as_handled()
+						return
+					if not manager.is_open and is_any_panel_open():
 						get_viewport().set_input_as_handled()
 						return
 					if manager.is_open:
@@ -146,7 +161,6 @@ func _input(event):
 			get_viewport().set_input_as_handled()
 			return
 		
-		# 如果已有面板打开，只允许关闭当前面板
 		if is_any_panel_open():
 			var handled = false
 			match event.keycode:
@@ -162,11 +176,14 @@ func _input(event):
 					if inventory_node and inventory_node.get("is_open"):
 						inventory_node.toggle()
 						handled = true
+			match event.keycode:
+				KEY_B, KEY_E, KEY_F:
+					if not handled:
+						handled = true
 			if handled:
 				get_viewport().set_input_as_handled()
 			return
 		
-		# 无面板打开时正常处理
 		match event.keycode:
 			KEY_B:
 				if market_node and market_node.has_method("toggle"):
