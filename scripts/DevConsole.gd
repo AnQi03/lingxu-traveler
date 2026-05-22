@@ -177,7 +177,16 @@ func _build_ui():
 	btn4.pressed.connect(_preset_full_test)
 	preset_hbox.add_child(btn4)
 	
+	var preset_hbox2 = HBoxContainer.new()
+	preset_hbox2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	
+	var btn5 = Button.new()
+	btn5.text = "测试高品阶 (灵品/宝品/仙品)"
+	btn5.pressed.connect(_preset_high_tier)
+	preset_hbox2.add_child(btn5)
+	
 	vbox.add_child(preset_hbox)
+	vbox.add_child(preset_hbox2)
 	
 	# 状态显示
 	_add_section_header(vbox, "📋 当前状态")
@@ -357,6 +366,30 @@ func _preset_full_test():
 	PlayerData.shang_dao = 999
 	PlayerData.tian_dao = 999
 	PlayerData.ren_xin = 999
+	_refresh_status()
+
+
+func _preset_high_tier():
+	PlayerData.spirit_stones = 9999
+	PlayerData.mid_spirit_stones = 99
+	PlayerData.high_spirit_stones = 99
+	PlayerData.inventory.clear()
+	
+	var tier_prices = [10, 100, 1000, 10000]
+	var items = MaterialData.get_market_items()
+	
+	for item_def in items:
+		# 每种灵材各给灵品、宝品、仙品各3个
+		for tier in [1, 2, 3]:
+			var tid = item_def.id + "_t" + str(tier)
+			PlayerData.add_item({
+				"id": tid,
+				"name": item_def.name,
+				"tier": tier,
+				"element": item_def.element,
+				"price": tier_prices[tier],
+				"count": 3
+			})
 	_refresh_status()
 
 

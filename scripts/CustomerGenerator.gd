@@ -47,20 +47,30 @@ static func generate_customer() -> Dictionary:
 	# 随机性格
 	var personality = randi() % 8
 	var name = FIRST_NAMES[randi() % FIRST_NAMES.size()]
-	var is_urgent = randf() < 0.25  # 25%概率是急需客
-	var count = randi_range(1, 5)
+	var is_urgent = randf() < 0.25
 	
-	# 价格计算
-	var base_price = target_item.base_price * count
+	# 需求量随游戏进度增长
+	var day = PlayerData.game_day
+	var count = 0
+	if day <= 7:
+		count = randi_range(1, 2)
+	elif day <= 15:
+		count = randi_range(1, 3)
+	elif day <= 30:
+		count = randi_range(2, 4)
+	else:
+		count = randi_range(2, 5)
+	
+	# 价格计算——用集市当天的实际价格（和集市面板一致）
+	var market_inst = MaterialData.create_market_instance(target_item)
+	var unit_price = market_inst.price  # 集市当天单价
+	var total_base = unit_price * count
 	var offer_ratio = _get_offer_ratio(personality, is_urgent)
-	var offer_price = int(base_price * offer_ratio)
+	var offer_price = maxi(total_base + 1, int(total_base * offer_ratio))
 	var max_ratio = _get_max_ratio(personality, is_urgent)
-	var max_price = int(base_price * max_ratio)
+	var max_price = maxi(offer_price + 1, int(total_base * max_ratio))
 	
-	# 议价轮次
 	var patience = _get_patience(personality, is_urgent)
-	
-	# 情绪/动作描述
 	var mood = _get_mood(personality, is_urgent)
 	
 	return {
@@ -68,10 +78,10 @@ static func generate_customer() -> Dictionary:
 		"personality": personality,
 		"want_item": target_item,
 		"want_count": count,
-		"base_price": base_price,
+		"unit_price": unit_price,        # 集市标价/个
+		"base_price": total_base,        # 总参考价
 		"offer_price": offer_price,
 		"max_price": max(offer_price + 1, max_price),
-		"patience": patience,
 		"round": 0,
 		"is_urgent": is_urgent,
 		"mood": mood

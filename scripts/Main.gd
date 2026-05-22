@@ -4,6 +4,7 @@ var stall_scene: Node = null
 var market_node: Node = null
 var dev_console_node: Node = null
 var furnace_node: Node = null
+var inventory_node: Node = null
 
 
 func _ready():
@@ -18,13 +19,14 @@ func _ready():
 	_create_market()
 	_create_dev_console()
 	_create_furnace()
+	_create_inventory()
 	
 	var stall = preload("res://scenes/StallScene.tscn")
 	if stall:
 		stall_scene = stall.instantiate()
 		add_child(stall_scene)
 	
-	print("按 M 打开集市  |  按 S 开张收摊  |  按 F 熔炉  |  按 ~ 开发者控制台")
+	print("M 集市  |  S 摆摊  |  F 熔炉  |  I 背包  |  ~ 控制台")
 
 
 func _setup_actions():
@@ -43,6 +45,11 @@ func _setup_actions():
 		var ev = InputEventKey.new()
 		ev.keycode = KEY_F
 		InputMap.action_add_event("open_furnace", ev)
+	if not InputMap.has_action("open_inventory"):
+		InputMap.add_action("open_inventory")
+		var ev = InputEventKey.new()
+		ev.keycode = KEY_I
+		InputMap.action_add_event("open_inventory", ev)
 
 
 func _create_market():
@@ -87,6 +94,20 @@ func _create_furnace():
 	furnace_node = furnace_layer
 
 
+func _create_inventory():
+	var inv_layer = CanvasLayer.new()
+	inv_layer.name = "Inventory"
+	inv_layer.layer = 2
+	inv_layer.set_process_mode(PROCESS_MODE_WHEN_PAUSED)
+	add_child(inv_layer)
+	
+	var script = load("res://scripts/Inventory.gd")
+	if script:
+		inv_layer.set_script(script)
+	
+	inventory_node = inv_layer
+
+
 func _input(event):
 	if event is InputEventMouseMotion or event is InputEventMouseButton:
 		return
@@ -109,6 +130,11 @@ func _input(event):
 	elif event.is_action_pressed("open_furnace"):
 		if furnace_node and furnace_node.has_method("toggle"):
 			furnace_node.toggle()
+		get_viewport().set_input_as_handled()
+	
+	elif event.is_action_pressed("open_inventory"):
+		if inventory_node and inventory_node.has_method("toggle"):
+			inventory_node.toggle()
 		get_viewport().set_input_as_handled()
 	
 	if event is InputEventKey and event.pressed and not event.echo:
