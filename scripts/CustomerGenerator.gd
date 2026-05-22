@@ -396,6 +396,47 @@ static func _get_dismiss_msg(c: Dictionary) -> String:
 	var pool = msgs.get(c.personality, ["%s转身走了。" % name])
 	return pool[randi() % pool.size()]
 
+# ============================================================
+# 常客心级事件 — loyalty 3/5/7 触发专属对话
+# ============================================================
+
+static func get_loyalty_event(customer_name: String, loyalty: int) -> String:
+	var event_key = "%s_%d" % [customer_name, loyalty]
+	if event_key in PlayerData.loyalty_events_triggered:
+		return ""
+	
+	PlayerData.loyalty_events_triggered.append(event_key)
+	
+	match customer_name:
+		"石老":
+			match loyalty:
+				2: return "石老慢悠悠地从袖中取出一枚旧玉简：'年轻人，老夫观察你许久了。你对灵材的感知，不一般。'"
+				4: return "石老难得地露出笑容：'老夫年轻时也曾在散修联盟闯荡……看到你，就像看到当年的自己。'"
+				6: return "石老郑重地递过一枚令牌：'这是老夫的引荐信。散修联盟的门，永远为你开着。'"
+		"青儿":
+			match loyalty:
+				2: return "青儿兴奋地比划着：'老板老板！我按你说的买了那株赤炎草，师父都夸我有眼光！'"
+				4: return "青儿眼睛亮晶晶的：'等我筑基成功了，一定要请你来万木灵宗看看！师父说要请你吃饭！'"
+				6: return "青儿神秘兮兮地凑近：'师父说，你的熔炼手法不是凡人能会的。老板，你到底是什么来头呀？'"
+		"霍老板":
+			match loyalty:
+				2: return "霍老板压低声音：'小兄弟，有批货我想让你过过眼。一般人我不放心。'"
+				4: return "霍老板递来一张契约：'灵墟商会有个规矩——合作满五次以上的伙伴，可以免押金赊账。你够格了。'"
+				6: return "霍老板神色凝重：'天机子大人最近身体不太好……商会暗流涌动。你是少数我信得过的人。'"
+		"冷面客":
+			match loyalty:
+				2: return "黑衣人在案板上放了块冰蓝色的令牌，什么也没说就走了。令牌上刻着：寒渊。"
+				4: return "冷面客终于开口：'你的灵材……品相很好。寒渊宗需要长期供货。'声音低沉沙哑。"
+				6: return "冷面客摘下斗笠——是一张年轻却带着疤痕的脸：'我叫沈霜。既然你信得过我，我也就不再藏着了。'"
+		"金娘子":
+			match loyalty:
+				2: return "金娘子挑剔地翻看着你的灵材：'嗯……勉强入眼。不过比东市那几家好多了。'"
+				4: return "金娘子叹了口气：'我那作坊缺个懂灵材的。你要是哪天不想摆摊了，随时来找我。'"
+				6: return "金娘子忽然红了眼眶：'当年铸魂殿把我赶出来时，我以为这辈子完了……谢谢你一直认真对待我的每一单生意。'"
+	
+	return ""
+
+
 static func _get_grudging_accept_msg(c: Dictionary) -> String:
 	var name = c.name
 	var msgs = {

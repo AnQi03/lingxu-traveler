@@ -47,3 +47,37 @@ static func _get_seasonal_price_multiplier() -> float:
 		2: return 0.85  # 丰收季：万物成熟，降价
 		3: return 1.4   # 静修季：灵材枯竭，暴涨
 	return 1.0
+
+## 每日热门灵材——需求±30%波动
+static func get_daily_hot_items() -> Array:
+	var items = get_market_items()
+	var rng = RandomNumberGenerator.new()
+	rng.set_seed(PlayerData.game_day * 107)
+	
+	var result: Array = []
+	var used = {}
+	
+	# 选2个热门（需求↑），1个冷门（需求↓）
+	for _i in range(2):
+		var idx = rng.randi() % items.size()
+		var loops = 0
+		while used.has(idx) and loops < 20:
+			idx = rng.randi() % items.size()
+			loops += 1
+		used[idx] = true
+		var hot_item = items[idx].duplicate()
+		hot_item["demand_bonus"] = 1.0 + rng.randf_range(0.15, 0.35)
+		hot_item["hot"] = true
+		result.append(hot_item)
+	
+	var cold_idx = rng.randi() % items.size()
+	var loops = 0
+	while used.has(cold_idx) and loops < 20:
+		cold_idx = rng.randi() % items.size()
+		loops += 1
+	var cold_item = items[cold_idx].duplicate()
+	cold_item["demand_bonus"] = 1.0 - rng.randf_range(0.15, 0.30)
+	cold_item["hot"] = false
+	result.append(cold_item)
+	
+	return result

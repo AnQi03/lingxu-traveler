@@ -36,6 +36,10 @@ var inventory: Array = []
 var daily_refine_count: int = 0
 const MAX_DAILY_REFINE: int = 5
 
+## ---------- 连续出摊 ----------
+var consecutive_stall_days: int = 0
+var has_stalled_today: bool = false
+
 ## ---------- 灵识 ----------
 var ling_shi: int = 80
 const MAX_LING_SHI: int = 100
@@ -87,6 +91,7 @@ func upgrade_furnace() -> bool:
 
 ## ---------- 顾客关系 ----------
 var customer_relations: Dictionary = {}
+var loyalty_events_triggered: Array = []  # 已触发的常客事件 ["石老_3", "青儿_5", ...]
 
 
 # ============================================================
@@ -215,6 +220,14 @@ func advance_time(hours: float) -> void:
 		game_day += 1
 		daily_refine_count = 0
 		reset_ling_shi()
+		
+		# 连续出摊追踪
+		if has_stalled_today:
+			consecutive_stall_days += 1
+		else:
+			consecutive_stall_days = 0
+		has_stalled_today = false
+		
 		season_day += 1
 		if season_day > DAYS_PER_SEASON:
 			season_day = 1

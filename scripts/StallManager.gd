@@ -39,7 +39,29 @@ func _process(delta: float) -> void:
 func open_stall() -> void:
 	is_open = true
 	customer_timer = 2.0  # 开张后2秒来第一位顾客
-	print("摊位开张了！")
+	
+	var msg = "摊位开张了！"
+	var streak = PlayerData.consecutive_stall_days + 1  # +1 because we're about to start today
+	if streak >= 7:
+		msg += " [🔥 连续出摊%d天！老顾客都等着你呢]" % streak
+	elif streak >= 3:
+		msg += " [📅 连续出摊%d天]" % streak
+	
+	var hot_items = MaterialData.get_daily_hot_items()
+	if not hot_items.is_empty():
+		var hot_names = []
+		var cold_names = []
+		for it in hot_items:
+			if it.get("hot"):
+				hot_names.append(it.name)
+			else:
+				cold_names.append(it.name)
+		if not hot_names.is_empty():
+			msg += " | 📈 热门: %s" % "/".join(hot_names)
+		if not cold_names.is_empty():
+			msg += " | 📉 冷门: %s" % "/".join(cold_names)
+	
+	print(msg)
 
 
 func close_stall() -> void:
@@ -80,6 +102,16 @@ func start_haggle(player_offer: int) -> Dictionary:
 			today_customers += 1
 			PlayerData.update_customer_relation(current_customer.name, 2)
 			PlayerData.shang_dao += 1  # 商道成长：每次成功交易+1
+			PlayerData.has_stalled_today = true  # 连续出摊追踪
+			
+			# 常客心级事件
+			var new_loyalty = PlayerData.get_customer_loyalty(current_customer.name)
+			var event_msg = CustomerGenerator.get_loyalty_event(current_customer.name, new_loyalty)
+			if event_msg != "":
+				result.message = event_msg + "\n\n" + result.message
+				var hud = PlayerData.get_meta("hud")
+				if hud and hud.has_method("show_toast"):
+					hud.show_toast("💎 %s 好感 Lv.%d！" % [current_customer.name, new_loyalty], Color(0.8, 0.4, 1.0), 5.0)
 			trade_completed.emit(item.id, count, total_price)
 			current_customer = {}
 				

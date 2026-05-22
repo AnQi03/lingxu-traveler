@@ -16,6 +16,16 @@ var period_colors = {
 	"night": Color(0.05, 0.02, 0.10, 0.65)
 }
 
+## 语义颜色体系
+const COLOR_SUCCESS = Color(0.3, 1.0, 0.4)    # 绿 — 成交/升品
+const COLOR_WARNING = Color(1.0, 0.7, 0.25)   # 黄 — 灵识低/快没耐心
+const COLOR_DANGER = Color(1.0, 0.25, 0.25)   # 红 — 被拒/销毁
+const COLOR_INFO = Color(0.4, 0.7, 1.0)       # 蓝 — 信息提示
+const COLOR_RARE = Color(0.8, 0.4, 1.0)       # 紫 — 稀有/仙品
+
+var toast_label: Label = null
+var toast_timer: float = 0.0
+
 
 func _ready() -> void:
 	period_label = Label.new()
@@ -55,11 +65,40 @@ func _ready() -> void:
 	$HUD_Background/TopBar.add_child(ling_label)
 	$HUD_Background/TopBar.move_child(ling_label, 4)
 	
+	# 吐司通知标签
+	toast_label = Label.new()
+	toast_label.name = "toast_label"
+	toast_label.add_theme_font_size_override("font_size", 16)
+	toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	toast_label.position = Vector2(0, 0)
+	toast_label.size = Vector2(1152, 40)
+	toast_label.visible = false
+	toast_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$HUD_Background.add_child(toast_label)
+	
+	PlayerData.set_meta("hud", self)
+	
 	_update_display()
 
 
 func _process(_delta: float) -> void:
 	_update_display()
+	_update_toast(_delta)
+
+func _update_toast(delta: float):
+	if not toast_label or not toast_label.visible:
+		return
+	toast_timer -= delta
+	if toast_timer <= 0:
+		toast_label.visible = false
+
+func show_toast(text: String, color: Color = COLOR_INFO, duration: float = 3.0):
+	if not toast_label:
+		return
+	toast_label.text = text
+	toast_label.add_theme_color_override("font_color", color)
+	toast_label.visible = true
+	toast_timer = duration
 
 
 func _update_display() -> void:
