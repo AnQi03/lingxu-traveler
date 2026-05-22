@@ -37,8 +37,22 @@ static func generate_customer() -> Dictionary:
 	
 	var known = PlayerData.get_known_customer_names()
 	
+	# Day1 第一位顾客必是常客——给新手一个好印象
+	if PlayerData.game_day == 1 and randf() < 0.8:
+		var regular = REGULARS[randi() % REGULARS.size()]
+		name = regular.name
+		personality = regular.personality
+		loyalty = 0
+		customer_bg = regular.bg
+		if randf() < 0.6:
+			var matching = []
+			for it in items:
+				if it.element == regular.pref_element:
+					matching.append(it)
+			if not matching.is_empty():
+				target_item = matching[randi() % matching.size()]
 	# 20%概率生成有名常客
-	if randf() < 0.2:
+	elif randf() < 0.2:
 		var regular = REGULARS[randi() % REGULARS.size()]
 		name = regular.name
 		personality = regular.personality
