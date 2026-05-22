@@ -71,14 +71,20 @@ static func generate_customer() -> Dictionary:
 	else:
 		count = randi_range(2, 5)
 	
-	# 价格计算——用集市当天的实际价格（和集市面板一致）
-	var market_inst = MaterialData.create_market_instance(target_item)
+	# 价格计算——NPC不了解你的成本，按市场感知出价
 	var unit_price = market_inst.price
-	var total_base = unit_price * count
+	var reference_price = unit_price * count  # 市场参考价
+	
+	# 初始出价：不同性格差距巨大（可能远低于参考价）
 	var offer_ratio = _get_offer_ratio(personality, is_urgent)
-	var offer_price = maxi(total_base + 1, int(total_base * offer_ratio))
+	var offer_price = int(reference_price * offer_ratio)
+	
+	# 心理上限：愿意出到的最高价
 	var max_ratio = _get_max_ratio(personality, is_urgent)
-	var max_price = maxi(offer_price + 1, int(total_base * max_ratio))
+	var max_price = int(reference_price * max_ratio)
+	
+	# 最低接受价：低于此价直接走人
+	var min_accept = int(reference_price * 0.5)
 	
 	# 好感度加成
 	if loyalty >= 7:
@@ -118,9 +124,9 @@ static func generate_customer() -> Dictionary:
 		"want_item": target_item,
 		"want_count": count,
 		"unit_price": unit_price,
-		"base_price": total_base,
+		"base_price": reference_price,
 		"offer_price": offer_price,
-		"max_price": max(offer_price + 1, max_price),
+		"max_price": max_price,
 		"min_accept": min_accept,
 		"patience": patience,
 		"round": 0,
@@ -218,30 +224,30 @@ static func _get_round_mood(customer: Dictionary) -> String:
 
 
 static func _get_offer_ratio(personality: int, urgent: bool) -> float:
-	if urgent: return 1.1 + randf() * 0.3
+	if urgent: return 1.05 + randf() * 0.15
 	match personality:
-		Personality.SHUANGZHI: return 0.9 + randf() * 0.1
-		Personality.JINGMING: return 0.85 + randf() * 0.1
-		Personality.JIZAO: return 0.95 + randf() * 0.1
-		Personality.NAIXIN: return 0.9 + randf() * 0.1
-		Personality.LINSE: return 0.8 + randf() * 0.1
-		Personality.KANGKAI: return 1.0 + randf() * 0.1
-		Personality.DUOYI: return 0.85 + randf() * 0.1
-		Personality.QINGXIN: return 0.9 + randf() * 0.1
-	return 0.9
+		Personality.SHUANGZHI: return 0.85 + randf() * 0.10
+		Personality.JINGMING: return 0.65 + randf() * 0.15
+		Personality.JIZAO: return 0.75 + randf() * 0.15
+		Personality.NAIXIN: return 0.70 + randf() * 0.15
+		Personality.LINSE: return 0.55 + randf() * 0.15
+		Personality.KANGKAI: return 0.95 + randf() * 0.15
+		Personality.DUOYI: return 0.65 + randf() * 0.15
+		Personality.QINGXIN: return 0.80 + randf() * 0.15
+	return 0.75
 
 static func _get_max_ratio(personality: int, urgent: bool) -> float:
-	if urgent: return 1.3 + randf() * 0.5
+	if urgent: return 1.30 + randf() * 0.20
 	match personality:
-		Personality.SHUANGZHI: return 0.85 + randf() * 0.1
-		Personality.JINGMING: return 0.75 + randf() * 0.15
-		Personality.JIZAO: return 0.9 + randf() * 0.1
-		Personality.NAIXIN: return 0.8 + randf() * 0.1
-		Personality.LINSE: return 0.65 + randf() * 0.1
-		Personality.KANGKAI: return 1.0 + randf() * 0.15
-		Personality.DUOYI: return 0.7 + randf() * 0.1
-		Personality.QINGXIN: return 0.9 + randf() * 0.1
-	return 0.85
+		Personality.SHUANGZHI: return 1.10 + randf() * 0.10
+		Personality.JINGMING: return 1.15 + randf() * 0.15
+		Personality.JIZAO: return 1.05 + randf() * 0.10
+		Personality.NAIXIN: return 1.15 + randf() * 0.10
+		Personality.LINSE: return 1.05 + randf() * 0.10
+		Personality.KANGKAI: return 1.25 + randf() * 0.15
+		Personality.DUOYI: return 1.10 + randf() * 0.15
+		Personality.QINGXIN: return 1.15 + randf() * 0.10
+	return 1.10
 
 static func _get_patience(personality: int, urgent: bool) -> int:
 	if urgent: return 1

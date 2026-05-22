@@ -116,15 +116,16 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	
 	customer_request.text = "想要: [%s][%s] %s × %d" % [tier_names[item.tier], elem_str, item.name, customer.want_count]
 	
-	# 显示参考价（集市单价）和顾客出价
-	var cost_text = "集市价: %d灵石/个 × %d" % [customer.get("unit_price", item.base_price), customer.want_count]
-	customer_price.text = "出价: %d灵石 | 参考价: %d灵石 | %s" % [customer.offer_price, customer.base_price, cost_text]
+	# 显示市场参考价和顾客出价
+	var ref_total = customer.base_price  # 市场价总额
+	customer_price.text = "出价: %d灵石 | 市场价: %d灵石（%d/个×%d）" % [customer.offer_price, ref_total, customer.unit_price, customer.want_count]
 	
 	customer_panel.show()
 	haggle_panel.show()
 	haggle_result.text = ""
+	# 滑块从顾客出价到市场价×1.3（给博弈空间）
 	haggle_slider.min_value = customer.offer_price
-	haggle_slider.max_value = int(customer.base_price * 1.5)
+	haggle_slider.max_value = max(customer.max_price, int(ref_total * 1.3))
 	haggle_slider.value = customer.offer_price
 	_on_slider_changed(haggle_slider.value)
 
@@ -168,11 +169,8 @@ func _on_counter_offer() -> void:
 		_on_trade_completed("", 0, result.final_price)
 	elif result.result == "counter":
 		haggle_result.text = result.message
-		# 保留完整价格信息
 		var c = result.customer
-		var item = c.want_item
-		customer_price.text = "新出价: %d灵石 | 参考价: %d灵石 | 集市价: %d/个×%d" % [c.offer_price, c.base_price, c.unit_price, c.want_count]
-		# 更新滑块范围
+		customer_price.text = "出价: %d灵石 | 市场价: %d灵石（%d/个×%d）" % [c.offer_price, c.base_price, c.unit_price, c.want_count]
 		haggle_slider.min_value = c.offer_price
 		haggle_slider.value = c.offer_price
 		_on_slider_changed(haggle_slider.value)
