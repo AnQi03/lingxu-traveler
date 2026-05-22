@@ -42,6 +42,13 @@ const MAX_LING_SHI: int = 100
 
 ## ---------- 熔炉升级 ----------
 var furnace_tier: int = 1
+
+## ---------- 系统解锁 ----------
+func is_furnace_unlocked() -> bool:
+	return game_day >= 5
+
+func is_slicing_unlocked() -> bool:
+	return game_day >= 10
 const FURNACE_UPGRADE_COST = {
 	2: 180,
 	3: 600,
@@ -148,6 +155,9 @@ func update_customer_relation(customer_name: String, delta: int) -> void:
 	r.loyalty = clampi(r.loyalty + delta, 0, 10)
 	r.visits += 1
 	r.last_seen = game_day
+	
+	if delta > 0:
+		ren_xin += 1  # 人心成长：好感增加时+1
 
 func get_customer_loyalty(customer_name: String) -> int:
 	if not customer_relations.has(customer_name):

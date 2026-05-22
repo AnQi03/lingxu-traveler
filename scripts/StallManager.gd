@@ -79,6 +79,7 @@ func start_haggle(player_offer: int) -> Dictionary:
 			daily_income += total_price
 			today_customers += 1
 			PlayerData.update_customer_relation(current_customer.name, 2)
+			PlayerData.shang_dao += 1  # 商道成长：每次成功交易+1
 			trade_completed.emit(item.id, count, total_price)
 			current_customer = {}
 				

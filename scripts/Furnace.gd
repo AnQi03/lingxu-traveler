@@ -287,7 +287,12 @@ func _select_item(idx: int):
 	
 	var sbtn = find_child("slice_btn", true, false)
 	if sbtn:
-		sbtn.disabled = false
+		if PlayerData.is_slicing_unlocked():
+			sbtn.text = "🔪 切片加工"
+			sbtn.disabled = false
+		else:
+			sbtn.text = "🔒 Day10解锁"
+			sbtn.disabled = true
 
 
 func _do_smelt():
@@ -398,6 +403,7 @@ func _do_smelt():
 		result_text = "✨ 升品成功！[%s] %s → [%s]！" % [tier_names[item.tier], item.name, tier_names[nt]]
 		result_color = Color(1, 0.8, 0.3)
 		PlayerData.daily_refine_count += 1
+		PlayerData.tian_dao += 1  # 天道成长：每次升品+1
 	
 	if is_instance_valid(result_label):
 		result_label.text = result_text
@@ -473,6 +479,10 @@ func _show_result(text: String, color: Color):
 
 
 func _do_slice():
+	if not PlayerData.is_slicing_unlocked():
+		_show_result("🔒 切片加工将在 Day 10 解锁——先熔炼试试吧！", Color(0.5, 0.5, 0.5))
+		return
+	
 	if selected_item_idx < 0 or selected_item_idx >= PlayerData.inventory.size():
 		return
 	

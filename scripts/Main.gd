@@ -28,7 +28,12 @@ func _ready():
 	DayCycle.start()
 	DayCycle.night_falling.connect(_on_night_falling)
 	
-	print("B 集市  |  空格 摆摊  |  F 熔炉  |  E 背包  |  ~ 控制台")
+	var key_hint = "B 集市  |  空格 摆摊  |  E 背包  |  ~ 控制台"
+	if PlayerData.is_furnace_unlocked():
+		key_hint += "  |  F 熔炉"
+	else:
+		key_hint += "  |  F 熔炉(Day5解锁)"
+	print(key_hint)
 
 
 func _create_market():
@@ -196,7 +201,11 @@ func _input(event):
 				if inventory_node and inventory_node.has_method("toggle"):
 					inventory_node.toggle()
 				get_viewport().set_input_as_handled()
-			KEY_F:
-				if furnace_node and furnace_node.has_method("toggle"):
-					furnace_node.toggle()
-				get_viewport().set_input_as_handled()
+		KEY_F:
+			if furnace_node and furnace_node.has_method("toggle"):
+				if not PlayerData.is_furnace_unlocked():
+					print("熔炉 Day5解锁")
+					get_viewport().set_input_as_handled()
+					return
+				furnace_node.toggle()
+			get_viewport().set_input_as_handled()
