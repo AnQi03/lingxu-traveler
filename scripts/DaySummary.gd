@@ -73,6 +73,16 @@ func _build_ui():
 	butler_label.visible = false
 	summary_panel.add_child(butler_label)
 	
+	var world_label = Label.new()
+	world_label.name = "world_label"
+	world_label.position = Vector2(30, 320)
+	world_label.size = Vector2(540, 30)
+	world_label.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
+	world_label.add_theme_font_size_override("font_size", 12)
+	world_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	world_label.visible = false
+	summary_panel.add_child(world_label)
+	
 	var hint = Label.new()
 	hint.name = "hint_label"
 	hint.text = "（点击任意位置关闭，或10秒后自动消失……）"
@@ -131,6 +141,15 @@ func show_summary():
 			butler.visible = true
 		else:
 			butler.visible = false
+	
+	var world = find_child("world_label", true, false)
+	if world:
+		var fb = _get_world_feedback()
+		if fb != "":
+			world.text = fb
+			world.visible = true
+		else:
+			world.visible = false
 
 
 func _get_butler_msg(day: int) -> String:
@@ -143,6 +162,35 @@ func _get_butler_msg(day: int) -> String:
 		60: return "📜 管家来信：'听说暗市开张了——不过那里水深，少爷多留个心眼。'"
 		90: return "📜 管家来信：'半年了。少爷的摊子——不，该叫店铺了——真是越来越像样了。'"
 		_: return ""
+
+
+func _get_world_feedback() -> String:
+	var earned = PlayerData.total_earned
+	var regulars = PlayerData.get_known_customer_names().size()
+	var parts = []
+	
+	if earned >= 10000:
+		parts.append("灵墟没有人不知道你的摊位了。")
+	elif earned >= 5000:
+		parts.append("你的名字开始在灵墟商界流传。")
+	elif earned >= 2000:
+		parts.append("灵墟商会的管事开始留意你的摊位。")
+	elif earned >= 500:
+		parts.append("你的摊位在周边小有名气了。")
+	
+	if regulars >= 5:
+		parts.append("几位常客已经把你当成了灵墟最可靠的商人。")
+	elif regulars >= 3:
+		parts.append("几位熟客成了你的固定主顾。")
+	
+	if PlayerData.shang_dao >= 40:
+		parts.append("同行们提起你都点点头。")
+	if PlayerData.tian_dao >= 40:
+		parts.append("你能感受到灵材在你手中微微颤动。")
+	if PlayerData.ren_xin >= 40:
+		parts.append("街坊邻居提起你都竖大拇指。")
+	
+	return " | ".join(parts)
 
 
 func _get_tomorrow_hint(day: int) -> String:

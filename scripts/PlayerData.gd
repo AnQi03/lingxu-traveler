@@ -8,6 +8,7 @@ extends Node
 var spirit_stones: int = 100          # 下品灵石
 var mid_spirit_stones: int = 0       # 中品灵石
 var high_spirit_stones: int = 0      # 上品灵石
+var total_earned: int = 0            # 累计收入
 
 ## ---------- 三道 ----------
 var shang_dao: int = 0
@@ -106,6 +107,7 @@ func spend_stones(amount: int) -> bool:
 	return true
 
 func earn_stones(amount: int) -> void:
+	total_earned += amount
 	var total = amount
 	while total >= 10000:
 		high_spirit_stones += 1
