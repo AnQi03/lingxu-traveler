@@ -135,6 +135,10 @@ func _update_display() -> void:
 		var s_text = PlayerData.get_season_label()
 		if PlayerData.is_festival_day():
 			s_text += " 🎪集市大日"
+		# 年度评定倒计时
+		var days_left = PlayerData.ASSESSMENT_DAY - PlayerData.game_day
+		if days_left <= 30 and days_left > 0 and not PlayerData.year_assessed:
+			s_text += " | 🏛️ 评定还有%d天" % days_left
 		season_label.text = s_text
 	
 	var ling_label = find_child("ling_label", true, false)

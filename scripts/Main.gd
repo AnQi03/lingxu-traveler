@@ -197,6 +197,18 @@ func get_stall_income() -> int:
 func _on_night_falling():
 	SoundManager.sfx_day_transition()
 	force_close_stall()
+	
+	# 年度评定日 → 用 YearEnd 替代 DaySummary
+	if PlayerData.game_day == PlayerData.ASSESSMENT_DAY and not PlayerData.year_assessed:
+		var year_end = load("res://scripts/YearEnd.gd")
+		if year_end:
+			var layer = CanvasLayer.new()
+			layer.name = "YearEnd"
+			layer.layer = 25
+			layer.set_script(year_end)
+			add_child(layer)
+			return
+	
 	var summary = load("res://scripts/DaySummary.gd")
 	if summary:
 		var layer = CanvasLayer.new()

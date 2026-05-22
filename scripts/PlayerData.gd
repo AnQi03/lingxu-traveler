@@ -24,6 +24,13 @@ var shang_voice_heard: bool = false      # 商道第一次说话
 var tian_voice_heard: bool = false       # 天道第一次说话
 var renxin_voice_heard: bool = false     # 人心第一次说话
 
+## ---------- 年度评定 ----------
+var year_assessed: bool = false           # 是否已完成首次评定
+var assessment_score: int = 0             # 最近一次评定分数
+var assessment_rating: int = 0            # 1-5星
+const ASSESSMENT_DAY: int = 120           # 评定日（一年）
+const ASSESSMENT_WARNING_DAY: int = 90    # 提前30天预告
+
 ## ---------- 时间 ----------
 var game_day: int = 1
 var is_daytime: bool = true
@@ -123,6 +130,110 @@ func add_fragments(count: int) -> void:
 		set_meta("fragment_discount_triggered", true)
 		if hud and hud.has_method("show_toast"):
 			hud.show_toast("🏷️ 碎片之力汇聚！下次熔炉升级享受8折优惠！", Color(1, 0.8, 0.3), 5.0)
+
+
+## ---------- 年度评定评分 ----------
+func calculate_assessment() -> Dictionary:
+	var score = 0
+	var parts = []  # 各项得分说明
+	
+	# 灵石 (0-3分)
+	var stones = get_total_stones()
+	if stones >= 10000:
+		score += 3; parts.append("灵石富可敌城 +3")
+	elif stones >= 5000:
+		score += 2; parts.append("灵石积累丰厚 +2")
+	elif stones >= 1000:
+		score += 1; parts.append("灵石小有积蓄 +1")
+	else:
+		parts.append("灵石不足... 0")
+	
+	# 熔炉等级 (0-3分)
+	if furnace_tier >= 5:
+		score += 3; parts.append("熔炉登峰造极 +3")
+	elif furnace_tier >= 3:
+		score += 2; parts.append("熔炉炉火纯青 +2")
+	elif furnace_tier >= 2:
+		score += 1; parts.append("熔炉初具规模 +1")
+	else:
+		parts.append("熔炉尚未升级 0")
+	
+	# 常客数量 (0-2分)
+	var regular_count = get_known_customer_names().size()
+	if regular_count >= 5:
+		score += 2; parts.append("常客遍布灵墟 +2")
+	elif regular_count >= 3:
+		score += 1; parts.append("有几位熟客 +1")
+	else:
+		parts.append("还需多结识常客 0")
+	
+	# 灵材图鉴 (0-2分)
+	var material_count = 0
+	for item in inventory:
+		material_count += 1
+	if material_count >= 15:
+		score += 2; parts.append("灵材收藏家 +2")
+	elif material_count >= 8:
+		score += 1; parts.append("灵材品种渐丰 +1")
+	else:
+		parts.append("灵材品种太少 0")
+	
+	# 碎片收集 (0-1分)
+	if lingxu_fragments >= 50:
+		score += 1; parts.append("灵墟碎片大量收集 +1")
+	elif lingxu_fragments >= 20:
+		score += 1; parts.append("灵墟碎片小成 +1")
+	else:
+		parts.append("碎片收集不足 0")
+	
+	# 连续出摊 (0-1分)
+	if consecutive_stall_days >= 30:
+		score += 1; parts.append("风雨无阻 +1")
+	elif consecutive_stall_days >= 10:
+		score += 1; parts.append("勤奋出摊 +1")
+	else:
+		parts.append("出摊不够勤快 0")
+	
+	# 评级
+	var rating = 1
+	var rating_text = "⭐ 初来乍到"
+	var rating_color = Color(0.5, 0.5, 0.5)
+	if score >= 12:
+		rating = 5; rating_text = "⭐⭐⭐⭐⭐ 灵墟传奇"; rating_color = Color(1, 0.8, 0.2)
+	elif score >= 9:
+		rating = 4; rating_text = "⭐⭐⭐⭐ 杰出商贾"; rating_color = Color(0.3, 0.9, 0.5)
+	elif score >= 6:
+		rating = 3; rating_text = "⭐⭐⭐ 稳健经营"; rating_color = Color(0.4, 0.7, 1.0)
+	elif score >= 3:
+		rating = 2; rating_text = "⭐⭐ 还需历练"; rating_color = Color(0.7, 0.7, 0.3)
+	
+	# 三道影响评级叙事
+	var narrative = ""
+	if shang_dao >= tian_dao and shang_dao >= ren_xin:
+		narrative = "商道之路，你已经走得很远了。"
+	elif tian_dao >= shang_dao and tian_dao >= ren_xin:
+		narrative = "天道眷顾，你与灵材之间有了奇妙的共鸣。"
+	elif ren_xin >= shang_dao and ren_xin >= tian_dao:
+		narrative = "人心所向，这灵墟因你而温暖了几分。"
+	else:
+		narrative = "三道均衡，你走出了属于自己的路。"
+	
+	if shang_dao >= 50 and tian_dao >= 50 and ren_xin >= 50:
+		narrative = "商道、天道、人心——三条路你都走到了深处。灵墟从未见过这样的奇才。"
+	
+	assessment_score = score
+	assessment_rating = rating
+	year_assessed = true
+	
+	return {
+		"score": score,
+		"max_score": 12,
+		"rating": rating,
+		"rating_text": rating_text,
+		"rating_color": rating_color,
+		"parts": parts,
+		"narrative": narrative
+	}
 
 ## ---------- 顾客关系 ----------
 var customer_relations: Dictionary = {}
@@ -326,7 +437,10 @@ func save_game() -> void:
 		"has_seen_opening": has_seen_opening,
 		"shang_voice_heard": shang_voice_heard,
 		"tian_voice_heard": tian_voice_heard,
-		"renxin_voice_heard": renxin_voice_heard
+		"renxin_voice_heard": renxin_voice_heard,
+		"year_assessed": year_assessed,
+		"assessment_score": assessment_score,
+		"assessment_rating": assessment_rating
 	}
 	var file = FileAccess.open("user://save.json", FileAccess.WRITE)
 	if file:
@@ -374,6 +488,9 @@ func load_game() -> bool:
 	shang_voice_heard = data.get("shang_voice_heard", false)
 	tian_voice_heard = data.get("tian_voice_heard", false)
 	renxin_voice_heard = data.get("renxin_voice_heard", false)
+	year_assessed = data.get("year_assessed", false)
+	assessment_score = data.get("assessment_score", 0)
+	assessment_rating = data.get("assessment_rating", 0)
 	
 	is_daytime = time_of_day >= 5.0 and time_of_day < 19.0
 	print("读档成功！第%d天" % game_day)
