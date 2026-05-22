@@ -67,6 +67,16 @@ static func generate_customer() -> Dictionary:
 		patience += 1
 	if loyalty >= 7:
 		patience += 1
+	
+	# 商道加成：更高的商道让顾客更耐心、出价更高
+	if PlayerData.shang_dao >= 50:
+		max_price = int(max_price * 1.10)
+		patience += 1
+	elif PlayerData.shang_dao >= 30:
+		max_price = int(max_price * 1.05)
+	elif PlayerData.shang_dao >= 10:
+		patience += 1
+	
 	var mood = _get_mood(personality, is_urgent)
 	if loyalty >= 5:
 		mood = "⭐ 老顾客(好感%d) — " % loyalty + mood

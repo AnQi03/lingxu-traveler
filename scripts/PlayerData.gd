@@ -134,6 +134,15 @@ func update_customer_relation(customer_name: String, delta: int) -> void:
 	if not customer_relations.has(customer_name):
 		customer_relations[customer_name] = {"loyalty": 0, "visits": 0, "last_seen": 0}
 	var r = customer_relations[customer_name]
+	
+	# 人心加成：好人缘让成交好感+1，赶人的惩罚减轻
+	if delta > 0 and PlayerData.ren_xin >= 30:
+		delta += 1
+	if delta < 0 and PlayerData.ren_xin >= 10:
+		delta += 1
+	if delta < 0 and PlayerData.ren_xin >= 50:
+		delta += 1
+	
 	r.loyalty = clampi(r.loyalty + delta, 0, 10)
 	r.visits += 1
 	r.last_seen = game_day
