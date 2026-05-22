@@ -233,14 +233,22 @@ static func _get_mood(personality: int, urgent: bool) -> String:
 	return "神色如常"
 
 static func _get_accept_msg(c: Dictionary) -> String:
-	var msgs = ["%s爽快地付了灵石：'成交！'" % c.name, "%s点点头：'行，就这么定了。'" % c.name, "%s笑了：'老板爽快！'" % c.name]
-	return msgs[randi() % msgs.size()]
+	var msgs = {
+		Personality.SHUANGZHI: ["%s爽快地一拍桌子：'成交！老板够意思！'", "%s笑道：'行！我就喜欢痛快的！'"],
+		Personality.JINGMING: ["%s眯起眼：'这个价还行……成交。'", "%s仔细点了点灵石：'好，就这个价。'"],
+		Personality.JIZAO: ["%s一把抓过灵材：'行行行赶紧的！'", "%s急匆匆道：'成交成交，别磨蹭！'"],
+		Personality.NAIXIN: ["%s慢悠悠道：'嗯……这个价可以。'", "%s点点头，不紧不慢地付了灵石。"],
+		Personality.LINSE: ["%s咬着牙：'……行吧，算你狠。'", "%s一脸不情愿地掏出灵石：'便宜你了。'"],
+		Personality.KANGKAI: ["%s哈哈大笑：'成交！多给你几块灵石当赏钱！'", "%s爽朗一笑：'好买卖！拿着！'"],
+		Personality.DUOYI: ["%s反复查验灵材后才点头：'……行，成交。'", "%s狐疑地盯着你：'质量没问题吧？那……成交。'"],
+		Personality.QINGXIN: ["%s开心地付了灵石：'成交！老板你人真好！'", "%s笑眯眯道：'好呀好呀，就这个价！'"],
+	}
+	var pool = msgs.get(c.personality, ["%s点点头：'成交。'" % c.name])
+	return pool[randi() % pool.size()] % c.name
 
 static func _get_no_stock_msg(c: Dictionary) -> String:
-	var item = c.want_item
 	var name = c.name
 	var bg = c.get("bg", "")
-	# 常客有特殊台词
 	if bg != "":
 		match name:
 			"石老": return "石老慢悠悠地看了你一眼：'小友，没有货就不要浪费老朽的时间。'"
@@ -249,32 +257,48 @@ static func _get_no_stock_msg(c: Dictionary) -> String:
 			"冷面客": return "冷面客一言不发，转身就走。"
 			"金娘子": return "金娘子哼了一声：'什么也没有出来摆什么摊。'"
 	
-	var msgs = [
-		"%s瞪了你一眼：'没有还摆什么摊？'" % name,
-		"%s一脸失望：'……什么都没有啊。'" % name,
-		"%s摆摆手：'没货就别耽误工夫了。'" % name,
-		"%s讥讽道：'光摆个空摊子？'" % name,
-	]
-	return msgs[randi() % msgs.size()]
+	var msgs = {
+		Personality.SHUANGZHI: ["%s一愣：'啥？没有？早说嘛！'", "%s挠挠头：'没货啊……那我改天来。'"],
+		Personality.JINGMING: ["%s扫了一眼空摊：'没货还摆摊？浪费时间。'", "%s摇了摇头：'没准备好就不要开张。'"],
+		Personality.JIZAO: ["%s大怒：'没有？！信不信我砸了你这破烂摊子！'", "%s一脚踢在摊位上：'耍老子玩呢？！'", "%s脸都气红了：'没货你摆什么摆！'"],
+		Personality.NAIXIN: ["%s也不恼：'没关系，我明天再来看看。'", "%s笑了笑：'不妨事，做生意哪有天天有货的。'"],
+		Personality.LINSE: ["%s瞪眼：'什么？亏我大老远跑来！'", "%s哼了一声：'白跑一趟，你得赔我路费！'"],
+		Personality.KANGKAI: ["%s摆摆手：'哈哈没事没事，下次有了记得给我留着！'", "%s笑道：'不要紧，改日再来便是。'"],
+		Personality.DUOYI: ["%s眯起眼睛：'你是看不起我，还是真没有？'", "%s左右看了看：'该不会是藏起来不卖给我吧？'"],
+		Personality.QINGXIN: ["%s失望地低下头：'啊……没有啊……'", "%s有点难过：'我特意跑来的……算了算了。'"],
+	}
+	var pool = msgs.get(c.personality, ["%s转身走了。" % name])
+	return pool[randi() % pool.size()] % name
 
 static func _get_walk_away_msg(c: Dictionary) -> String:
 	var name = c.name
-	var msgs = [
-		"%s摇了摇头：'太贵了，我去别家看看。'" % name,
-		"%s叹了口气：'算了吧……'" % name,
-		"%s转身就走，嘴里嘟囔着什么。" % name,
-		"%s摆摆手：'这价谈不拢，走了。'" % name,
-	]
-	return msgs[randi() % msgs.size()]
+	var msgs = {
+		Personality.SHUANGZHI: ["%s一摆手：'太贵了，不买了不买了！'", "%s摇头：'这价钱不太实在，走了。'"],
+		Personality.JINGMING: ["%s冷笑：'这个价，你当我是冤大头？'", "%s转身就走：'我去别家比比价。'"],
+		Personality.JIZAO: ["%s破口大骂：'抢钱啊？！老子不买了！'", "%s一甩袖子：'这破摊子，下次不来了！'", "%s重重哼了一声：'真当自己是仙品了？'"],
+		Personality.NAIXIN: ["%s叹了口气：'还是贵了点，下次吧。'", "%s慢悠悠地起身：'不急，我去逛逛别家。'"],
+		Personality.LINSE: ["%s攥紧钱袋：'这么贵，你是要我倾家荡产？'", "%s嘀嘀咕咕：'便宜点会死啊……走了。'"],
+		Personality.KANGKAI: ["%s笑道：'这价高了点，不过——算了，改天再来。'", "%s拍了拍摊位：'老板，下次便宜点我给你介绍客人！'"],
+		Personality.DUOYI: ["%s狐疑地打量你：'你是不是看我好欺负故意抬价？'", "%s阴沉着脸：'我觉得你在骗我。走了。'"],
+		Personality.QINGXIN: ["%s一脸为难：'我……我没那么多灵石。对不起。'", "%s小声道：'太贵了……我不买了。'"],
+	}
+	var pool = msgs.get(c.personality, ["%s摇了摇头走了。" % name])
+	return pool[randi() % pool.size()] % name
 
 static func _get_counter_msg(c: Dictionary) -> String:
 	var name = c.name
-	var msgs = [
-		"%s皱了皱眉：'这个价不行。最多……%d灵石。'" % [name, c.offer_price],
-		"%s犹豫了一下：'再低点嘛——%d灵石怎么样？'" % [name, c.offer_price],
-		"%s摇头：'不行不行，%d灵石最多了。'" % [name, c.offer_price],
-	]
-	return msgs[randi() % msgs.size()]
+	var msgs = {
+		Personality.SHUANGZHI: ["%s直说道：'不行不行，最多%d灵石。'" % [name, c.offer_price], "%s摸了摸下巴：'说实在的，%d灵石顶天了。'" % [name, c.offer_price]],
+		Personality.JINGMING: ["%s精打细算道：'我给你算过了，%d灵石才合理。'" % [name, c.offer_price], "%s伸出几根手指：'这个数——%d，多了没有。'" % [name, c.offer_price]],
+		Personality.JIZAO: ["%s不耐烦地敲着桌子：'快点！%d灵石，卖不卖？！'" % [name, c.offer_price], "%s吼道：'磨蹭什么！%d爱卖不卖！'" % [name, c.offer_price]],
+		Personality.NAIXIN: ["%s不急不缓：'再想想——%d灵石如何？'" % [name, c.offer_price], "%s温和地说：'不着急，你再考虑考虑，%d灵石。'" % [name, c.offer_price]],
+		Personality.LINSE: ["%s一脸肉疼：'%d……已经是我的极限了。'" % [name, c.offer_price], "%s咬着牙：'最多最多——%d！多了我真的买不起。'" % [name, c.offer_price]],
+		Personality.KANGKAI: ["%s笑道：'咱们各退一步，%d灵石，成不？'" % [name, c.offer_price], "%s豪爽道：'这样，我再加一点——%d灵石！'" % [name, c.offer_price]],
+		Personality.DUOYI: ["%s警惕地看着你：'我觉得你在宰我。最多%d。'" % [name, c.offer_price], "%s压低声音：'别唬我，我知道市价——%d。'" % [name, c.offer_price]],
+		Personality.QINGXIN: ["%s怯生生道：'%d灵石可不可以……'" % [name, c.offer_price], "%s试探着问：'那个……%d灵石行吗？'" % [name, c.offer_price]],
+	}
+	var pool = msgs.get(c.personality, ["%s还价道：'%d灵石。'" % [name, c.offer_price]])
+	return pool[randi() % pool.size()]
 
 static func _get_dismiss_msg(c: Dictionary) -> String:
 	var name = c.name
@@ -284,16 +308,31 @@ static func _get_dismiss_msg(c: Dictionary) -> String:
 			"石老": return "石老叹了口气：'年轻人，这么没耐心可不行。'"
 			"青儿": return "青儿气鼓鼓地走了：'再也不来你这了！'"
 			"霍老板": return "霍老板冷笑：'这就是你的待客之道？'"
-	var msgs = [
-		"%s一甩袖子：'不卖了？那我走！'" % name,
-		"%s瞪了你一眼，头也不回地走了。" % name,
-	]
-	return msgs[randi() % msgs.size()]
+	
+	var msgs = {
+		Personality.SHUANGZHI: ["%s一摆手：'不卖拉倒！'" % name, "%s头也不回：'行，买卖不成仁义在。'" % name],
+		Personality.JINGMING: ["%s冷着脸：'你会后悔的。'" % name, "%s不屑道：'不做生意也好，省得亏本。'" % name],
+		Personality.JIZAO: ["%s暴跳如雷：'耍我？！你这摊子我记住了！'" % name, "%s一脚踢飞石子：'什么玩意儿！'" % name],
+		Personality.NAIXIN: ["%s也不生气：'没事，买卖嘛，讲不成就算了。'" % name, "%s点点头：'那我就不打扰了。'" % name],
+		Personality.LINSE: ["%s骂骂咧咧：'白费我半天功夫……'" % name, "%s甩手走了：'真晦气！'" % name],
+		Personality.KANGKAI: ["%s哈哈大笑：'没关系！生意不成情意在！'" % name, "%s拍拍你肩膀：'下次再说，下次再说。'" % name],
+		Personality.DUOYI: ["%s冷冷道：'果然有猫腻。'" % name, "%s用怀疑的眼神最后看了你一眼才走。" % name],
+		Personality.QINGXIN: ["%s委屈巴巴：'好吧……那我走了。'" % name, "%s小声道歉：'对不起打扰了……'" % name],
+	}
+	var pool = msgs.get(c.personality, ["%s转身走了。" % name])
+	return pool[randi() % pool.size()]
 
 static func _get_grudging_accept_msg(c: Dictionary) -> String:
 	var name = c.name
-	var msgs = [
-		"%s犹豫了一下：'……好吧，就这个价。'" % name,
-		"%s咬了咬牙：'行吧行吧，成交！'" % name,
-	]
-	return msgs[randi() % msgs.size()]
+	var msgs = {
+		Personality.SHUANGZHI: ["%s想了想：'有点贵……不过算了，成交。'", "%s犹豫一下：'行吧行吧，就这个价。'"],
+		Personality.JINGMING: ["%s盘算了一会：'……勉强不亏，成交。'", "%s小声嘀咕：'其实还能再低点的……算了。'"],
+		Personality.JIZAO: ["%s不耐烦道：'行行行就这个价赶紧的！'", "%s一把抓过灵材：'成交！别废话了！'"],
+		Personality.NAIXIN: ["%s沉吟片刻：'嗯……这个价也还行。成交。'", "%s不紧不慢：'好吧，就依你。'"],
+		Personality.LINSE: ["%s咬了咬牙，手抖着递出灵石：'……行。'", "%s一脸肉疼：'我这可是大出血了……'"],
+		Personality.KANGKAI: ["%s笑道：'这个价不算贵，成交！'", "%s爽快掏钱：'行！就当交个朋友！'"],
+		Personality.DUOYI: ["%s反复检查了灵材：'……没做手脚吧？行，成交。'", "%s犹豫了一会才点头：'好吧，信你一次。'"],
+		Personality.QINGXIN: ["%s开心道：'可以可以！谢谢你！'", "%s松了口气：'好，那就这个价！'"],
+	}
+	var pool = msgs.get(c.personality, ["%s犹豫了一下：'……好吧。'" % name])
+	return pool[randi() % pool.size()] % name
