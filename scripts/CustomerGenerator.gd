@@ -288,7 +288,7 @@ static func _get_dismiss_msg(c: Dictionary) -> String:
 		"%s一甩袖子：'不卖了？那我走！'" % name,
 		"%s瞪了你一眼，头也不回地走了。" % name,
 	]
-	return msgs[randi() % msgs.size()
+	return msgs[randi() % msgs.size()]
 
 static func _get_grudging_accept_msg(c: Dictionary) -> String:
 	var name = c.name
@@ -296,4 +296,4 @@ static func _get_grudging_accept_msg(c: Dictionary) -> String:
 		"%s犹豫了一下：'……好吧，就这个价。'" % name,
 		"%s咬了咬牙：'行吧行吧，成交！'" % name,
 	]
-	return msgs[randi() % msgs.size()
+	return msgs[randi() % msgs.size()]
