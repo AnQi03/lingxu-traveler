@@ -106,11 +106,13 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	customer_name.text = "👤 %s" % customer.name
 	customer_mood.text = "状态: %s" % customer.mood
 	
-	# 商道提示：足够高时显示顾客可能接受的价位
+	# 商道提示：足够高时显示顾客的议价区间
 	if PlayerData.shang_dao >= 30:
-		var hint_min = customer.offer_price
+		var hint_min = customer.get("min_accept", customer.offer_price)
 		var hint_max = customer.max_price
-		customer_mood.text += "\n💼 商道眼光：%d~%d灵石" % [hint_min, hint_max]
+		customer_mood.text += "\n💼 商道眼光：可谈区间 %d~%d灵石" % [hint_min, hint_max]
+	elif PlayerData.shang_dao >= 10:
+		customer_mood.text += "\n💼 隐约感觉这位顾客还有议价空间"
 	
 	customer_request.text = "想要: [%s][%s] %s × %d" % [tier_names[item.tier], elem_str, item.name, customer.want_count]
 	

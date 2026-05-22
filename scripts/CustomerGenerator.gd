@@ -109,6 +109,9 @@ static func generate_customer() -> Dictionary:
 	elif customer_bg != "":
 		mood = "🏷 " + customer_bg
 	
+	# 最低接受价：低于此价顾客可能直接走人
+	var min_accept = int(offer_price * 0.7)
+	
 	return {
 		"name": name,
 		"personality": personality,
@@ -118,6 +121,7 @@ static func generate_customer() -> Dictionary:
 		"base_price": total_base,
 		"offer_price": offer_price,
 		"max_price": max(offer_price + 1, max_price),
+		"min_accept": min_accept,
 		"patience": patience,
 		"round": 0,
 		"is_urgent": is_urgent,
@@ -137,6 +141,20 @@ static func handle_haggle(customer: Dictionary, player_offer: int) -> Dictionary
 	# 察言观色：每轮顾客情绪变化
 	var round_mood = _get_round_mood(customer)
 	
+	# 出价太低可能直接激怒顾客
+	if player_offer < customer.min_accept:
+		var anger_chance = 0.4 - float(PlayerData.shang_dao) / 200.0
+		if randf() < anger_chance:
+			result_type = "walk_away"
+			result_msg = "[💢 被激怒了] " + _get_walk_away_msg(customer)
+			return {
+				"result": result_type,
+				"message": result_msg,
+				"final_price": 0,
+				"customer": customer,
+				"round_mood": round_mood
+			}
+	
 	if player_offer <= customer.offer_price:
 		result_type = "accept"
 		final_price = player_offer
@@ -152,9 +170,27 @@ static func handle_haggle(customer: Dictionary, player_offer: int) -> Dictionary
 		result_msg = _get_walk_away_msg(customer)
 		
 	else:
-		# 顾客每次还价逐步接近心理上限
-		var new_offer = int(customer.offer_price + (customer.max_price - customer.offer_price) * 0.5)
-		new_offer = mini(new_offer, customer.max_price)
+		# 让步递减：越往后让步越小，释放"没空间了"的信号
+		var gap = customer.max_price - customer.offer_price
+		var concession = 0.0
+		match customer.round:
+			1: concession = 0.40
+			2: concession = 0.25
+			3: concession = 0.10
+			_: concession = 0.02
+		
+		# 性格调整让步幅度
+		match customer.personality:
+			Personality.SHUANGZHI: concession += 0.05
+			Personality.JINGMING: concession -= 0.05
+			Personality.JIZAO: concession += 0.10
+			Personality.NAIXIN: concession -= 0.03
+			Personality.LINSE: concession -= 0.10
+			Personality.KANGKAI: concession += 0.08
+			Personality.DUOYI: concession -= 0.02
+		
+		var new_offer = int(customer.offer_price + gap * concession)
+		new_offer = clampi(new_offer, customer.offer_price + 1, customer.max_price)
 		customer.offer_price = new_offer
 		result_type = "counter"
 		result_msg = _get_counter_msg(customer)
