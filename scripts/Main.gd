@@ -75,7 +75,7 @@ func _create_scene_background():
 func _update_background():
 	var t = PlayerData.time_of_day
 	var is_night = t >= 19.0 or t < 5.0
-	var tex_path = "res://assets/img/ui/bg/night_scene.png" if is_night else "res://assets/img/ui/bg/market_scene.png"
+	var tex_path = "res://assets/img/bg/market_scene_night.png" if is_night else "res://assets/img/bg/market_scene_day.png"
 	var tex = load(tex_path)
 	if tex:
 		scene_bg.texture = tex
@@ -199,7 +199,7 @@ func _create_player():
 	var tex = load("res://assets/img/characters/player_front.png")
 	if tex:
 		sprite.texture = tex
-		sprite.scale = Vector2(0.15, 0.15)
+		sprite.scale = Vector2(0.18, 0.18)  # 素白仙袍角色稍大
 	player.add_child(sprite)
 	
 	var shape = CollisionShape2D.new()
@@ -230,6 +230,15 @@ func _create_interact_points():
 		{"name": "熔炉", "pos": Vector2(950, 324), "radius": 100, "action": "furnace"},
 	]
 	
+	# 建筑精灵（场景装饰）
+	_spawn_building(Vector2(120, 280), "res://assets/img/buildings/market_shop.png", 0.15)
+	_spawn_building(Vector2(540, 370), "res://assets/img/buildings/stall_stand.png", 0.13)
+	_spawn_building(Vector2(910, 280), "res://assets/img/buildings/furnace_forge.png", 0.14)
+	
+	# 装饰NPC（让场景有生气）
+	_spawn_npc(Vector2(80, 260), "res://assets/img/characters/npc_elder.png", 0.12)
+	_spawn_npc(Vector2(1050, 380), "res://assets/img/characters/npc_girl.png", 0.12)
+	
 	var hint = Label.new()
 	hint.name = "InteractHint"
 	hint.add_theme_font_size_override("font_size", 16)
@@ -237,6 +246,26 @@ func _create_interact_points():
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.visible = false
 	add_child(hint)
+
+func _spawn_building(pos: Vector2, tex_path: String, scale: float):
+	var spr = Sprite2D.new()
+	spr.position = pos
+	var tex = load(tex_path)
+	if tex:
+		spr.texture = tex
+		spr.scale = Vector2(scale, scale)
+		spr.z_index = -1
+	add_child(spr)
+
+func _spawn_npc(pos: Vector2, tex_path: String, scale: float):
+	var spr = Sprite2D.new()
+	spr.position = pos
+	var tex = load(tex_path)
+	if tex:
+		spr.texture = tex
+		spr.scale = Vector2(scale, scale)
+		spr.z_index = 0
+	add_child(spr)
 
 func _get_nearest_interact() -> Dictionary:
 	if not player:
