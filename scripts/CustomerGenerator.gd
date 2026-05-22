@@ -72,6 +72,7 @@ static func generate_customer() -> Dictionary:
 		count = randi_range(2, 5)
 	
 	# 价格计算——NPC不了解你的成本，按市场感知出价
+	var market_inst = MaterialData.create_market_instance(target_item)
 	var unit_price = market_inst.price
 	var reference_price = unit_price * count  # 市场参考价
 	
@@ -83,8 +84,8 @@ static func generate_customer() -> Dictionary:
 	var max_ratio = _get_max_ratio(personality, is_urgent)
 	var max_price = int(reference_price * max_ratio)
 	
-	# 最低接受价：低于此价直接走人
-	var min_accept = int(reference_price * 0.5)
+	# 最低接受价：低于此价可能直接走人
+	var min_accept = int(offer_price * 0.7)
 	
 	# 好感度加成
 	if loyalty >= 7:
@@ -114,9 +115,6 @@ static func generate_customer() -> Dictionary:
 		mood = "回头客(好感%d) — " % loyalty + mood
 	elif customer_bg != "":
 		mood = "🏷 " + customer_bg
-	
-	# 最低接受价：低于此价顾客可能直接走人
-	var min_accept = int(offer_price * 0.7)
 	
 	return {
 		"name": name,

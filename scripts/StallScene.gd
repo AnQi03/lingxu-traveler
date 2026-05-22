@@ -118,7 +118,10 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	
 	# 显示市场参考价和顾客出价
 	var ref_total = customer.base_price  # 市场价总额
-	customer_price.text = "出价: %d灵石 | 市场价: %d灵石（%d/个×%d）" % [customer.offer_price, ref_total, customer.unit_price, customer.want_count]
+	var price_text = "出价: %d灵石 | 市场价: %d灵石（%d/个×%d）" % [customer.offer_price, ref_total, customer.unit_price, customer.want_count]
+	if customer.offer_price < ref_total:
+		price_text += "\n⚠️ 出价低于市场价，需要谈判抬价！"
+	customer_price.text = price_text
 	
 	customer_panel.show()
 	haggle_panel.show()
