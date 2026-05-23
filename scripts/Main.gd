@@ -226,8 +226,9 @@ func _on_monthly_report(day: int) -> void:
 	else:
 		msg += "\\n\\n💬 老管家：'慢慢来，日子还长。'"
 	
-	if hud_node:
-		hud_node.show_toast(msg, Color(0.7, 0.8, 1.0), 6.0)
+	var hud = PlayerData.get_meta("hud")
+	if hud and hud.has_method("show_toast"):
+		hud.show_toast(msg, Color(0.7, 0.8, 1.0), 6.0)
 
 
 func _on_night_falling():
