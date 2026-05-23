@@ -651,6 +651,16 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int, item2: Dictionary 
 		PlayerData.tian_dao += 1
 		PlayerData.add_fragments(3 + WorldEvents.get_fragment_bonus(PlayerData.today_events))
 		PlayerData.smelt_streak = 0
+		# 天道之音：失败叙事（按品阶分级）
+		match item.tier:
+			0:
+				result_text += "\n💫 天道低语：『急不得。灵材有灵，它还没准备好。』"
+			1:
+				result_text += "\n💫 天道低语：『炉火由红转蓝…降下考验，可惜时候未到。』"
+				PlayerData.add_fragments(2)
+			2:
+				result_text += "\n💫 天道低语：『天地变色！灵材化为金光冲天而去…远处有什么被惊醒了。』"
+				PlayerData.add_fragments(3)
 		
 	elif roll < base_destroy + base_fail:
 		var nt = max(0, item.tier - 1)
@@ -763,9 +773,15 @@ func _play_smelt_animation(outcome_type: String, result_text: String, result_col
 	# 结果背景闪光
 	_flash_result(result_color)
 	
-	# 屏幕震动
+	# 屏幕震动（分级仪式 — 宝品/仙品更强）
 	if outcome_type == "upgrade":
-		_shake(furnace_panel, 6.0, 0.3)
+		var new_tier = min(3, item.tier + 1)
+		if new_tier >= 3:
+			_shake(furnace_panel, 15.0, 0.6)
+		elif new_tier >= 2:
+			_shake(furnace_panel, 8.0, 0.4)
+		else:
+			_shake(furnace_panel, 6.0, 0.3)
 	elif outcome_type == "destroy":
 		_shake(furnace_panel, 3.0, 0.2)
 	
@@ -780,6 +796,15 @@ func _play_smelt_animation(outcome_type: String, result_text: String, result_col
 			SoundManager.sfx_smelt_destroy()
 		_:
 			SoundManager.sfx_smelt_normal()
+	
+	# 分级仪式toast（宝品/仙品专属）
+	if outcome_type == "upgrade":
+		var new_tier = min(3, item.tier + 1)
+		var hud = PlayerData.get_meta("hud")
+		if new_tier >= 3 and hud and hud.has_method("show_toast"):
+			hud.show_toast("🔥 仙品诞生！灵墟为之震动…", Color(1.0, 0.8, 0.2), 5.0)
+		elif new_tier >= 2 and hud and hud.has_method("show_toast"):
+			hud.show_toast("✨ 宝品诞生！", Color(1.0, 0.7, 0.2), 3.0)
 	
 	# 等待粒子动画
 	await get_tree().create_timer(0.5, true, false, true)
