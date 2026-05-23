@@ -74,6 +74,10 @@ var stall_decorations: Dictionary = {}     # 已购装饰 {"fire_sign":true,...}
 var intelligence_bought: bool = false      # 今日是否已买情报
 var orders: Array = []                     # 常客预订 [{name,tier,element,count,days_left,reward,accepted_day}]
 
+## ---------- 灵材图鉴 ----------
+var material_journal: Dictionary = {}      # 已发现的灵材 {"chiyancao_fan": true, ...}
+var journal_rewards_claimed: Array = []    # 已领取的图鉴奖励
+
 ## ---------- 五行 ----------
 const ELEMENT_NAMES = ["金", "木", "水", "火", "土"]
 # 相生: 木→火→土→金→水→木
@@ -427,6 +431,9 @@ func add_item(item_data: Dictionary) -> void:
 		if not new_item.has("count"):
 			new_item.count = 1
 		inventory.append(new_item)
+	
+	# 图鉴自动记录
+	_discover_material(item_data.get("name", ""), item_data.get("tier", -1), item_data.get("element", -1))
 
 func find_similar_item(item_name: String, item_tier: int) -> Dictionary:
 	if item_name == "" or item_tier < 0:
@@ -589,6 +596,34 @@ func add_order(customer_name: String, item_tier: int, item_element: int, count: 
 		"accepted_day": game_day
 	})
 
+
+## ---------- 图鉴 ----------
+func _discover_material(name: String, tier: int, element: int) -> void:
+	if name == "" or tier < 0: return
+	# 用名字+品阶做key，去重（同一种灵材不同ID只记一次）
+	var key = "%s_t%d_e%d" % [name, tier, element]
+	if not material_journal.has(key):
+		material_journal[key] = true
+		var hud = get_meta("hud")
+		if hud and hud.has_method("show_toast"):
+			var tier_names = ["凡品", "灵品", "宝品", "仙品"]
+			var elem_icons = ["金", "木", "水", "火", "土"]
+			hud.show_toast("📖 图鉴更新: [%s][%s] %s" % [tier_names[tier] if tier < 4 else "?", elem_icons[element] if element >= 0 else "?", name], Color(0.5, 0.8, 1.0), 3.0)
+
+func get_journal_counts() -> Dictionary:
+	var tiers = [0, 0, 0, 0]  # 凡灵宝仙
+	var elements = [0, 0, 0, 0, 0]  # 金木水火土
+	for key in material_journal:
+		var parts = key.split("_")
+		# key格式: name_tN_eM
+		var t = -1; var e = -1
+		for p in parts:
+			if p.begins_with("t"): t = int(p.substr(1))
+			if p.begins_with("e"): e = int(p.substr(1))
+		if t >= 0 and t < 4: tiers[t] += 1
+		if e >= 0 and e < 5: elements[e] += 1
+	return {"tiers": tiers, "elements": elements, "total": material_journal.size()}
+
 func get_season_label() -> String:
 	return "第%d年 %s%s 第%d天" % [game_year, SEASON_EMOJI[season_index], SEASON_NAMES[season_index], season_day]
 
@@ -634,6 +669,7 @@ func save_game() -> void:
 		"stall_decorations": stall_decorations,
 		"rent_paid_day": rent_paid_day,
 		"orders": orders,
+		"material_journal": material_journal,
 		"consecutive_stall_days": consecutive_stall_days,
 		"inventory": inventory,
 		"customer_relations": customer_relations,
@@ -692,6 +728,7 @@ func load_game() -> bool:
 	stall_decorations = data.get("stall_decorations", {})
 	rent_paid_day = data.get("rent_paid_day", 0)
 	orders = data.get("orders", [])
+	material_journal = data.get("material_journal", {})
 	consecutive_stall_days = data.get("consecutive_stall_days", 0)
 	inventory = data.get("inventory", [])
 	customer_relations = data.get("customer_relations", {})

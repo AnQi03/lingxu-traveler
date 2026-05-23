@@ -5,6 +5,7 @@ var market_node: Node = null
 var dev_console_node: Node = null
 var furnace_node: Node = null
 var inventory_node: Node = null
+var journal_node: Node = null
 var day_summary_node: Node = null
 var scene_bg: Control = null
 var atmosphere_label: Label = null
@@ -24,6 +25,7 @@ func _ready():
 	_create_dev_console()
 	_create_furnace()
 	_create_inventory()
+	_create_journal()
 	
 	var stall = preload("res://scenes/StallScene.tscn")
 	if stall:
@@ -133,6 +135,30 @@ func _create_market():
 		market_layer.set_script(script)
 	market_node = market_layer
 
+
+func _create_inventory():
+	var inv_layer = CanvasLayer.new()
+	inv_layer.name = "Inventory"
+	inv_layer.layer = 5
+	inv_layer.set_process_mode(PROCESS_MODE_WHEN_PAUSED)
+	add_child(inv_layer)
+	var script = load("res://scripts/Inventory.gd")
+	if script:
+		inv_layer.set_script(script)
+	inventory_node = inv_layer
+
+
+func _create_journal():
+	var layer = CanvasLayer.new()
+	layer.name = "Journal"
+	layer.layer = 5
+	layer.set_process_mode(PROCESS_MODE_WHEN_PAUSED)
+	add_child(layer)
+	var script = load("res://scripts/MaterialJournal.gd")
+	if script:
+		layer.set_script(script)
+	journal_node = layer
+
 func _create_dev_console():
 	var console_layer = CanvasLayer.new()
 	console_layer.name = "DevConsole"
@@ -155,17 +181,6 @@ func _create_furnace():
 		furnace_layer.set_script(script)
 	furnace_node = furnace_layer
 
-func _create_inventory():
-	var inv_layer = CanvasLayer.new()
-	inv_layer.name = "Inventory"
-	inv_layer.layer = 5
-	inv_layer.set_process_mode(PROCESS_MODE_WHEN_PAUSED)
-	add_child(inv_layer)
-	var script = load("res://scripts/Inventory.gd")
-	if script:
-		inv_layer.set_script(script)
-	inventory_node = inv_layer
-
 
 func is_any_panel_open() -> bool:
 	if day_summary_node and is_instance_valid(day_summary_node) and day_summary_node.get("is_showing"):
@@ -175,6 +190,8 @@ func is_any_panel_open() -> bool:
 	if furnace_node and furnace_node.get("is_open"):
 		return true
 	if inventory_node and inventory_node.get("is_open"):
+		return true
+	if journal_node and journal_node.get("is_open"):
 		return true
 	return false
 
@@ -423,7 +440,11 @@ func _input(event):
 				if inventory_node and inventory_node.has_method("toggle"):
 					inventory_node.toggle()
 				get_viewport().set_input_as_handled()
-			KEY_SPACE:
+			KEY_J:
+			if journal_node and journal_node.has_method("toggle"):
+				journal_node.toggle()
+			get_viewport().set_input_as_handled()
+		KEY_SPACE:
 				if stall_scene:
 					var manager = stall_scene.get_node("StallManager")
 					if manager:
