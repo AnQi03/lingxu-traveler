@@ -312,16 +312,19 @@ func _on_order_available(order: Dictionary):
 	var elem = element_names[order.item_element]
 	var tier = tier_names[order.item_tier]
 	customer_request.text += "\n\n📜 %s下单: %d个[%s][%s]灵材, %d天后交货\n报酬: %d灵石  [接受订单?]"
+	var decline = Button.new()
+	decline.text = "拒绝"
 	var accept = Button.new()
 	accept.text = "接受"
 	accept.pressed.connect(func():
 		PlayerData.add_order(order.customer_name, order.item_tier, order.item_element, order.count, order.days, order.reward)
+		customer_request.text += "\n📜 已接受%s的订单!" % order.customer_name
 		accept.queue_free()
 		decline.queue_free()
-		customer_request.text = customer_request.text.replace("\n\n📜 %s下单: %d个[%s][%s]灵材, %d天后交货\n报酬: %d灵石  [接受订单?]", "\n📜 已接受%s的订单!" % order.customer_name)
 	)
-	var decline = Button.new()
-	decline.text = "拒绝"
-	decline.pressed.connect(func(): accept.queue_free(); decline.queue_free())
+	decline.pressed.connect(func():
+		accept.queue_free()
+		decline.queue_free()
+	)
 	customer_panel.add_child(accept)
 	customer_panel.add_child(decline)
