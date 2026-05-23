@@ -10,6 +10,7 @@ var day_summary_node: Node = null
 var scene_bg: Control = null
 var atmosphere_label: Label = null
 var player: Player = null
+var map: Node = null  ## MapManager 节点
 
 ## 交互点 {name, pos, radius, action}
 var interact_points: Array = []
@@ -21,6 +22,7 @@ func _ready():
 	print("灵墟旅商 loaded!")
 	print("初始灵石: %d" % PlayerData.spirit_stones)
 	
+	_create_map()
 	_create_market()
 	_create_dev_console()
 	_create_furnace()
@@ -62,27 +64,26 @@ func _show_opening():
 		add_child(layer)
 		get_tree().paused = true  # 开场时暂停游戏
 
+## ══════════════════════════════════════════
+## 地图系统（TileMapLayer 混合模式）
+## ══════════════════════════════════════════
+
+func _create_map():
+	var map_node = Node2D.new()
+	map_node.name = "Map"
+	map_node.set_script(load("res://scripts/MapManager.gd"))
+	add_child(map_node)
+	move_child(map_node, 0)  # 放在最底层
+	map = map_node
+
+
 func _create_scene_background():
-	scene_bg = TextureRect.new()
-	scene_bg.name = "SceneBackground"
-	scene_bg.size = Vector2(1728, 972)
-	scene_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	scene_bg.stretch_mode = TextureRect.STRETCH_SCALE
-	scene_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(scene_bg)
-	move_child(scene_bg, 0)
-	
-	var overlay = ColorRect.new()
-	overlay.name = "SceneOverlay"
-	overlay.size = Vector2(1728, 972)
-	overlay.color = Color(0, 0, 0, 0.35)
-	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	scene_bg.add_child(overlay)
-	
+	# 地图系统已接管背景渲染
+	# 仅保留气氛文字叠加层
 	atmosphere_label = Label.new()
 	atmosphere_label.name = "Atmosphere"
-	atmosphere_label.position = Vector2(0, 885)
-	atmosphere_label.size = Vector2(1728, 75)
+	atmosphere_label.position = Vector2(0, 580)
+	atmosphere_label.size = Vector2(1152, 60)
 	atmosphere_label.add_theme_font_size_override("font_size", 13)
 	atmosphere_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	atmosphere_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -90,23 +91,12 @@ func _create_scene_background():
 	
 	_update_background()
 
+
 func _update_background():
+	if not atmosphere_label:
+		return
+	
 	var t = PlayerData.time_of_day
-	var is_night = t >= 19.0 or t < 5.0
-	var tex_path = "res://assets/img/bg/market_scene_night.png" if is_night else "res://assets/img/bg/market_scene_day.png"
-	var tex = load(tex_path)
-	if tex:
-		scene_bg.texture = tex
-	
-	var overlay = scene_bg.find_child("SceneOverlay", false, false)
-	if overlay:
-		if t >= 19.0 and t < 21.0:
-			overlay.color = Color(0.05, 0.05, 0.15, 0.45)
-		elif t >= 21.0 or t < 5.0:
-			overlay.color = Color(0.02, 0.02, 0.08, 0.55)
-		else:
-			overlay.color = Color(0, 0, 0, 0.30)
-	
 	var atm_text = ""
 	if t >= 5.0 and t < 7.0:
 		atm_text = "晨雾未散，灵墟集市灯火渐明……"
@@ -264,7 +254,11 @@ func _on_period_changed(_period: String):
 func _create_player():
 	player = Player.new()
 	player.name = "Player"
-	player.position = Vector2(864, 486)
+	# 从地图锚点获取出生位置
+	var spawn_pos := Vector2(864, 486)  # 默认
+	if map and map.has_method("get_spawn_pos"):
+		spawn_pos = map.get_spawn_pos()
+	player.position = spawn_pos
 	add_child(player)
 	
 	var sprite = Sprite2D.new()
@@ -287,30 +281,37 @@ func _setup_camera():
 	cam.position_smoothing_enabled = true
 	cam.position_smoothing_speed = 5.0
 	cam.zoom = Vector2(1.0, 1.0)
+	# 相机限制匹配地图大小（48×32 tiles × 64px = 3072×2048）
 	cam.limit_left = 0
 	cam.limit_top = 0
-	cam.limit_right = 1152
-	cam.limit_bottom = 648
+	cam.limit_right = 3072
+	cam.limit_bottom = 2048
 	add_child(cam)
 	cam.make_current()
 	cam.reparent(player)
 
 
 func _create_interact_points():
+	# 从地图锚点计算世界坐标
+	var get_pos := func(key: String, fallback: Vector2) -> Vector2:
+		if map and map.has_method("get_world_pos"):
+			return map.get_world_pos(key)
+		return fallback
+	
 	interact_points = [
-		{"name": "集市", "pos": Vector2(225, 486), "radius": 100, "action": "market"},
-		{"name": "摊位", "pos": Vector2(864, 630), "radius": 100, "action": "stall"},
-		{"name": "熔炉", "pos": Vector2(1425, 486), "radius": 100, "action": "furnace"},
+		{"name": "集市", "pos": get_pos.call("market_gate", Vector2(225, 486)), "radius": 100, "action": "market"},
+		{"name": "摊位", "pos": get_pos.call("player_stall", Vector2(864, 630)), "radius": 100, "action": "stall"},
+		{"name": "熔炉", "pos": get_pos.call("furnace", Vector2(1425, 486)), "radius": 100, "action": "furnace"},
 	]
 	
-	# 建筑精灵（场景装饰）
-	_spawn_building(Vector2(180, 420), "res://assets/img/buildings/market_shop.png", 0.15)
-	_spawn_building(Vector2(810, 555), "res://assets/img/buildings/stall_stand.png", 0.13)
-	_spawn_building(Vector2(1365, 420), "res://assets/img/buildings/furnace_forge.png", 0.14)
+	# 建筑精灵（地图锚点位置）
+	_spawn_building(get_pos.call("market_gate", Vector2(180, 420)), "res://assets/img/buildings/market_shop.png", 0.15)
+	_spawn_building(get_pos.call("player_stall", Vector2(810, 555)), "res://assets/img/buildings/stall_stand.png", 0.13)
+	_spawn_building(get_pos.call("furnace", Vector2(1365, 420)), "res://assets/img/buildings/furnace_forge.png", 0.14)
 	
-	# 装饰NPC（让场景有生气）
-	_spawn_npc(Vector2(120, 390), "res://assets/img/characters/npc_elder.png", 0.12)
-	_spawn_npc(Vector2(1575, 570), "res://assets/img/characters/npc_girl.png", 0.12)
+	# 装饰NPC
+	_spawn_npc(get_pos.call("inn", Vector2(120, 390)), "res://assets/img/characters/npc_elder.png", 0.12)
+	_spawn_npc(get_pos.call("spirit_bank", Vector2(1575, 570)), "res://assets/img/characters/npc_girl.png", 0.12)
 	
 	var hint = Label.new()
 	hint.name = "InteractHint"
