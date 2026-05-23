@@ -173,6 +173,10 @@ func _on_trade_completed(_item_id: String, _count: int, price: int) -> void:
 	await get_tree().create_timer(2.5).timeout
 	customer_panel.hide()
 	haggle_panel.hide()
+	
+	# 内心声音
+	var hud = PlayerData.get_meta("hud")
+	InnerVoice.maybe_speak("haggle_success", hud)
 
 
 func _on_trade_failed(_item_id: String, _count: int, reason: String) -> void:

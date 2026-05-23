@@ -596,6 +596,12 @@ func _play_smelt_animation(outcome_type: String, result_text: String, result_col
 	_refresh_items()
 	_refresh_history()
 	
+	# 内心声音
+	var hud = PlayerData.get_meta("hud")
+	match outcome_type:
+		"upgrade": InnerVoice.maybe_speak("upgrade", hud)
+		"destroy": InnerVoice.maybe_speak("destroy", hud)
+	
 	if PlayerData.daily_refine_count >= PlayerData.MAX_DAILY_REFINE:
 		if is_instance_valid(result_label):
 			result_label.text = "⚠️ 今日熔炼次数已用完！\n" + result_label.text

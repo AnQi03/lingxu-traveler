@@ -276,6 +276,10 @@ func show_summary():
 			world.visible = true
 		else:
 			world.visible = false
+	
+	# 内心声音：新的一天
+	var hud = PlayerData.get_meta("hud")
+	InnerVoice.maybe_speak("day_start", hud)
 
 
 ## ---------- 进度条工具 ----------
