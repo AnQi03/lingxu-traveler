@@ -417,6 +417,10 @@ func _input(event):
 					inventory_node.toggle()
 				get_viewport().set_input_as_handled()
 				return
+			if event.keycode == KEY_J and journal_node and journal_node.get("is_open"):
+				journal_node.toggle()
+				get_viewport().set_input_as_handled()
+				return
 			if (event.keycode == KEY_TAB) and inventory_node and inventory_node.get("is_open"):
 				inventory_node.toggle()
 				get_viewport().set_input_as_handled()
