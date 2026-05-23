@@ -68,6 +68,48 @@ func _build_ui():
 	item_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	item_grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.add_child(item_grid)
+	
+	# ---- 灵石庄（单向兑换：高→低） ----
+	var exchange_bg = ColorRect.new()
+	exchange_bg.name = "exchange_bg"
+	exchange_bg.position = Vector2(20, 555)
+	exchange_bg.size = Vector2(1040, 35)
+	exchange_bg.color = Color(0.08, 0.05, 0.15, 0.8)
+	market_ui.add_child(exchange_bg)
+	
+	var exchange_label = Label.new()
+	exchange_label.name = "exchange_label"
+	exchange_label.position = Vector2(30, 557)
+	exchange_label.size = Vector2(500, 30)
+	exchange_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+	exchange_label.add_theme_font_size_override("font_size", 12)
+	market_ui.add_child(exchange_label)
+	
+	var btn_high = Button.new()
+	btn_high.name = "exchange_high_btn"
+	btn_high.text = "💎 上品→中品(1换100)"
+	btn_high.position = Vector2(540, 557)
+	btn_high.size = Vector2(180, 30)
+	btn_high.add_theme_font_size_override("font_size", 12)
+	btn_high.pressed.connect(_exchange_high)
+	market_ui.add_child(btn_high)
+	
+	var btn_mid = Button.new()
+	btn_mid.name = "exchange_mid_btn"
+	btn_mid.text = "💰 中品→下品(1换100)"
+	btn_mid.position = Vector2(730, 557)
+	btn_mid.size = Vector2(180, 30)
+	btn_mid.add_theme_font_size_override("font_size", 12)
+	btn_mid.pressed.connect(_exchange_mid)
+	market_ui.add_child(btn_mid)
+	
+	var exchange_note = Label.new()
+	exchange_note.position = Vector2(920, 560)
+	exchange_note.size = Vector2(130, 25)
+	exchange_note.text = "⚠ 仅高兑低"
+	exchange_note.add_theme_color_override("font_color", Color(0.5, 0.4, 0.3))
+	exchange_note.add_theme_font_size_override("font_size", 10)
+	market_ui.add_child(exchange_note)
 
 
 func toggle():
@@ -89,6 +131,7 @@ func open():
 	var tw = create_tween()
 	tw.tween_property(market_ui, "modulate:a", 1.0, 0.2)
 	_refresh_grid()
+	_refresh_exchange()
 	get_tree().paused = true
 
 
@@ -170,5 +213,30 @@ func _buy(data):
 			"count": 1
 		})
 		_refresh_grid()
+		_refresh_exchange()
+
+
+func _exchange_high():
+	if PlayerData.exchange_do(2):
+		PlayerData.emit_signal("stones_changed")
+		_refresh_exchange()
+
+func _exchange_mid():
+	if PlayerData.exchange_do(1):
+		PlayerData.emit_signal("stones_changed")
+		_refresh_exchange()
+
+func _refresh_exchange():
+	var label = market_ui.find_child("exchange_label", true, false)
+	if label:
+		label.text = "💎 灵石庄 | 上品:%d  中品:%d  下品:%d (仅支持高兑低)" % [
+			PlayerData.high_spirit_stones, PlayerData.mid_spirit_stones, PlayerData.spirit_stones
+		]
+	var btn_h = market_ui.find_child("exchange_high_btn", true, false)
+	if btn_h:
+		btn_h.disabled = (PlayerData.high_spirit_stones <= 0)
+	var btn_m = market_ui.find_child("exchange_mid_btn", true, false)
+	if btn_m:
+		btn_m.disabled = (PlayerData.mid_spirit_stones <= 0)
 
 ## 像素角标 — 已替换为面板纹理

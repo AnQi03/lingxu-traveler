@@ -278,14 +278,8 @@ func spend_stones(amount: int) -> bool:
 		var use: int = mini(mid_spirit_stones, int(float(remaining) / 100.0))
 		mid_spirit_stones -= use
 		remaining -= use * 100
-	# 如果下品灵石不够，自动从高级转换
 	if spirit_stones < remaining:
-		if mid_spirit_stones > 0:
-			mid_spirit_stones -= 1
-			spirit_stones += 100
-		elif high_spirit_stones > 0:
-			high_spirit_stones -= 1
-			spirit_stones += 10000
+		return false  # 灵石不够，去灵石庄兑换
 	spirit_stones -= remaining
 	return true
 
@@ -299,6 +293,27 @@ func earn_stones(amount: int) -> void:
 		mid_spirit_stones += 1
 		total -= 100
 	spirit_stones += total
+
+# 灵石兑换：仅支持高→低单向（保持上品稀有度）
+# 1上品 = 100中品, 1中品 = 100下品
+func exchange_down() -> int:
+	"""返回可兑换的方案数。0=无可兑换。调用具体兑换用 exchange_do()"""
+	var options = 0
+	if high_spirit_stones > 0: options += 1
+	if mid_spirit_stones > 0: options += 1
+	return options
+
+func exchange_do(from_tier: int) -> bool:
+	"""from_tier: 2=上品→中品, 1=中品→下品。返回是否成功"""
+	if from_tier == 2 and high_spirit_stones > 0:
+		high_spirit_stones -= 1
+		mid_spirit_stones += 100
+		return true
+	if from_tier == 1 and mid_spirit_stones > 0:
+		mid_spirit_stones -= 1
+		spirit_stones += 100
+		return true
+	return false
 
 
 ## ---------- 灵识 ----------

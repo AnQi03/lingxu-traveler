@@ -388,13 +388,24 @@ func _input(event):
 			get_viewport().set_input_as_handled()
 			return
 		
-		# 有任何面板打开时：只处理该面板对应的关闭键
+		# 有任何面板打开时：E 关闭当前面板，Tab 关闭背包
 		if is_any_panel_open():
+			if event.keycode == KEY_E:
+				# E = 万能关闭键：关闭任何打开的交互面板
+				if furnace_node and furnace_node.get("is_open"):
+					furnace_node.toggle()
+				elif market_node and market_node.get("is_open"):
+					market_node.toggle()
+				elif inventory_node and inventory_node.get("is_open"):
+					inventory_node.toggle()
+				get_viewport().set_input_as_handled()
+				return
 			if (event.keycode == KEY_TAB) and inventory_node and inventory_node.get("is_open"):
 				inventory_node.toggle()
 				get_viewport().set_input_as_handled()
-			else:
-				get_viewport().set_input_as_handled()
+				return
+			# 其他键：面板开着时屏蔽
+			get_viewport().set_input_as_handled()
 			return
 		
 		# 无面板打开：正常按键映射
