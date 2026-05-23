@@ -42,6 +42,7 @@ func _ready() -> void:
 	stall_manager.trade_completed.connect(_on_trade_completed)
 	stall_manager.trade_failed.connect(_on_trade_failed)
 	stall_manager.stall_closed.connect(_on_stall_closed)
+	stall_manager.order_available.connect(_on_order_available)
 	
 	# 连接按钮
 	open_btn.pressed.connect(_on_open_stall)
@@ -303,3 +304,24 @@ func _personality_threshold_mod(personality: int) -> float:
 		6: return -0.05  # 多疑 — 略带怀疑
 		7: return 0.10   # 轻信 — 容易开心
 		_: return 0.0    # 精明(1) — 标准
+
+
+func _on_order_available(order: Dictionary):
+	var element_names = ["金", "木", "水", "火", "土"]
+	var tier_names = ["凡品", "灵品"]
+	var elem = element_names[order.item_element]
+	var tier = tier_names[order.item_tier]
+	customer_request.text += "\n\n📜 %s下单: %d个[%s][%s]灵材, %d天后交货\n报酬: %d灵石  [接受订单?]"
+	var accept = Button.new()
+	accept.text = "接受"
+	accept.pressed.connect(func():
+		PlayerData.add_order(order.customer_name, order.item_tier, order.item_element, order.count, order.days, order.reward)
+		accept.queue_free()
+		decline.queue_free()
+		customer_request.text = customer_request.text.replace("\n\n📜 %s下单: %d个[%s][%s]灵材, %d天后交货\n报酬: %d灵石  [接受订单?]", "\n📜 已接受%s的订单!" % order.customer_name)
+	)
+	var decline = Button.new()
+	decline.text = "拒绝"
+	decline.pressed.connect(func(): accept.queue_free(); decline.queue_free())
+	customer_panel.add_child(accept)
+	customer_panel.add_child(decline)

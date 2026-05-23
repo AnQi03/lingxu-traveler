@@ -9,6 +9,7 @@ signal customer_arrived(customer_data: Dictionary)
 signal trade_completed(item_id: String, count: int, price: int)
 signal trade_failed(item_id: String, reason: String)
 signal stall_closed()
+signal order_available(order_data: Dictionary)
 
 var is_open: bool = false          # 摊位是否开张
 var customer_queue: Array = []      # 等待中的顾客
@@ -174,6 +175,29 @@ func _spawn_customer() -> void:
 	customer_queue.append(customer)
 	current_customer = customer
 	customer_arrived.emit(customer)
+	
+	# 常客可能下订单（忠诚≥2，25%概率）
+	var loyalty = PlayerData.get_customer_loyalty(customer.name)
+	if loyalty >= 2 and randf() < 0.25 and PlayerData.orders.size() < 3:
+		var order = _generate_order(customer)
+		if not order.is_empty():
+			order_available.emit(order)
+
+func _generate_order(customer: Dictionary) -> Dictionary:
+	var tier = randi_range(0, 1)  # 凡品或灵品
+	var element = customer.want_item.element
+	var count = randi_range(2, 5)
+	var days = randi_range(3, 7)
+	var price_per = [8, 80][tier]  # 凡品8/灵品80
+	var reward = int(count * price_per * randf_range(1.3, 1.8))
+	return {
+		"customer_name": customer.name,
+		"item_tier": tier,
+		"item_element": element,
+		"count": count,
+		"days": days,
+		"reward": reward
+	}
 
 func _apply_loyalty_reward(reward: String, trade_price: int) -> void:
 	match reward:

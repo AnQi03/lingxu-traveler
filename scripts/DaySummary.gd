@@ -245,6 +245,10 @@ func show_summary():
 		elif (PlayerData.game_day % PlayerData.RENT_INTERVAL) == 0:
 			texts.append("💸 今日已缴纳租金 %d灵石" % PlayerData.get_rent_amount())
 		
+		# 订单状态
+		for order in PlayerData.orders:
+			texts.append("📦 %s的订单: 还剩%d天 (报酬%d灵石)" % [order.customer_name, order.days_left, order.reward])
+		
 		var days_to_season_end = PlayerData.DAYS_PER_SEASON - PlayerData.season_day
 		if days_to_season_end <= 5:
 			var next_season = (PlayerData.season_index + 1) % 4

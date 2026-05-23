@@ -72,6 +72,7 @@ const RENT_INTERVAL: int = 10              # 每10天收一次租
 const RENT_BASE: int = 50                  # 基础租金
 var stall_decorations: Dictionary = {}     # 已购装饰 {"fire_sign":true,...}
 var intelligence_bought: bool = false      # 今日是否已买情报
+var orders: Array = []                     # 常客预订 [{name,tier,element,count,days_left,reward,accepted_day}]
 
 ## ---------- 五行 ----------
 const ELEMENT_NAMES = ["金", "木", "水", "火", "土"]
@@ -472,6 +473,9 @@ func advance_time(hours: float) -> void:
 		# 租金日检查
 		_check_rent()
 		
+		# 订单倒计时
+		_tick_orders()
+		
 		# 连续出摊追踪
 		if has_stalled_today:
 			consecutive_stall_days += 1
@@ -529,6 +533,62 @@ func get_stall_customer_bonus() -> int:
 		bonus += 1
 	return bonus
 
+
+## ---------- 订单 ----------
+func _tick_orders() -> void:
+	var expired = []
+	for i in range(orders.size()):
+		orders[i].days_left -= 1
+		if orders[i].days_left <= 0:
+			expired.append(i)
+	# 从后往前删避免索引错乱
+	for i in range(expired.size() - 1, -1, -1):
+		var idx = expired[i]
+		var order = orders[idx]
+		# 检查是否可交货
+		if _can_fulfill(order):
+			# 自动完成
+			_fulfill_order(idx)
+		else:
+			# 过期未完成——扣好感
+			update_customer_relation(order.customer_name, -3)
+			orders.remove_at(idx)
+
+func _can_fulfill(order: Dictionary) -> bool:
+	var found = 0
+	for item in inventory:
+		if item.tier == order.item_tier and item.element == order.item_element:
+			found += item.get("count", 1)
+	return found >= order.count
+
+func _fulfill_order(idx: int) -> void:
+	var order = orders[idx]
+	var to_remove = order.count
+	for item in inventory:
+		if to_remove <= 0: break
+		if item.tier == order.item_tier and item.element == order.item_element:
+			var take = mini(to_remove, item.get("count", 1))
+			remove_item(item.id, take)
+			to_remove -= take
+	earn_stones(order.reward)
+	update_customer_relation(order.customer_name, 2)
+	
+	var hud = get_meta("hud")
+	if hud and hud.has_method("show_toast"):
+		hud.show_toast("📦 %s的订单完成！+%d灵石" % [order.customer_name, order.reward], Color(0.4, 0.85, 0.6), 4.0)
+	orders.remove_at(idx)
+
+func add_order(customer_name: String, item_tier: int, item_element: int, count: int, days: int, reward: int) -> void:
+	orders.append({
+		"customer_name": customer_name,
+		"item_tier": item_tier,
+		"item_element": item_element,
+		"count": count,
+		"days_left": days,
+		"reward": reward,
+		"accepted_day": game_day
+	})
+
 func get_season_label() -> String:
 	return "第%d年 %s%s 第%d天" % [game_year, SEASON_EMOJI[season_index], SEASON_NAMES[season_index], season_day]
 
@@ -573,6 +633,7 @@ func save_game() -> void:
 		"today_events": today_events,
 		"stall_decorations": stall_decorations,
 		"rent_paid_day": rent_paid_day,
+		"orders": orders,
 		"consecutive_stall_days": consecutive_stall_days,
 		"inventory": inventory,
 		"customer_relations": customer_relations,
@@ -630,6 +691,7 @@ func load_game() -> bool:
 	today_events = data.get("today_events", [])
 	stall_decorations = data.get("stall_decorations", {})
 	rent_paid_day = data.get("rent_paid_day", 0)
+	orders = data.get("orders", [])
 	consecutive_stall_days = data.get("consecutive_stall_days", 0)
 	inventory = data.get("inventory", [])
 	customer_relations = data.get("customer_relations", {})
