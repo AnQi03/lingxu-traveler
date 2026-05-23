@@ -74,6 +74,7 @@ func _ready() -> void:
 	_place_paths()
 	_place_anchors()
 	_place_decorations()
+	_test_terrain_auto_tile()  # ← Terrain Auto-Tiling 验证
 	print("MapManager: 灵墟地图生成完毕 %d×%d tiles (%d×%d px)" % [MAP_WIDTH, MAP_HEIGHT, MAP_PX_W, MAP_PX_H])
 
 
@@ -152,6 +153,98 @@ func _create_tileset() -> void:
 		tile_data.set_collision_polygon_points(0, 0, poly)
 
 	print("MapManager: TileSet 创建完毕，%d 种地形" % tex_paths.size())
+	
+	# ── 草地↔泥土过渡变体（Terrain Auto-Tiling 验证）──
+	_setup_grass_dirt_terrains()
+
+
+# ══════════════════════════════════════════
+# Terrain Auto-Tiling 配置（草地↔泥土）
+# ══════════════════════════════════════════
+
+func _setup_grass_dirt_terrains() -> void:
+	# 加载过渡 tileset 条带 (18 tiles × 64px = 1152×64)
+	var strip_tex: Texture2D = load("res://assets/tilesets/grass_dirt_tileset.png")
+	if not strip_tex:
+		push_warning("MapManager: 找不到 grass_dirt_tileset.png")
+		return
+	
+	# 添加为新的 AtlasSource
+	var strip_source := TileSetAtlasSource.new()
+	strip_source.texture = strip_tex
+	strip_source.texture_region_size = Vector2i(TILE_SIZE, TILE_SIZE)
+	var strip_sid := _tileset.add_source(strip_source)
+	
+	# 创建 18 个 tile
+	for i in range(18):
+		strip_source.create_tile(Vector2i(i, 0))
+	
+	# ── 配置 Terrain 系统 ──
+	const TERRAIN_SET := 0
+	const G := 0  # Grass terrain ID
+	const D := 1  # Dirt terrain ID
+	
+	_tileset.set_terrain_set_mode(TERRAIN_SET, TileSet.TERRAIN_MODE_MATCH_CORNERS_AND_SIDES)
+	_tileset.add_terrain(G)  # Grass
+	_tileset.add_terrain(D)  # Dirt
+	
+	# Terrain 角落 peering 使用 TileSet.CellNeighbor 枚举
+	const C_TL := TileSet.CELL_NEIGHBOR_TOP_LEFT_CORNER
+	const C_TR := TileSet.CELL_NEIGHBOR_TOP_RIGHT_CORNER
+	const C_BR := TileSet.CELL_NEIGHBOR_BOTTOM_RIGHT_CORNER
+	const C_BL := TileSet.CELL_NEIGHBOR_BOTTOM_LEFT_CORNER
+	
+	# 每个 tile 的角落 terrain 归属
+	# [G=Grass, D=Dirt]
+	var corner_map := [
+		[G, G, G, G],  #  0: grass center
+		[D, D, D, D],  #  1: dirt center
+		[G, G, D, D],  #  2: grass_dirt_top (dirt=top half, bottom=grass)
+		[D, G, D, G],  #  3: grass_dirt_right (dirt=right half)
+		[D, D, G, G],  #  4: grass_dirt_bottom (dirt=bottom half)
+		[G, D, G, D],  #  5: grass_dirt_left (dirt=left half)
+		[D, D, G, G],  #  6: dirt_grass_top (grass=top, dirt=bottom)
+		[G, D, G, D],  #  7: dirt_grass_right
+		[G, G, D, D],  #  8: dirt_grass_bottom
+		[D, G, D, G],  #  9: dirt_grass_left
+		[D, G, G, G],  # 10: grass_dirt_tl
+		[G, D, G, G],  # 11: grass_dirt_tr
+		[G, G, G, D],  # 12: grass_dirt_br
+		[G, G, D, G],  # 13: grass_dirt_bl
+		[G, D, D, D],  # 14: dirt_grass_tl
+		[D, G, D, D],  # 15: dirt_grass_tr
+		[D, D, D, G],  # 16: dirt_grass_br
+		[D, D, G, D],  # 17: dirt_grass_bl
+	]
+	
+	for i in range(18):
+		var tile_data: TileData = strip_source.get_tile_data(Vector2i(i, 0), 0)
+		if not tile_data:
+			continue
+		tile_data.set_terrain_peering_bit(C_TL, corner_map[i][0])
+		tile_data.set_terrain_peering_bit(C_TR, corner_map[i][1])
+		tile_data.set_terrain_peering_bit(C_BR, corner_map[i][2])
+		tile_data.set_terrain_peering_bit(C_BL, corner_map[i][3])
+	
+	_terrain_source["strip_sid"] = strip_sid
+	
+	# 同时给原始草地/泥土中心 tile 设置 terrain bits
+	# （否则 Godot 不会从过渡 strip 选 tile）
+	var grass_sid: int = _terrain_source.get(Terrain.GRASS, -1)
+	var dirt_sid: int = _terrain_source.get(Terrain.DIRT, -1)
+	for pair in [[grass_sid, G], [dirt_sid, D]]:
+		var sid := pair[0] as int
+		var tid := pair[1] as int
+		if sid < 0:
+			continue
+		var td: TileData = _tileset.get_source(sid).get_tile_data(Vector2i(0, 0), 0)
+		if td:
+			td.set_terrain_peering_bit(C_TL, tid)
+			td.set_terrain_peering_bit(C_TR, tid)
+			td.set_terrain_peering_bit(C_BR, tid)
+			td.set_terrain_peering_bit(C_BL, tid)
+	
+	print("MapManager: Terrain Auto-Tiling 配置完毕 (Grass↔Dirt, 18变体)")
 
 
 # ══════════════════════════════════════════
@@ -411,3 +504,34 @@ func _in_bounds(pos: Vector2i) -> bool:
 ## 获取所有锚点信息（供其他系统使用）
 func get_all_anchors() -> Dictionary:
 	return ANCHORS.duplicate()
+
+
+# ══════════════════════════════════════════
+# Terrain Auto-Tiling 验证区域
+# ══════════════════════════════════════════
+
+func _test_terrain_auto_tile() -> void:
+	## 在玩家右侧画一个 8×6 的草地→泥土过渡测试区
+	var strip_sid: int = _terrain_source.get("strip_sid", -1)
+	if strip_sid < 0:
+		return
+	
+	# 测试区起点（tile坐标）：玩家摊位右侧 4tile
+	var base_x := ANCHORS["player_stall"].x + 8
+	var base_y := ANCHORS["player_stall"].y - 3
+	
+	# 清除测试区 → 全铺草地 terrain
+	var grass_cells: Array[Vector2i] = []
+	for x in range(base_x, base_x + 8):
+		for y in range(base_y, base_y + 6):
+			grass_cells.append(Vector2i(x, y))
+	_ground_layer.set_cells_terrain_connect(grass_cells, 0, 0, false)  # terrain_set=0, Grass
+	
+	# 中间画一个 4×3 泥土斑块 → 边缘自动出现过渡 tile
+	var dirt_cells: Array[Vector2i] = []
+	for x in range(base_x + 2, base_x + 6):
+		for y in range(base_y + 1, base_y + 4):
+			dirt_cells.append(Vector2i(x, y))
+	_ground_layer.set_cells_terrain_connect(dirt_cells, 0, 1, false)  # terrain_set=0, Dirt
+	
+	print("MapManager: Auto-Tiling 测试区 (%d,%d) 8×6, 草地底+4×3泥土斑块" % [base_x, base_y])
