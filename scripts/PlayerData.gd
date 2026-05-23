@@ -80,10 +80,10 @@ func is_furnace_unlocked() -> bool:
 func is_slicing_unlocked() -> bool:
 	return game_day >= 10
 const FURNACE_UPGRADE_COST = {
-	2: 180,
-	3: 600,
-	4: 2000,
-	5: 8000
+	2: 3000,     # 凡→灵熔炼 — 散修毕生积蓄
+	3: 15000,    # 灵→宝熔炼 — 小宗门底蕴
+	4: 50000,    # 高阶宝品 — 一方豪强倾尽家财
+	5: 120000,   # 宝→仙熔炼 — 神器，可遇不可求
 }
 const FURNACE_UPGRADE_LUCK = {
 	1: [0.40, 0.22, 0.007],
