@@ -45,10 +45,14 @@ func _build_ui():
 	journal_panel.add_child(content)
 
 func toggle():
+	if not journal_panel:
+		_build_ui()
 	if is_open: close()
 	else: open()
 
 func open():
+	if not journal_panel:
+		_build_ui()
 	journal_panel.visible = true
 	is_open = true
 	get_tree().paused = true
