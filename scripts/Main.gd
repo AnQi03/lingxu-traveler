@@ -271,7 +271,7 @@ func _create_player():
 	
 	var shape = CollisionShape2D.new()
 	var circle = CircleShape2D.new()
-	circle.radius = 12
+	circle.radius = 18
 	shape.shape = circle
 	player.add_child(shape)
 
@@ -299,9 +299,9 @@ func _create_interact_points():
 		return fallback
 	
 	interact_points = [
-		{"name": "集市", "pos": get_pos.call("market_gate", Vector2(225, 486)), "radius": 100, "action": "market"},
-		{"name": "摊位", "pos": get_pos.call("player_stall", Vector2(864, 630)), "radius": 100, "action": "stall"},
-		{"name": "熔炉", "pos": get_pos.call("furnace", Vector2(1425, 486)), "radius": 100, "action": "furnace"},
+		{"name": "集市", "pos": get_pos.call("market_gate", Vector2(225, 486)), "radius": 150, "action": "market"},
+		{"name": "摊位", "pos": get_pos.call("player_stall", Vector2(864, 630)), "radius": 150, "action": "stall"},
+		{"name": "熔炉", "pos": get_pos.call("furnace", Vector2(1425, 486)), "radius": 150, "action": "furnace"},
 	]
 	
 	# 建筑精灵（地图锚点位置）
