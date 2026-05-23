@@ -20,6 +20,7 @@ var strategy_panel: Panel
 var item_grid: GridContainer
 var result_label: Label
 var selected_item_idx: int = -1
+var selected_item_idx2: int = -1  # 双槽熔炼第二槽
 var pending_item_id: String = ""
 
 var tier_names = ["凡品", "灵品", "宝品", "仙品"]
@@ -138,6 +139,40 @@ func _build_ui():
 	smelt_btn.disabled = true
 	smelt_btn.pressed.connect(_do_smelt)
 	furnace_panel.add_child(smelt_btn)
+	
+	# ---- 第二槽（双槽熔炼） ----
+	var slot2_frame = ColorRect.new()
+	slot2_frame.name = "select_frame2"
+	slot2_frame.position = Vector2(465, 180)
+	slot2_frame.size = Vector2(400, 50)
+	slot2_frame.color = Color(0.08, 0.06, 0.16, 0.6)
+	furnace_panel.add_child(slot2_frame)
+	
+	var slot2_name = Label.new()
+	slot2_name.name = "select_name2"
+	slot2_name.text = "+ 第二槽（可选·五行组合）"
+	slot2_name.position = Vector2(470, 185)
+	slot2_name.add_theme_color_override("font_color", Color(0.4, 0.4, 0.5))
+	slot2_name.add_theme_font_size_override("font_size", 12)
+	furnace_panel.add_child(slot2_name)
+	
+	var slot2_clear = Button.new()
+	slot2_clear.name = "slot2_clear"
+	slot2_clear.text = "清空"
+	slot2_clear.position = Vector2(820, 185)
+	slot2_clear.size = Vector2(40, 24)
+	slot2_clear.add_theme_font_size_override("font_size", 10)
+	slot2_clear.pressed.connect(_clear_slot2)
+	slot2_clear.visible = false
+	furnace_panel.add_child(slot2_clear)
+	
+	var slot2_hint = Label.new()
+	slot2_hint.name = "combo_hint"
+	slot2_hint.position = Vector2(465, 235)
+	slot2_hint.size = Vector2(400, 20)
+	slot2_hint.add_theme_color_override("font_color", Color(0.4, 0.5, 0.4))
+	slot2_hint.add_theme_font_size_override("font_size", 11)
+	furnace_panel.add_child(slot2_hint)
 	
 	var upgrade_btn = Button.new()
 	upgrade_btn.name = "upgrade_btn"
@@ -274,7 +309,9 @@ func open():
 	_refresh_tier()
 	_refresh_items()
 	_refresh_history()
+	_refresh_selection()
 	selected_item_idx = -1
+	selected_item_idx2 = -1
 
 func close():
 	furnace_panel.visible = false
@@ -301,6 +338,7 @@ func _refresh_items():
 		child.queue_free()
 	
 	selected_item_idx = -1
+	selected_item_idx2 = -1
 	
 	var select_name = find_child("select_name", true, false)
 	if select_name:
@@ -330,31 +368,100 @@ func _refresh_items():
 
 
 func _select_item(idx: int):
-	selected_item_idx = idx
-	var item = PlayerData.inventory[idx]
+	# 双槽逻辑：如果第一槽已选且点的是不同灵材 → 放入第二槽
+	if selected_item_idx >= 0 and idx != selected_item_idx and selected_item_idx2 < 0:
+		selected_item_idx2 = idx
+	else:
+		selected_item_idx = idx
+		selected_item_idx2 = -1
+	_refresh_selection()
+
+
+func _clear_slot2():
+	selected_item_idx2 = -1
+	_refresh_selection()
+
+
+func _refresh_selection():
+	var item = {}
+	if selected_item_idx >= 0 and selected_item_idx < PlayerData.inventory.size():
+		item = PlayerData.inventory[selected_item_idx]
 	
 	var name_label = find_child("select_name", true, false)
 	if name_label:
-		var tier_str = tier_names[item.tier] if item.tier < tier_names.size() else "?"
-		var elem_str = element_icons[item.element] if item.element >= 0 and item.element < element_icons.size() else "?"
-		name_label.text = "[%s][%s] %s ×%d" % [tier_str, elem_str, item.name, item.get("count", 1)]
+		if item.is_empty():
+			name_label.text = "未选择灵材"
+			name_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+		else:
+			var tier_str = tier_names[item.tier] if item.tier < tier_names.size() else "?"
+			var elem_str = element_icons[item.element] if item.element >= 0 and item.element < element_icons.size() else "?"
+			name_label.text = "[%s][%s] %s ×%d" % [tier_str, elem_str, item.name, item.get("count", 1)]
+			name_label.add_theme_color_override("font_color", Color.WHITE)
 	
 	var desc_label = find_child("select_desc", true, false)
 	if desc_label:
-		desc_label.text = "品阶: %s  |  五行: %s  |  来源于: %s" % [tier_names[item.tier] if item.tier < tier_names.size() else "?", element_icons[item.element] if item.element >= 0 and item.element < element_icons.size() else "?", item.get("origin", "未知")]
+		if item.is_empty():
+			desc_label.text = "点击左侧背包中的灵材选择"
+		else:
+			desc_label.text = "品阶: %s  |  五行: %s" % [tier_names[item.tier] if item.tier < tier_names.size() else "?", element_icons[item.element] if item.element >= 0 and item.element < element_icons.size() else "?"]
+	
+	# 第二槽
+	var item2 = {}
+	if selected_item_idx2 >= 0 and selected_item_idx2 < PlayerData.inventory.size():
+		item2 = PlayerData.inventory[selected_item_idx2]
+	
+	var slot2_name = find_child("select_name2", true, false)
+	if slot2_name:
+		if item2.is_empty():
+			slot2_name.text = "+ 第二槽（可选·五行组合）"
+			slot2_name.add_theme_color_override("font_color", Color(0.4, 0.4, 0.5))
+		else:
+			var t2 = tier_names[item2.tier] if item2.tier < tier_names.size() else "?"
+			var e2 = element_icons[item2.element] if item2.element >= 0 and item2.element < element_icons.size() else "?"
+			slot2_name.text = "+ [%s][%s] %s" % [t2, e2, item2.name]
+			slot2_name.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
+	
+	var slot2_clear = find_child("slot2_clear", true, false)
+	if slot2_clear:
+		slot2_clear.visible = not item2.is_empty()
+	
+	# 五行关系提示
+	var combo_hint = find_child("combo_hint", true, false)
+	if combo_hint and not item.is_empty() and not item2.is_empty():
+		var e1 = item.element
+		var e2 = item2.element
+		var rel = _get_element_relation(e1, e2)
+		combo_hint.text = rel
+		combo_hint.visible = true
+	elif combo_hint:
+		combo_hint.visible = false
 	
 	var btn = find_child("smelt_btn", true, false)
 	if btn:
-		btn.disabled = false
+		btn.disabled = item.is_empty()
 	
 	var sbtn = find_child("slice_btn", true, false)
 	if sbtn:
 		if PlayerData.is_slicing_unlocked():
 			sbtn.text = "🔪 切片加工"
-			sbtn.disabled = false
+			sbtn.disabled = item.is_empty()
 		else:
 			sbtn.text = "🔒 Day10解锁"
 			sbtn.disabled = true
+
+
+func _get_element_relation(e1: int, e2: int) -> String:
+	if e1 == e2:
+		return "🔥 同属性共鸣 — 升品率 +15%"
+	if PlayerData.ELEMENT_GENERATE.get(e1, -1) == e2:
+		return "✨ 相生（%s生%s）— 升品率 +20%% + 额外产出" % [PlayerData.ELEMENT_NAMES[e1], PlayerData.ELEMENT_NAMES[e2]]
+	if PlayerData.ELEMENT_OVERCOME.get(e1, -1) == e2:
+		return "⚡ 相克（%s克%s）— 成功率 -10%% / 碎片翻倍" % [PlayerData.ELEMENT_NAMES[e1], PlayerData.ELEMENT_NAMES[e2]]
+	if PlayerData.ELEMENT_GENERATE.get(e2, -1) == e1:
+		return "✨ 相生（%s生%s）— 升品率 +20%% + 额外产出" % [PlayerData.ELEMENT_NAMES[e2], PlayerData.ELEMENT_NAMES[e1]]
+	if PlayerData.ELEMENT_OVERCOME.get(e2, -1) == e1:
+		return "⚡ 相克（%s克%s）— 成功率 -10%% / 碎片翻倍" % [PlayerData.ELEMENT_NAMES[e2], PlayerData.ELEMENT_NAMES[e1]]
+	return "— 无特殊反应"
 
 
 func _do_smelt():
@@ -381,7 +488,12 @@ func _do_smelt():
 		var info = strategy_panel.find_child("strategy_info", true, false)
 		if info:
 			var tier_str = tier_names[item.tier] if item.tier < tier_names.size() else "?"
-			info.text = "正在熔炼：[%s] %s  |  当前天道：%d  |  灵识：%d" % [tier_str, item.name, PlayerData.tian_dao, PlayerData.ling_shi]
+			var dual = ""
+			if selected_item_idx2 >= 0:
+				var item2 = PlayerData.inventory[selected_item_idx2]
+				var t2 = tier_names[item2.tier] if item2.tier < tier_names.size() else "?"
+				dual = " + [%s] %s" % [t2, item2.name]
+			info.text = "正在熔炼：[%s] %s%s  |  天道：%d  |  灵识：%d" % [tier_str, item.name, dual, PlayerData.tian_dao, PlayerData.ling_shi]
 		strategy_panel.visible = true
 
 
@@ -389,6 +501,9 @@ func _on_strategy_picked(strategy: int):
 	strategy_panel.visible = false
 	
 	var cost = STRATEGY_COSTS[strategy]
+	# 双槽消耗额外灵识
+	if selected_item_idx2 >= 0:
+		cost += 3
 	if not PlayerData.spend_ling_shi(cost):
 		if is_instance_valid(result_label):
 			result_label.text = "灵识耗尽！今天你已经太累了，休息吧。"
@@ -402,11 +517,17 @@ func _on_strategy_picked(strategy: int):
 	if not PlayerData.remove_item(item.id, 1):
 		return
 	
-	# 异步执行熔炼动画
-	_do_smelt_with_strategy(item, strategy)
+	# 第二槽
+	var item2 = {}
+	if selected_item_idx2 >= 0 and selected_item_idx2 < PlayerData.inventory.size():
+		item2 = PlayerData.inventory[selected_item_idx2]
+		PlayerData.remove_item(item2.id, 1)
+	
+	_do_smelt_with_strategy(item, strategy, item2)
+	selected_item_idx2 = -1
 
 
-func _do_smelt_with_strategy(item: Dictionary, strategy: int):
+func _do_smelt_with_strategy(item: Dictionary, strategy: int, item2: Dictionary = {}):
 	var base_id = _get_base_id(item.id)
 	var feat_name = STRATEGY_NAMES[strategy]
 	
@@ -428,6 +549,25 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 	luck_table[0] += tian_bonus + streak_bonus + luck_mod + WorldEvents.get_smelt_luck_bonus(PlayerData.today_events)
 	luck_table[1] += tian_bonus + streak_bonus + luck_mod
 	luck_table[2] += tian_bonus + streak_bonus + luck_mod
+	
+	# 五行双槽加成
+	var elem_bonus = 0.0
+	var elem_text = ""
+	if not item2.is_empty():
+		var e1 = item.element
+		var e2 = item2.element
+		if e1 == e2:
+			elem_bonus = 0.15
+			elem_text = "🔥同属性共鸣 "
+		elif PlayerData.ELEMENT_GENERATE.get(e1, -1) == e2 or PlayerData.ELEMENT_GENERATE.get(e2, -1) == e1:
+			elem_bonus = 0.20
+			elem_text = "✨相生 "
+		elif PlayerData.ELEMENT_OVERCOME.get(e1, -1) == e2 or PlayerData.ELEMENT_OVERCOME.get(e2, -1) == e1:
+			elem_bonus = -0.10
+			elem_text = "⚡相克 "
+	luck_table[0] += elem_bonus
+	luck_table[1] += elem_bonus
+	luck_table[2] += elem_bonus
 	
 	var base_luck = luck_table[0]
 	var base_fail = 0.25
@@ -455,7 +595,7 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 	var base_same = clamp(1.0 - base_luck - base_fail - base_destroy, 0.0, 1.0)
 	
 	var roll = randf()
-	var result_text = "[%s] " % feat_name
+	var result_text = "[%s] %s" % [feat_name, elem_text]
 	var result_color = Color(0.6, 0.6, 0.6)
 	var outcome_type = "same"  # upgrade / same / degrade / destroy
 	

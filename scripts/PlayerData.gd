@@ -66,6 +66,13 @@ var trade_streak: int = 0      # 交易成功连胜
 ## ---------- 世界事件 ----------
 var today_events: Array = []   # 今日活跃的随机事件
 
+## ---------- 五行 ----------
+const ELEMENT_NAMES = ["金", "木", "水", "火", "土"]
+# 相生: 木→火→土→金→水→木
+const ELEMENT_GENERATE = {1:3, 3:4, 4:0, 0:2, 2:1}  # 生→被生
+# 相克: 木→土→水→火→金→木  
+const ELEMENT_OVERCOME = {1:4, 4:2, 2:3, 3:0, 0:1}  # 克→被克
+
 ## ---------- 灵墟碎片 ----------
 var lingxu_fragments: int = 0  # 熔炼失败时获得，积累解锁隐藏配方
 const FRAGMENT_SECRET: int = 10   # 10碎片→解锁隐藏熔炼配方
