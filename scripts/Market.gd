@@ -69,7 +69,19 @@ func _build_ui():
 	item_grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.add_child(item_grid)
 	
-	# ---- 灵石庄（单向兑换：高→低） ----
+	# 批量购买提示
+	var batch_hint = Label.new()
+	batch_hint.text = "💡 Shift+点击买5个 | Ctrl+点击全买"
+	batch_hint.position = Vector2(20, 50)  # 暂时压在 title 下面，scroll 往下挪
+	batch_hint.add_theme_color_override("font_color", Color(0.4, 0.5, 0.6))
+	batch_hint.add_theme_font_size_override("font_size", 11)
+	market_ui.add_child(batch_hint)
+	
+	# 调整 scroll 位置让出提示空间
+	scroll.position = Vector2(20, 70)
+	scroll.size = Vector2(1040, 480)
+	
+	# ---- 灵石庄 ----
 	var exchange_bg = ColorRect.new()
 	exchange_bg.name = "exchange_bg"
 	exchange_bg.position = Vector2(20, 555)
@@ -212,14 +224,27 @@ func _buy(data):
 	if data.is_empty():
 		return
 	
-	if PlayerData.spend_stones(data.price):
+	var qty = 1
+	var total_cost = data.price
+	
+	# Shift+点击：买5个（不够则买可负担数量）
+	if Input.is_key_pressed(KEY_SHIFT):
+		var max_afford = maxi(1, int(float(PlayerData.get_total_stones()) / float(data.price)))
+		qty = mini(5, max_afford)
+	# Ctrl+点击：买最大可负担数量
+	elif Input.is_key_pressed(KEY_CTRL):
+		qty = maxi(1, int(float(PlayerData.get_total_stones()) / float(data.price)))
+	
+	total_cost = data.price * qty
+	
+	if PlayerData.spend_stones(total_cost):
 		PlayerData.add_item({
 			"id": data.id,
 			"name": data.name,
 			"tier": data.tier,
 			"element": data.element,
 			"price": data.price,
-			"count": 1
+			"count": qty
 		})
 		_refresh_grid()
 		_refresh_exchange()
