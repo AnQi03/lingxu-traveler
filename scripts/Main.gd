@@ -441,10 +441,10 @@ func _input(event):
 					inventory_node.toggle()
 				get_viewport().set_input_as_handled()
 			KEY_J:
-			if journal_node and journal_node.has_method("toggle"):
-				journal_node.toggle()
-			get_viewport().set_input_as_handled()
-		KEY_SPACE:
+				if journal_node and journal_node.has_method("toggle"):
+					journal_node.toggle()
+				get_viewport().set_input_as_handled()
+			KEY_SPACE:
 				if stall_scene:
 					var manager = stall_scene.get_node("StallManager")
 					if manager:
