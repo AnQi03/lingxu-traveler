@@ -105,53 +105,73 @@ func _build_ui():
 	# ---- 灵石庄 ----
 	var exchange_bg = ColorRect.new()
 	exchange_bg.name = "exchange_bg"
-	exchange_bg.position = Vector2(20, 555)
-	exchange_bg.size = Vector2(1040, 35)
+	exchange_bg.position = Vector2(20, 540)
+	exchange_bg.size = Vector2(1040, 28)
 	exchange_bg.color = Color(0.08, 0.05, 0.15, 0.8)
 	market_ui.add_child(exchange_bg)
 	
 	var exchange_label = Label.new()
 	exchange_label.name = "exchange_label"
-	exchange_label.position = Vector2(30, 557)
-	exchange_label.size = Vector2(500, 30)
+	exchange_label.position = Vector2(30, 542)
+	exchange_label.size = Vector2(450, 24)
 	exchange_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
-	exchange_label.add_theme_font_size_override("font_size", 12)
+	exchange_label.add_theme_font_size_override("font_size", 11)
 	market_ui.add_child(exchange_label)
+	
+	var btn_extreme = Button.new()
+	btn_extreme.name = "exchange_extreme_btn"
+	btn_extreme.text = "✨极品→上品"
+	btn_extreme.position = Vector2(500, 540)
+	btn_extreme.size = Vector2(130, 26)
+	btn_extreme.add_theme_font_size_override("font_size", 10)
+	btn_extreme.pressed.connect(_exchange_extreme)
+	market_ui.add_child(btn_extreme)
 	
 	var btn_high = Button.new()
 	btn_high.name = "exchange_high_btn"
-	btn_high.text = "💎 上品→中品(1换100)"
-	btn_high.position = Vector2(500, 557)
-	btn_high.size = Vector2(170, 30)
-	btn_high.add_theme_font_size_override("font_size", 11)
+	btn_high.text = "💎上品→中品"
+	btn_high.position = Vector2(635, 540)
+	btn_high.size = Vector2(130, 26)
+	btn_high.add_theme_font_size_override("font_size", 10)
 	btn_high.pressed.connect(_exchange_high)
 	market_ui.add_child(btn_high)
 	
 	var btn_mid = Button.new()
 	btn_mid.name = "exchange_mid_btn"
-	btn_mid.text = "💰 中品→下品(1换100)"
-	btn_mid.position = Vector2(675, 557)
-	btn_mid.size = Vector2(170, 30)
-	btn_mid.add_theme_font_size_override("font_size", 11)
+	btn_mid.text = "💰中品→下品"
+	btn_mid.position = Vector2(770, 540)
+	btn_mid.size = Vector2(130, 26)
+	btn_mid.add_theme_font_size_override("font_size", 10)
 	btn_mid.pressed.connect(_exchange_mid)
 	market_ui.add_child(btn_mid)
 	
-	var btn_extreme = Button.new()
-	btn_extreme.name = "exchange_extreme_btn"
-	btn_extreme.text = "✨ 极品→上品(1换100)"
-	btn_extreme.position = Vector2(850, 557)
-	btn_extreme.size = Vector2(170, 30)
-	btn_extreme.add_theme_font_size_override("font_size", 11)
-	btn_extreme.pressed.connect(_exchange_extreme)
-	market_ui.add_child(btn_extreme)
+	# ---- 情报+装饰（底部第二行） ----
+	var intel_btn = Button.new()
+	intel_btn.name = "intel_btn"
+	intel_btn.text = "🔮 灵墟情报(100)"
+	intel_btn.position = Vector2(500, 572)
+	intel_btn.size = Vector2(150, 26)
+	intel_btn.add_theme_font_size_override("font_size", 10)
+	intel_btn.pressed.connect(_buy_intel)
+	market_ui.add_child(intel_btn)
 	
-	var exchange_note = Label.new()
-	exchange_note.position = Vector2(920, 560)
-	exchange_note.size = Vector2(130, 25)
-	exchange_note.text = "⚠ 仅高兑低"
-	exchange_note.add_theme_color_override("font_color", Color(0.5, 0.4, 0.3))
-	exchange_note.add_theme_font_size_override("font_size", 10)
-	market_ui.add_child(exchange_note)
+	var deco_fire = Button.new()
+	deco_fire.name = "deco_fire"
+	deco_fire.text = "🔥火系招牌(5000)"
+	deco_fire.position = Vector2(655, 572)
+	deco_fire.size = Vector2(140, 26)
+	deco_fire.add_theme_font_size_override("font_size", 10)
+	deco_fire.pressed.connect(_buy_deco.bind("fire_sign", 5000, "🔥火系招牌"))
+	market_ui.add_child(deco_fire)
+	
+	var deco_charm = Button.new()
+	deco_charm.name = "deco_charm"
+	deco_charm.text = "💝熟客牌(3000)"
+	deco_charm.position = Vector2(800, 572)
+	deco_charm.size = Vector2(130, 26)
+	deco_charm.add_theme_font_size_override("font_size", 10)
+	deco_charm.pressed.connect(_buy_deco.bind("regular_charm", 3000, "💝熟客牌"))
+	market_ui.add_child(deco_charm)
 
 
 func toggle():
@@ -314,18 +334,71 @@ func _exchange_extreme():
 func _refresh_exchange():
 	var label = market_ui.find_child("exchange_label", true, false)
 	if label:
-		label.text = "💎 灵石庄 | 极品:%d  上品:%d  中品:%d  下品:%d" % [
+		label.text = "💎 极品:%d  上品:%d  中品:%d  下品:%d" % [
 			PlayerData.extreme_spirit_stones, PlayerData.high_spirit_stones,
 			PlayerData.mid_spirit_stones, PlayerData.spirit_stones
 		]
 	var btn_e = market_ui.find_child("exchange_extreme_btn", true, false)
-	if btn_e:
-		btn_e.disabled = (PlayerData.extreme_spirit_stones <= 0)
+	if btn_e: btn_e.disabled = (PlayerData.extreme_spirit_stones <= 0)
 	var btn_h = market_ui.find_child("exchange_high_btn", true, false)
-	if btn_h:
-		btn_h.disabled = (PlayerData.high_spirit_stones <= 0)
+	if btn_h: btn_h.disabled = (PlayerData.high_spirit_stones <= 0)
 	var btn_m = market_ui.find_child("exchange_mid_btn", true, false)
-	if btn_m:
-		btn_m.disabled = (PlayerData.mid_spirit_stones <= 0)
+	if btn_m: btn_m.disabled = (PlayerData.mid_spirit_stones <= 0)
+	
+	# 情报按钮
+	var intel_btn = market_ui.find_child("intel_btn", true, false)
+	if intel_btn:
+		intel_btn.disabled = PlayerData.intelligence_bought or PlayerData.get_total_stones() < 100
+		if PlayerData.intelligence_bought:
+			intel_btn.text = "🔮 已购买"
+	
+	# 装饰按钮
+	var deco_fire = market_ui.find_child("deco_fire", true, false)
+	if deco_fire:
+		deco_fire.disabled = PlayerData.stall_decorations.get("fire_sign", false) or PlayerData.get_total_stones() < 5000
+		if PlayerData.stall_decorations.get("fire_sign", false):
+			deco_fire.text = "🔥已拥有"
+	var deco_charm = market_ui.find_child("deco_charm", true, false)
+	if deco_charm:
+		deco_charm.disabled = PlayerData.stall_decorations.get("regular_charm", false) or PlayerData.get_total_stones() < 3000
+		if PlayerData.stall_decorations.get("regular_charm", false):
+			deco_charm.text = "💝已拥有"
+
+
+func _buy_intel():
+	if PlayerData.intelligence_bought:
+		return
+	if PlayerData.spend_stones(100):
+		PlayerData.intelligence_bought = true
+		PlayerData.emit_signal("stones_changed")
+		_refresh_exchange()
+		var hud = PlayerData.get_meta("hud")
+		if hud and hud.has_method("show_toast"):
+			var tip = _get_intel_tip()
+			hud.show_toast("🔮 灵墟情报: " + tip, Color(0.5, 0.8, 1.0), 5.0)
+
+
+func _get_intel_tip() -> String:
+	var tips = []
+	for ev in PlayerData.today_events:
+		tips.append(ev.desc)
+	if tips.is_empty():
+		var rng = RandomNumberGenerator.new()
+		rng.set_seed(PlayerData.game_day * 53)
+		var generic = ["今日市场平稳，适合进货。", "邻里宗门需求量平稳。", "灵墟无大事，专心熔炼即可。"]
+		return generic[rng.randi() % generic.size()]
+	return tips[randi() % tips.size()]
+
+
+func _buy_deco(key: String, cost: int, name: String):
+	if PlayerData.stall_decorations.has(key):
+		return
+	if PlayerData.spend_stones(cost):
+		PlayerData.stall_decorations[key] = true
+		PlayerData.emit_signal("stones_changed")
+		_refresh_exchange()
+		var hud = PlayerData.get_meta("hud")
+		if hud and hud.has_method("show_toast"):
+			hud.show_toast("🏪 购入%s！永久生效。" % name, Color(1, 0.85, 0.3), 4.0)
 
 ## 像素角标 — 已替换为面板纹理

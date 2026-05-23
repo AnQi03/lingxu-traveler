@@ -232,6 +232,12 @@ func show_summary():
 		elif days_to_festival <= 5:
 			texts.append("🎪 距集市大日还有%d天" % days_to_festival)
 		
+		# 租金提醒
+		if PlayerData.is_rent_due_tomorrow():
+			texts.append("💸 明天交租！%d灵石" % PlayerData.get_rent_amount())
+		elif (PlayerData.game_day % PlayerData.RENT_INTERVAL) == 0:
+			texts.append("💸 今日已缴纳租金 %d灵石" % PlayerData.get_rent_amount())
+		
 		var days_to_season_end = PlayerData.DAYS_PER_SEASON - PlayerData.season_day
 		if days_to_season_end <= 5:
 			var next_season = (PlayerData.season_index + 1) % 4

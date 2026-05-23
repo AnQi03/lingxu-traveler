@@ -66,6 +66,13 @@ var trade_streak: int = 0      # 交易成功连胜
 ## ---------- 世界事件 ----------
 var today_events: Array = []   # 今日活跃的随机事件
 
+## ---------- 摊位经营 ----------
+var rent_paid_day: int = 0                 # 上次交租日
+const RENT_INTERVAL: int = 10              # 每10天收一次租
+const RENT_BASE: int = 50                  # 基础租金
+var stall_decorations: Dictionary = {}     # 已购装饰 {"fire_sign":true,...}
+var intelligence_bought: bool = false      # 今日是否已买情报
+
 ## ---------- 五行 ----------
 const ELEMENT_NAMES = ["金", "木", "水", "火", "土"]
 # 相生: 木→火→土→金→水→木
@@ -460,6 +467,10 @@ func advance_time(hours: float) -> void:
 		
 		# 每日随机事件
 		today_events = WorldEvents.roll_daily_events()
+		intelligence_bought = false
+		
+		# 租金日检查
+		_check_rent()
 		
 		# 连续出摊追踪
 		if has_stalled_today:
@@ -482,6 +493,41 @@ func get_time_label() -> String:
 	var period = "上午" if hour < 12 else "下午"
 	var hour_str = str(hour) if hour <= 12 else str(hour - 12)
 	return "第%d天 · %s%s时" % [game_day, period, hour_str]
+
+
+## ---------- 租金 ----------
+func _check_rent() -> void:
+	if game_day - rent_paid_day >= RENT_INTERVAL:
+		var rent = get_rent_amount()
+		rent_paid_day = game_day
+		if get_total_stones() >= rent:
+			spend_stones(rent)
+		else:
+			# 交不起租——扣好感
+			for name in customer_relations:
+				customer_relations[name].loyalty = max(0, customer_relations[name].loyalty - 1)
+
+func get_rent_amount() -> int:
+	var base = RENT_BASE + furnace_tier * 20
+	if stall_decorations.get("member_card", false):
+		base = int(float(base) * 0.8)
+	return base
+
+func is_rent_due_tomorrow() -> bool:
+	return (game_day + 1 - rent_paid_day) >= RENT_INTERVAL
+
+
+## ---------- 摊位装饰buff ----------
+func get_stall_price_bonus(element: int) -> float:
+	if element == 3 and stall_decorations.get("fire_sign", false):
+		return 0.10
+	return 0.0
+
+func get_stall_customer_bonus() -> int:
+	var bonus = 0
+	if stall_decorations.get("regular_charm", false):
+		bonus += 1
+	return bonus
 
 func get_season_label() -> String:
 	return "第%d年 %s%s 第%d天" % [game_year, SEASON_EMOJI[season_index], SEASON_NAMES[season_index], season_day]
@@ -525,6 +571,8 @@ func save_game() -> void:
 		"smelt_streak": smelt_streak,
 		"trade_streak": trade_streak,
 		"today_events": today_events,
+		"stall_decorations": stall_decorations,
+		"rent_paid_day": rent_paid_day,
 		"consecutive_stall_days": consecutive_stall_days,
 		"inventory": inventory,
 		"customer_relations": customer_relations,
@@ -580,6 +628,8 @@ func load_game() -> bool:
 	smelt_streak = data.get("smelt_streak", 0)
 	trade_streak = data.get("trade_streak", 0)
 	today_events = data.get("today_events", [])
+	stall_decorations = data.get("stall_decorations", {})
+	rent_paid_day = data.get("rent_paid_day", 0)
 	consecutive_stall_days = data.get("consecutive_stall_days", 0)
 	inventory = data.get("inventory", [])
 	customer_relations = data.get("customer_relations", {})
