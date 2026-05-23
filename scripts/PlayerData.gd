@@ -278,6 +278,14 @@ func spend_stones(amount: int) -> bool:
 		var use: int = mini(mid_spirit_stones, int(float(remaining) / 100.0))
 		mid_spirit_stones -= use
 		remaining -= use * 100
+	# 如果下品灵石不够，自动从高级转换
+	if spirit_stones < remaining:
+		if mid_spirit_stones > 0:
+			mid_spirit_stones -= 1
+			spirit_stones += 100
+		elif high_spirit_stones > 0:
+			high_spirit_stones -= 1
+			spirit_stones += 10000
 	spirit_stones -= remaining
 	return true
 
@@ -346,13 +354,26 @@ func get_known_customer_names() -> Array:
 
 func add_item(item_data: Dictionary) -> void:
 	var existing = find_item(item_data.id)
+	if not existing:
+		# ID 不匹配：尝试按 名字+品阶 找同类物品（兼容不同 ID 命名体系）
+		existing = find_similar_item(item_data.get("name", ""), item_data.get("tier", -1))
 	if existing and existing.has("count"):
 		existing.count += item_data.get("count", 1)
+		# 统一 ID 为库存中已有物品的 ID
+		item_data.id = existing.id
 	else:
 		var new_item = item_data.duplicate()
 		if not new_item.has("count"):
 			new_item.count = 1
 		inventory.append(new_item)
+
+func find_similar_item(item_name: String, item_tier: int) -> Dictionary:
+	if item_name == "" or item_tier < 0:
+		return {}
+	for item in inventory:
+		if item.get("name", "") == item_name and item.get("tier", -1) == item_tier:
+			return item
+	return {}
 
 func remove_item(item_id: String, count: int = 1) -> bool:
 	for i in range(inventory.size()):
