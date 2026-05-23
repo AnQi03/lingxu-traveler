@@ -3,6 +3,7 @@ extends Node
 signal day_started(game_day: int)
 signal period_changed(period: String)
 signal night_falling()
+signal monthly_report(game_day: int)
 
 const REAL_SECONDS_PER_TICK: float = 60.0
 const GAME_HOURS_PER_TICK: float = 1.0
@@ -56,8 +57,10 @@ func _advance_one_hour():
 				main_node.force_close_stall()
 			print("DayCycle: 入夜了")
 		if PlayerData.game_day != old_day:
-			day_started.emit(PlayerData.game_day)
-			print("DayCycle: 第%d天开始了" % PlayerData.game_day)
+		day_started.emit(PlayerData.game_day)
+		print("DayCycle: 第%d天开始了" % PlayerData.game_day)
+		if PlayerData.game_day % 30 == 0:
+			monthly_report.emit(PlayerData.game_day)
 
 
 static func get_period_name(time_of_day: float) -> String:

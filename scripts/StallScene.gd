@@ -173,10 +173,13 @@ func _on_trade_completed(_item_id: String, _count: int, price: int) -> void:
 	haggle_result.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
 	is_trading = false
 	
-	# 灵石到账效果 — HUD 会自己跳动，这里加个成交特效
+	# 成交特效 — 面板闪绿 + 数字弹跳 + 灵石粒子
+	_flash_panel_green(haggle_panel)
 	var tw = create_tween()
-	tw.tween_property(haggle_result, "scale", Vector2(1.15, 1.15), 0.1)
-	tw.tween_property(haggle_result, "scale", Vector2(1.0, 1.0), 0.15)
+	tw.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tw.tween_property(haggle_result, "scale", Vector2(1.3, 1.3), 0.12)
+	tw.tween_property(haggle_result, "scale", Vector2(1.0, 1.0), 0.22)
+	_spawn_coin_particles(price)
 	
 	await get_tree().create_timer(2.5).timeout
 	customer_panel.hide()
@@ -185,6 +188,49 @@ func _on_trade_completed(_item_id: String, _count: int, price: int) -> void:
 	# 内心声音
 	var hud = PlayerData.get_meta("hud")
 	InnerVoice.maybe_speak("haggle_success", hud)
+
+
+## 灵石入账粒子特效 — 金色粒子从成交面板飞出
+func _spawn_coin_particles(amount: int) -> void:
+	var count: int
+	if amount > 1000:
+		count = 15
+	elif amount > 500:
+		count = 12
+	elif amount > 100:
+		count = 8
+	else:
+		count = 5
+	
+	var center = haggle_result.position + haggle_result.size / 2
+	for i in range(count):
+		var p = ColorRect.new()
+		p.size = Vector2(8, 8)
+		p.position = center - Vector2(4, 4)
+		p.color = Color(1.0, 0.85, 0.2, 0.95)
+		p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		haggle_panel.add_child(p)
+		
+		var angle = randf_range(0, TAU)
+		var dist = randf_range(30, 80)
+		var target = center + Vector2(cos(angle), sin(angle)) * dist
+		var tw2 = create_tween().set_parallel(true)
+		tw2.tween_property(p, "position", target, randf_range(0.3, 0.6))
+		tw2.tween_property(p, "color:a", 0.0, randf_range(0.3, 0.6))
+		tw2.chain().tween_callback(p.queue_free)
+
+
+## 面板闪绿效果 — 成交瞬间的绿色闪光
+func _flash_panel_green(panel: Panel) -> void:
+	var flash = ColorRect.new()
+	flash.size = panel.size
+	flash.position = Vector2.ZERO
+	flash.color = Color(0.0, 0.9, 0.0, 0.2)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(flash)
+	var tw = create_tween()
+	tw.tween_property(flash, "color:a", 0.0, 0.2)
+	tw.chain().tween_callback(flash.queue_free)
 
 
 func _on_trade_failed(_item_id: String, _count: int, reason: String) -> void:

@@ -40,6 +40,7 @@ func _ready():
 	DayCycle.start()
 	DayCycle.night_falling.connect(_on_night_falling)
 	DayCycle.period_changed.connect(_on_period_changed)
+	DayCycle.monthly_report.connect(_on_monthly_report)
 	
 	# 首次启动 → 开场叙事
 	if not PlayerData.has_seen_opening:
@@ -209,6 +210,24 @@ func get_stall_income() -> int:
 		if manager:
 			return manager.daily_income
 	return 0
+
+
+func _on_monthly_report(day: int) -> void:
+	var month = day / 30
+	var total = PlayerData.total_earned
+	var stones = PlayerData.spirit_stones + PlayerData.mid_spirit_stones * 100
+	var msg = "📊 第%d个月 · 管家简报\\n累计营收: %d灵石 | 当前余额: %d灵石" % [month, total, stones]
+	if PlayerData.ren_xin >= 10:
+		msg += "\\n\\n💬 老管家：'少爷，生意越来越稳了。老奴替您高兴。'"
+	elif PlayerData.shang_dao >= 15:
+		msg += "\\n\\n💬 老管家：'少爷的商道眼光愈发老练了。'"
+	elif PlayerData.tian_dao >= 10:
+		msg += "\\n\\n💬 老管家：'老奴听说您在熔炼上也有进展……果然不是寻常人。'"
+	else:
+		msg += "\\n\\n💬 老管家：'慢慢来，日子还长。'"
+	
+	if hud_node:
+		hud_node.show_toast(msg, Color(0.7, 0.8, 1.0), 6.0)
 
 
 func _on_night_falling():
