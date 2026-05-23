@@ -98,6 +98,27 @@ static func generate_customer() -> Dictionary:
 	var max_ratio = _get_max_ratio(personality, is_urgent)
 	var max_price = int(reference_price * max_ratio)
 	
+	# 交易记忆影响（回头客加价/被宰过警惕/良心价回报/被激怒提防）
+	if name != "":
+		var mem = PlayerData.get_customer_memory(name)
+		if not mem.is_empty():
+			var visit_count = mem.get("visit_count", 0)
+			var last_result = mem.get("last_result", "")
+			var last_price = mem.get("last_price", 0)
+			# 回头客：更愿意出高价
+			if visit_count >= 3:
+				max_price = int(max_price * 1.10)
+			# 上次被宰（成交价>市场价30%）：本次出价更低
+			if last_result == "accept" and last_price > reference_price * 1.3:
+				max_price = int(max_price * 0.85)
+			# 上次良心价（成交价<市场价80%）：本次主动多出
+			elif last_result == "accept" and last_price < reference_price * 0.8:
+				max_price = int(max_price * 1.10)
+				count += 1
+			# 上次被激怒：大幅降低出价
+			elif last_result == "walk_away":
+				max_price = int(max_price * 0.80)
+	
 	# 最低接受价：低于此价可能直接走人
 	var min_accept = int(offer_price * 0.7)
 	
