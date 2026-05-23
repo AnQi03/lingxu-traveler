@@ -155,17 +155,17 @@ func _update_display() -> void:
 	var stones = PlayerData.spirit_stones
 	var mids = PlayerData.mid_spirit_stones
 	var highs = PlayerData.high_spirit_stones
-	var text = "灵石：%d" % stones
+	var text = "💰 %d" % stones
 	if mids > 0:
-		text += " + %d中品" % mids
+		text += "  ⚪×%d" % mids
 	if highs > 0:
-		text += " + %d上品" % highs
+		text += "  💎×%d" % highs
 	stone_label.text = text
-	
+
 	# 灵墟碎片计数
 	var fragments = PlayerData.lingxu_fragments
 	if fragments > 0:
-		stone_label.text += "  |  🔮 ×%d" % fragments
+		stone_label.text += "  |  🔮×%d" % fragments
 	
 	# 灵石跳动动画
 	var current = PlayerData.get_total_stones()

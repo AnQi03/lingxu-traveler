@@ -6,6 +6,13 @@ const STRATEGY_NAMES = ["稳扎稳打", "标准熔炼", "孤注一掷"]
 const STRATEGY_LUCK_MOD = [0.15, 0.0, -0.20]
 const STRATEGY_UPGRADE_MOD = [-0.20, 0.0, 0.30]
 const STRATEGY_COSTS = [8, 10, 12]
+# 各品阶价格区间（用于熔炼产出，与 MaterialData 对齐）
+const TIER_PRICE = {
+	0: [4, 12],      # 凡品
+	1: [45, 60],     # 灵品
+	2: [350, 600],   # 宝品
+	3: [3000, 5000], # 仙品
+}
 
 var is_open: bool = false
 var furnace_panel: Panel
@@ -284,6 +291,10 @@ func _get_base_id(item_id: String) -> String:
 		return item_id.substr(0, idx)
 	return item_id
 
+func _tier_price(tier: int) -> int:
+	var r = TIER_PRICE.get(tier, [4, 12])
+	return r[0] + randi() % (r[1] - r[0] + 1)
+
 
 func _refresh_items():
 	for child in item_grid.get_children():
@@ -462,7 +473,7 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 		var new_id = base_id + "_t" + str(nt) if nt > 0 else base_id
 		PlayerData.add_item({
 			"id": new_id, "name": item.name, "tier": nt,
-			"element": item.element, "price": max(1, item.price / 3), "count": 1
+			"element": item.element, "price": _tier_price(nt), "count": 1
 		})
 		result_text += "⚠️ 品阶下降：[%s] → [%s]\n🔮 残留了一丝灵墟碎片（+1）" % [tier_names[item.tier], tier_names[nt]]
 		result_color = Color(0.7, 0.5, 0.2)
@@ -477,7 +488,7 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 		var keep_id = base_id + "_t" + str(keep_tier) if keep_tier > 0 else base_id
 		PlayerData.add_item({
 			"id": keep_id, "name": item.name, "tier": keep_tier,
-			"element": item.element, "price": item.get("base_price", item.price), "count": 1
+			"element": item.element, "price": _tier_price(keep_tier), "count": 1
 		})
 		result_text += "  品阶不变：[%s]" % tier_names[item.tier]
 		result_color = Color(0.6, 0.6, 0.6)
@@ -490,7 +501,7 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 		var new_id = base_id + "_t" + str(nt)
 		PlayerData.add_item({
 			"id": new_id, "name": item.name, "tier": nt,
-			"element": item.element, "price": item.price * 3, "count": 1
+			"element": item.element, "price": _tier_price(nt), "count": 1
 		})
 		result_text += "✨ 升品成功！[%s] → [%s]！" % [tier_names[item.tier], tier_names[nt]]
 		result_color = Color(1, 0.8, 0.3)

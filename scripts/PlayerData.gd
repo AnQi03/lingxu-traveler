@@ -23,6 +23,7 @@ var has_seen_opening: bool = false       # 是否看过开场
 var shang_voice_heard: bool = false      # 商道第一次说话
 var tian_voice_heard: bool = false       # 天道第一次说话
 var renxin_voice_heard: bool = false     # 人心第一次说话
+var first_high_stone: bool = false       # 第一次获得上品灵石
 
 ## ---------- 年度评定 ----------
 var year_assessed: bool = false           # 是否已完成首次评定
@@ -285,6 +286,7 @@ func spend_stones(amount: int) -> bool:
 
 func earn_stones(amount: int) -> void:
 	total_earned += amount
+	var old_high = high_spirit_stones
 	var total = amount
 	while total >= 10000:
 		high_spirit_stones += 1
@@ -293,6 +295,12 @@ func earn_stones(amount: int) -> void:
 		mid_spirit_stones += 1
 		total -= 100
 	spirit_stones += total
+	# 第一次获得上品灵石
+	if high_spirit_stones > old_high and not first_high_stone:
+		first_high_stone = true
+		var hud = get_meta("hud")
+		if hud and hud.has_method("show_toast"):
+			hud.show_toast("💎 你获得了第一块上品灵石！灵墟商会都为之侧目…", Color(1, 0.85, 0.2), 5.0)
 
 # 灵石兑换：仅支持高→低单向（保持上品稀有度）
 # 1上品 = 100中品, 1中品 = 100下品
@@ -491,6 +499,7 @@ func save_game() -> void:
 		"shang_voice_heard": shang_voice_heard,
 		"tian_voice_heard": tian_voice_heard,
 		"renxin_voice_heard": renxin_voice_heard,
+		"first_high_stone": first_high_stone,
 		"year_assessed": year_assessed,
 		"assessment_score": assessment_score,
 		"assessment_rating": assessment_rating,
@@ -542,6 +551,7 @@ func load_game() -> bool:
 	shang_voice_heard = data.get("shang_voice_heard", false)
 	tian_voice_heard = data.get("tian_voice_heard", false)
 	renxin_voice_heard = data.get("renxin_voice_heard", false)
+	first_high_stone = data.get("first_high_stone", false)
 	year_assessed = data.get("year_assessed", false)
 	assessment_score = data.get("assessment_score", 0)
 	assessment_rating = data.get("assessment_rating", 0)

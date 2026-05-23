@@ -30,16 +30,18 @@ static func get_market_items() -> Array:
 		{ "id": "dilinggu_ling", "name": "地灵菇", "tier": Tier.LING, "element": Element.TU, "base_price": 45, "desc": "吸取地脉灵气的奇菌", "origin": "中央荒原", "market_rare": true },
 	]
 
-## 宝品/仙品（熔炼专属，不在市场售卖）
+## 宝品/仙品（熔炼专属，不在市场售卖）— 世间罕见的至宝
 static func get_refine_only_items() -> Array:
 	return [
-		# ===== 宝品（4种）— 只有熔炼能获得 =====
-		{ "id": "tianhuoshi_bao", "name": "天火石", "tier": Tier.BAO, "element": Element.HUO, "base_price": 180, "desc": "从天而降的陨铁，火系至宝", "origin": "炎狱域" },
-		{ "id": "xuanbingjing_bao", "name": "玄冰晶", "tier": Tier.BAO, "element": Element.SHUI, "base_price": 170, "desc": "万载玄冰之心，炼器圣品", "origin": "玄冰域" },
-		{ "id": "jinwusha_bao", "name": "金乌砂", "tier": Tier.BAO, "element": Element.JIN, "base_price": 195, "desc": "传说中的金乌陨落处产出的神砂", "origin": "金戈域" },
-		{ "id": "shenmuye_bao", "name": "神木液", "tier": Tier.BAO, "element": Element.MU, "base_price": 165, "desc": "千年神木分泌的灵液，一滴值千金", "origin": "苍木域" },
-		# ===== 仙品（1种）— 熔炼终极目标 =====
-		{ "id": "wuxinglingzhu_xian", "name": "五行灵珠", "tier": Tier.XIAN, "element": Element.TU, "base_price": 500, "desc": "蕴含五行平衡之力的灵珠，传说为古神遗物", "origin": "中央荒原" },
+		# ===== 宝品（4种）— 只有熔炼能获得，一方势力倾尽全力也未必能得一件 =====
+		{ "id": "tianhuoshi_bao", "name": "天火石", "tier": Tier.BAO, "element": Element.HUO, "base_price": 500, "desc": "从天而降的陨铁，火系至宝。拍卖会上能让三个宗门翻脸的稀世珍品", "origin": "炎狱域" },
+		{ "id": "xuanbingjing_bao", "name": "玄冰晶", "tier": Tier.BAO, "element": Element.SHUI, "base_price": 450, "desc": "万载玄冰之心，炼器圣品。一块足以换一座小城", "origin": "玄冰域" },
+		{ "id": "jinwusha_bao", "name": "金乌砂", "tier": Tier.BAO, "element": Element.JIN, "base_price": 550, "desc": "传说中的金乌陨落处产出的神砂，百年难遇", "origin": "金戈域" },
+		{ "id": "shenmuye_bao", "name": "神木液", "tier": Tier.BAO, "element": Element.MU, "base_price": 400, "desc": "千年神木分泌的灵液，一滴可令枯木逢春", "origin": "苍木域" },
+		# ===== 仙品（3种）— 熔炼终极目标，传说级 =====
+		{ "id": "wuxinglingzhu_xian", "name": "五行灵珠", "tier": Tier.XIAN, "element": Element.TU, "base_price": 5000, "desc": "蕴含五行平衡之力的灵珠，古神遗物。此物出世，天下震动", "origin": "中央荒原" },
+		{ "id": "fenghuangxie_xian", "name": "凤凰精血", "tier": Tier.XIAN, "element": Element.HUO, "base_price": 4200, "desc": "一滴凤凰心头血，可令凡人脱胎换骨。修仙界为之疯狂的至宝", "origin": "炎狱域" },
+		{ "id": "jiutianxirang_xian", "name": "九天息壤", "tier": Tier.XIAN, "element": Element.TU, "base_price": 3800, "desc": "传说中女娲造人所用的神土，一粒可演化一方洞天", "origin": "中央荒原" },
 	]
 
 ## 每日随机刷新——凡品全上 + 少量灵品偶尔出现（宝品/仙品只能靠熔炼）
