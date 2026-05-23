@@ -52,6 +52,7 @@ func _ready():
 
 func _process(delta):
 	_process_interact_hint(delta)
+	queue_redraw()  # 调试可视化：每帧刷新交互范围颜色
 
 
 func _show_opening():
@@ -353,6 +354,20 @@ func _get_nearest_interact() -> Dictionary:
 			best_dist = d
 	return best
 
+
+## 调试可视化：画出所有交互范围（F3 切换显示，或默认在debug构建中显示）
+var _show_debug_overlay: bool = OS.is_debug_build()
+
+func _draw() -> void:
+	if not _show_debug_overlay:
+		return
+	for pt in interact_points:
+		var in_range = player and player.position.distance_to(pt.pos) < pt.radius
+		var col = Color.GREEN if in_range else Color(0.2, 0.6, 0.2, 0.15)
+		draw_circle(pt.pos, pt.radius, col, false, 1.0)
+		# 标签
+		draw_string(ThemeDB.fallback_font, pt.pos + Vector2(0, -pt.radius - 10), pt.name, HORIZONTAL_ALIGNMENT_CENTER, -1, 14, Color.WHITE)
+
 func _process_interact_hint(_delta):
 	var hint = find_child("InteractHint", false, false)
 	if not hint or not player:
@@ -388,6 +403,12 @@ func _do_interact(action: String):
 
 func _input(event):
 	if event is InputEventMouseMotion or event is InputEventMouseButton:
+		return
+	
+	# F3 切换调试可视化
+	if event is InputEventKey and event.keycode == KEY_F3 and event.pressed:
+		_show_debug_overlay = !_show_debug_overlay
+		get_viewport().set_input_as_handled()
 		return
 	
 	if event is InputEventKey and event.pressed and not event.echo:
