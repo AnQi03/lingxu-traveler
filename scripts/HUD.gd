@@ -155,11 +155,14 @@ func _update_display() -> void:
 	var stones = PlayerData.spirit_stones
 	var mids = PlayerData.mid_spirit_stones
 	var highs = PlayerData.high_spirit_stones
+	var extremes = PlayerData.extreme_spirit_stones
 	var text = "💰 %d" % stones
 	if mids > 0:
 		text += "  ⚪×%d" % mids
 	if highs > 0:
 		text += "  💎×%d" % highs
+	if extremes > 0:
+		text += "  ✨×%d" % extremes
 	stone_label.text = text
 
 	# 灵墟碎片计数

@@ -88,20 +88,29 @@ func _build_ui():
 	var btn_high = Button.new()
 	btn_high.name = "exchange_high_btn"
 	btn_high.text = "💎 上品→中品(1换100)"
-	btn_high.position = Vector2(540, 557)
-	btn_high.size = Vector2(180, 30)
-	btn_high.add_theme_font_size_override("font_size", 12)
+	btn_high.position = Vector2(500, 557)
+	btn_high.size = Vector2(170, 30)
+	btn_high.add_theme_font_size_override("font_size", 11)
 	btn_high.pressed.connect(_exchange_high)
 	market_ui.add_child(btn_high)
 	
 	var btn_mid = Button.new()
 	btn_mid.name = "exchange_mid_btn"
 	btn_mid.text = "💰 中品→下品(1换100)"
-	btn_mid.position = Vector2(730, 557)
-	btn_mid.size = Vector2(180, 30)
-	btn_mid.add_theme_font_size_override("font_size", 12)
+	btn_mid.position = Vector2(675, 557)
+	btn_mid.size = Vector2(170, 30)
+	btn_mid.add_theme_font_size_override("font_size", 11)
 	btn_mid.pressed.connect(_exchange_mid)
 	market_ui.add_child(btn_mid)
+	
+	var btn_extreme = Button.new()
+	btn_extreme.name = "exchange_extreme_btn"
+	btn_extreme.text = "✨ 极品→上品(1换100)"
+	btn_extreme.position = Vector2(850, 557)
+	btn_extreme.size = Vector2(170, 30)
+	btn_extreme.add_theme_font_size_override("font_size", 11)
+	btn_extreme.pressed.connect(_exchange_extreme)
+	market_ui.add_child(btn_extreme)
 	
 	var exchange_note = Label.new()
 	exchange_note.position = Vector2(920, 560)
@@ -226,12 +235,21 @@ func _exchange_mid():
 		PlayerData.emit_signal("stones_changed")
 		_refresh_exchange()
 
+func _exchange_extreme():
+	if PlayerData.exchange_do(3):
+		PlayerData.emit_signal("stones_changed")
+		_refresh_exchange()
+
 func _refresh_exchange():
 	var label = market_ui.find_child("exchange_label", true, false)
 	if label:
-		label.text = "💎 灵石庄 | 上品:%d  中品:%d  下品:%d (仅支持高兑低)" % [
-			PlayerData.high_spirit_stones, PlayerData.mid_spirit_stones, PlayerData.spirit_stones
+		label.text = "💎 灵石庄 | 极品:%d  上品:%d  中品:%d  下品:%d" % [
+			PlayerData.extreme_spirit_stones, PlayerData.high_spirit_stones,
+			PlayerData.mid_spirit_stones, PlayerData.spirit_stones
 		]
+	var btn_e = market_ui.find_child("exchange_extreme_btn", true, false)
+	if btn_e:
+		btn_e.disabled = (PlayerData.extreme_spirit_stones <= 0)
 	var btn_h = market_ui.find_child("exchange_high_btn", true, false)
 	if btn_h:
 		btn_h.disabled = (PlayerData.high_spirit_stones <= 0)

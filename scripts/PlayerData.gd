@@ -6,8 +6,9 @@ extends Node
 
 ## ---------- 灵石 ----------
 var spirit_stones: int = 150          # 下品灵石
-var mid_spirit_stones: int = 0       # 中品灵石
-var high_spirit_stones: int = 0      # 上品灵石
+var mid_spirit_stones: int = 0       # 中品灵石 (×100)
+var high_spirit_stones: int = 0      # 上品灵石 (×10000)
+var extreme_spirit_stones: int = 0   # 极品灵石 (×1000000)
 var total_earned: int = 0            # 累计收入
 
 ## ---------- 三道 ----------
@@ -24,6 +25,7 @@ var shang_voice_heard: bool = false      # 商道第一次说话
 var tian_voice_heard: bool = false       # 天道第一次说话
 var renxin_voice_heard: bool = false     # 人心第一次说话
 var first_high_stone: bool = false       # 第一次获得上品灵石
+var first_extreme_stone: bool = false    # 第一次获得极品灵石
 
 ## ---------- 年度评定 ----------
 var year_assessed: bool = false           # 是否已完成首次评定
@@ -263,7 +265,7 @@ func get_customer_memory(customer_name: String) -> Dictionary:
 # ============================================================
 
 func get_total_stones() -> int:
-	return spirit_stones + mid_spirit_stones * 100 + high_spirit_stones * 10000
+	return spirit_stones + mid_spirit_stones * 100 + high_spirit_stones * 10000 + extreme_spirit_stones * 1000000
 
 func spend_stones(amount: int) -> bool:
 	var total = get_total_stones()
@@ -271,6 +273,10 @@ func spend_stones(amount: int) -> bool:
 		return false
 	
 	var remaining = amount
+	while remaining >= 1000000 and extreme_spirit_stones > 0:
+		var use: int = mini(extreme_spirit_stones, int(float(remaining) / 1000000.0))
+		extreme_spirit_stones -= use
+		remaining -= use * 1000000
 	while remaining >= 10000 and high_spirit_stones > 0:
 		var use: int = mini(high_spirit_stones, int(float(remaining) / 10000.0))
 		high_spirit_stones -= use
@@ -287,7 +293,11 @@ func spend_stones(amount: int) -> bool:
 func earn_stones(amount: int) -> void:
 	total_earned += amount
 	var old_high = high_spirit_stones
+	var old_extreme = extreme_spirit_stones
 	var total = amount
+	while total >= 1000000:
+		extreme_spirit_stones += 1
+		total -= 1000000
 	while total >= 10000:
 		high_spirit_stones += 1
 		total -= 10000
@@ -301,18 +311,28 @@ func earn_stones(amount: int) -> void:
 		var hud = get_meta("hud")
 		if hud and hud.has_method("show_toast"):
 			hud.show_toast("💎 你获得了第一块上品灵石！灵墟商会都为之侧目…", Color(1, 0.85, 0.2), 5.0)
+	# 第一次获得极品灵石
+	if extreme_spirit_stones > old_extreme and not first_extreme_stone:
+		first_extreme_stone = true
+		var hud = get_meta("hud")
+		if hud and hud.has_method("show_toast"):
+			hud.show_toast("✨ 极品灵石！灵脉之核…整个灵墟都在震颤。你已踏入传说之列。", Color(1, 0.5, 0.9), 6.0)
 
-# 灵石兑换：仅支持高→低单向（保持上品稀有度）
-# 1上品 = 100中品, 1中品 = 100下品
+# 灵石兑换：仅支持高→低单向（保持稀有度）
+# 1极品=100上品, 1上品=100中品, 1中品=100下品
 func exchange_down() -> int:
-	"""返回可兑换的方案数。0=无可兑换。调用具体兑换用 exchange_do()"""
 	var options = 0
+	if extreme_spirit_stones > 0: options += 1
 	if high_spirit_stones > 0: options += 1
 	if mid_spirit_stones > 0: options += 1
 	return options
 
 func exchange_do(from_tier: int) -> bool:
-	"""from_tier: 2=上品→中品, 1=中品→下品。返回是否成功"""
+	"""from_tier: 3=极品→上品, 2=上品→中品, 1=中品→下品"""
+	if from_tier == 3 and extreme_spirit_stones > 0:
+		extreme_spirit_stones -= 1
+		high_spirit_stones += 100
+		return true
 	if from_tier == 2 and high_spirit_stones > 0:
 		high_spirit_stones -= 1
 		mid_spirit_stones += 100
@@ -477,6 +497,7 @@ func save_game() -> void:
 		"spirit_stones": spirit_stones,
 		"mid_spirit_stones": mid_spirit_stones,
 		"high_spirit_stones": high_spirit_stones,
+		"extreme_spirit_stones": extreme_spirit_stones,
 		"total_earned": total_earned,
 		"ling_shi": ling_shi,
 		"shang_dao": shang_dao,
@@ -500,6 +521,7 @@ func save_game() -> void:
 		"tian_voice_heard": tian_voice_heard,
 		"renxin_voice_heard": renxin_voice_heard,
 		"first_high_stone": first_high_stone,
+		"first_extreme_stone": first_extreme_stone,
 		"year_assessed": year_assessed,
 		"assessment_score": assessment_score,
 		"assessment_rating": assessment_rating,
@@ -529,6 +551,7 @@ func load_game() -> bool:
 	spirit_stones = data.get("spirit_stones", 150)
 	mid_spirit_stones = data.get("mid_spirit_stones", 0)
 	high_spirit_stones = data.get("high_spirit_stones", 0)
+	extreme_spirit_stones = data.get("extreme_spirit_stones", 0)
 	total_earned = data.get("total_earned", 0)
 	ling_shi = data.get("ling_shi", 80)
 	shang_dao = data.get("shang_dao", 0)
@@ -552,6 +575,7 @@ func load_game() -> bool:
 	tian_voice_heard = data.get("tian_voice_heard", false)
 	renxin_voice_heard = data.get("renxin_voice_heard", false)
 	first_high_stone = data.get("first_high_stone", false)
+	first_extreme_stone = data.get("first_extreme_stone", false)
 	year_assessed = data.get("year_assessed", false)
 	assessment_score = data.get("assessment_score", 0)
 	assessment_rating = data.get("assessment_rating", 0)
