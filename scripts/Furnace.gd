@@ -14,6 +14,17 @@ const TIER_PRICE = {
 	3: [8000000, 20000000],  # 仙品 — 八到二十极品
 }
 
+# 隐藏配方：特定灵材组合→额外效果
+# key = "材料1名字+材料2名字" (按字母序)
+const HIDDEN_RECIPES = {
+	"寒露草+赤炎草": {"name": "冰火双生", "desc": "冰火交融，灵力倍增", "upgrade_bonus": 0.30, "price_mult": 2.0},
+	"金灵砂+翠灵木": {"name": "金木相济", "desc": "金克木而相济，异变陡生", "upgrade_bonus": 0.25, "extra_output": 1},
+	"熔火石+铁星石": {"name": "星辰锻体", "desc": "星辰铁与熔火淬炼", "luck_bonus": 0.15, "fragment_mult": 2},
+	"地灵菇+极地苔": {"name": "地脉共鸣", "desc": "水土相生，地脉涌动", "extra_output": 2, "price_mult": 1.5},
+	"赤炎草+熔火石": {"name": "双火聚灵", "desc": "同源火系共振", "upgrade_bonus": 0.20},
+	"冰晶矿+寒露草": {"name": "玄冰凝晶", "desc": "至寒之物相融", "upgrade_bonus": 0.20, "price_mult": 1.8},
+}
+
 var is_open: bool = false
 var furnace_panel: Panel
 var strategy_panel: Panel
@@ -332,6 +343,13 @@ func _tier_price(tier: int) -> int:
 	var r = TIER_PRICE.get(tier, [4, 12])
 	return r[0] + randi() % (r[1] - r[0] + 1)
 
+func _check_recipe(name1: String, name2: String) -> Dictionary:
+	var key1 = name1 + "+" + name2
+	var key2 = name2 + "+" + name1
+	if HIDDEN_RECIPES.has(key1): return HIDDEN_RECIPES[key1]
+	if HIDDEN_RECIPES.has(key2): return HIDDEN_RECIPES[key2]
+	return {}
+
 
 func _refresh_items():
 	for child in item_grid.get_children():
@@ -431,6 +449,9 @@ func _refresh_selection():
 		var e1 = item.element
 		var e2 = item2.element
 		var rel = _get_element_relation(e1, e2)
+		var recipe = _check_recipe(item.name, item2.name)
+		if not recipe.is_empty():
+			rel += "  |  🧪 隐藏配方: %s" % recipe.name
 		combo_hint.text = rel
 		combo_hint.visible = true
 	elif combo_hint:
@@ -569,6 +590,11 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int, item2: Dictionary 
 	luck_table[1] += elem_bonus
 	luck_table[2] += elem_bonus
 	
+	# 隐藏配方检测
+	var recipe = {}
+	if not item2.is_empty():
+		recipe = _check_recipe(item.name, item2.name)
+	
 	var base_luck = luck_table[0]
 	var base_fail = 0.25
 	var base_destroy = 0.1
@@ -597,7 +623,25 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int, item2: Dictionary 
 	var roll = randf()
 	var result_text = "[%s] %s" % [feat_name, elem_text]
 	var result_color = Color(0.6, 0.6, 0.6)
-	var outcome_type = "same"  # upgrade / same / degrade / destroy
+	var outcome_type = "same"
+	
+	# 隐藏配方加成（在roll之前应用）
+	var recipe_price_mult = 1.0
+	var recipe_extra_output = 0
+	if not recipe.is_empty():
+		result_text += "🧪 [%s] " % recipe.name
+		if recipe.has("upgrade_bonus"):
+			base_luck += recipe.upgrade_bonus
+		if recipe.has("luck_bonus"):
+			base_luck += recipe.luck_bonus
+		recipe_price_mult = recipe.get("price_mult", 1.0)
+		recipe_extra_output = recipe.get("extra_output", 0)
+		# 首次发现配方
+		if not PlayerData.discovered_recipes.has(recipe.name):
+			PlayerData.discovered_recipes.append(recipe.name)
+			var hud = PlayerData.get_meta("hud")
+			if hud and hud.has_method("show_toast"):
+				hud.show_toast("🧪 发现隐藏配方: %s — %s" % [recipe.name, recipe.desc], Color(1, 0.7, 0.3), 5.0)
 	
 	if roll < base_destroy:
 		result_text += "💀 熔炼失败！灵材化为灰烬……\n🔮 但天道留下了灵墟碎片（+%d）" % (3 + WorldEvents.get_fragment_bonus(PlayerData.today_events))
@@ -641,10 +685,12 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int, item2: Dictionary 
 		var new_id = base_id + "_t" + str(nt)
 		PlayerData.add_item({
 			"id": new_id, "name": item.name, "tier": nt,
-			"element": item.element, "price": _tier_price(nt), "count": 1
+			"element": item.element, "price": int(_tier_price(nt) * recipe_price_mult), "count": 1
 		})
 		result_text += "✨ 升品成功！[%s] → [%s]！" % [tier_names[item.tier], tier_names[nt]]
 		result_color = Color(1, 0.8, 0.3)
+		if not recipe.is_empty():
+			result_color = Color(1, 0.7, 0.2)
 		outcome_type = "upgrade"
 		PlayerData.daily_refine_count += 1
 		PlayerData.tian_dao += 1

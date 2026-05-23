@@ -77,6 +77,7 @@ var orders: Array = []                     # 常客预订 [{name,tier,element,co
 ## ---------- 灵材图鉴 ----------
 var material_journal: Dictionary = {}      # 已发现的灵材 {"chiyancao_fan": true, ...}
 var journal_rewards_claimed: Array = []    # 已领取的图鉴奖励
+var discovered_recipes: Array = []         # 已发现的隐藏配方 ["冰火双生", ...]
 
 ## ---------- 五行 ----------
 const ELEMENT_NAMES = ["金", "木", "水", "火", "土"]
@@ -670,6 +671,7 @@ func save_game() -> void:
 		"rent_paid_day": rent_paid_day,
 		"orders": orders,
 		"material_journal": material_journal,
+		"discovered_recipes": discovered_recipes,
 		"consecutive_stall_days": consecutive_stall_days,
 		"inventory": inventory,
 		"customer_relations": customer_relations,
@@ -729,6 +731,7 @@ func load_game() -> bool:
 	rent_paid_day = data.get("rent_paid_day", 0)
 	orders = data.get("orders", [])
 	material_journal = data.get("material_journal", {})
+	discovered_recipes = data.get("discovered_recipes", [])
 	consecutive_stall_days = data.get("consecutive_stall_days", 0)
 	inventory = data.get("inventory", [])
 	customer_relations = data.get("customer_relations", {})
