@@ -49,7 +49,7 @@ func _ready() -> void:
 	pause_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	pause_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	pause_label.position = Vector2(0, 0)
-	pause_label.size = Vector2(100, 20)
+	pause_label.size = Vector2(150, 30)
 	pause_label.visible = false
 	$HUD_Background/TopBar.add_child(pause_label)
 	$HUD_Background/TopBar.move_child(pause_label, 2)
@@ -77,7 +77,7 @@ func _ready() -> void:
 	toast_label.add_theme_font_size_override("font_size", 16)
 	toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	toast_label.position = Vector2(0, 0)
-	toast_label.size = Vector2(1152, 40)
+	toast_label.size = Vector2(1728, 60)
 	toast_label.visible = false
 	toast_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	$HUD_Background.add_child(toast_label)

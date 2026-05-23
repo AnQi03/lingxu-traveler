@@ -48,8 +48,8 @@ func _build_ui():
 	furnace_panel.visible = false
 	add_child(furnace_panel)
 	
-	furnace_panel.position = Vector2(150, 50)
-	furnace_panel.size = Vector2(900, 580)
+	furnace_panel.position = Vector2(225, 75)
+	furnace_panel.size = Vector2(1350, 870)
 	
 	var bg = ColorRect.new()
 	bg.color = Color(0.10, 0.06, 0.04, 0.97)
@@ -70,7 +70,7 @@ func _build_ui():
 	
 	var title_bar = HBoxContainer.new()
 	title_bar.position = Vector2(0, 0)
-	title_bar.size = Vector2(900, 36)
+	title_bar.size = Vector2(1350, 54)
 	furnace_panel.add_child(title_bar)
 	
 	var title = Label.new()
@@ -89,21 +89,21 @@ func _build_ui():
 	var info = Label.new()
 	info.text = "  选择灵材投入熔炉（每天最多5次）  |  今日已熔炼: %d/5" % PlayerData.daily_refine_count
 	info.name = "refine_info"
-	info.position = Vector2(15, 40)
+	info.position = Vector2(22, 60)
 	info.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	info.add_theme_font_size_override("font_size", 13)
 	furnace_panel.add_child(info)
 	
 	var left_label = Label.new()
 	left_label.text = "  背包中的灵材"
-	left_label.position = Vector2(15, 65)
+	left_label.position = Vector2(22, 98)
 	left_label.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
 	left_label.add_theme_font_size_override("font_size", 15)
 	furnace_panel.add_child(left_label)
 	
 	var left_scroll = ScrollContainer.new()
-	left_scroll.position = Vector2(15, 88)
-	left_scroll.size = Vector2(420, 320)
+	left_scroll.position = Vector2(22, 132)
+	left_scroll.size = Vector2(630, 480)
 	furnace_panel.add_child(left_scroll)
 	
 	item_grid = GridContainer.new()
@@ -114,22 +114,22 @@ func _build_ui():
 	
 	var right_label = Label.new()
 	right_label.text = "  熔炼操作"
-	right_label.position = Vector2(460, 65)
+	right_label.position = Vector2(690, 98)
 	right_label.add_theme_color_override("font_color", Color(1, 0.6, 0.2))
 	right_label.add_theme_font_size_override("font_size", 15)
 	furnace_panel.add_child(right_label)
 	
 	var select_frame = ColorRect.new()
 	select_frame.name = "select_frame"
-	select_frame.position = Vector2(465, 90)
-	select_frame.size = Vector2(400, 80)
+	select_frame.position = Vector2(698, 135)
+	select_frame.size = Vector2(600, 120)
 	select_frame.color = Color(0.12, 0.08, 0.18, 0.8)
 	furnace_panel.add_child(select_frame)
 	
 	var select_name = Label.new()
 	select_name.name = "select_name"
 	select_name.text = "未选择灵材"
-	select_name.position = Vector2(475, 95)
+	select_name.position = Vector2(712, 142)
 	select_name.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 	select_name.add_theme_font_size_override("font_size", 14)
 	furnace_panel.add_child(select_name)
@@ -137,7 +137,7 @@ func _build_ui():
 	var select_desc = Label.new()
 	select_desc.name = "select_desc"
 	select_desc.text = "点击左侧背包中的灵材选择"
-	select_desc.position = Vector2(475, 118)
+	select_desc.position = Vector2(712, 177)
 	select_desc.add_theme_color_override("font_color", Color(0.4, 0.4, 0.4))
 	select_desc.add_theme_font_size_override("font_size", 12)
 	furnace_panel.add_child(select_desc)
@@ -145,8 +145,8 @@ func _build_ui():
 	var smelt_btn = Button.new()
 	smelt_btn.name = "smelt_btn"
 	smelt_btn.text = "🔥 开始熔炼"
-	smelt_btn.position = Vector2(610, 200)
-	smelt_btn.size = Vector2(160, 50)
+	smelt_btn.position = Vector2(915, 300)
+	smelt_btn.size = Vector2(240, 75)
 	smelt_btn.disabled = true
 	smelt_btn.pressed.connect(_do_smelt)
 	furnace_panel.add_child(smelt_btn)
@@ -154,15 +154,15 @@ func _build_ui():
 	# ---- 第二槽（双槽熔炼） ----
 	var slot2_frame = ColorRect.new()
 	slot2_frame.name = "select_frame2"
-	slot2_frame.position = Vector2(465, 180)
-	slot2_frame.size = Vector2(400, 50)
+	slot2_frame.position = Vector2(698, 270)
+	slot2_frame.size = Vector2(600, 75)
 	slot2_frame.color = Color(0.08, 0.06, 0.16, 0.6)
 	furnace_panel.add_child(slot2_frame)
 	
 	var slot2_name = Label.new()
 	slot2_name.name = "select_name2"
 	slot2_name.text = "+ 第二槽（可选·五行组合）"
-	slot2_name.position = Vector2(470, 185)
+	slot2_name.position = Vector2(705, 278)
 	slot2_name.add_theme_color_override("font_color", Color(0.4, 0.4, 0.5))
 	slot2_name.add_theme_font_size_override("font_size", 12)
 	furnace_panel.add_child(slot2_name)
@@ -170,8 +170,8 @@ func _build_ui():
 	var slot2_clear = Button.new()
 	slot2_clear.name = "slot2_clear"
 	slot2_clear.text = "清空"
-	slot2_clear.position = Vector2(820, 185)
-	slot2_clear.size = Vector2(40, 24)
+	slot2_clear.position = Vector2(1230, 278)
+	slot2_clear.size = Vector2(60, 36)
 	slot2_clear.add_theme_font_size_override("font_size", 10)
 	slot2_clear.pressed.connect(_clear_slot2)
 	slot2_clear.visible = false
@@ -179,8 +179,8 @@ func _build_ui():
 	
 	var slot2_hint = Label.new()
 	slot2_hint.name = "combo_hint"
-	slot2_hint.position = Vector2(465, 235)
-	slot2_hint.size = Vector2(400, 20)
+	slot2_hint.position = Vector2(698, 352)
+	slot2_hint.size = Vector2(600, 30)
 	slot2_hint.add_theme_color_override("font_color", Color(0.4, 0.5, 0.4))
 	slot2_hint.add_theme_font_size_override("font_size", 11)
 	furnace_panel.add_child(slot2_hint)
@@ -188,39 +188,39 @@ func _build_ui():
 	var upgrade_btn = Button.new()
 	upgrade_btn.name = "upgrade_btn"
 	upgrade_btn.text = "⬆ 升级熔炉"
-	upgrade_btn.position = Vector2(465, 200)
-	upgrade_btn.size = Vector2(140, 50)
+	upgrade_btn.position = Vector2(698, 300)
+	upgrade_btn.size = Vector2(210, 75)
 	upgrade_btn.pressed.connect(_do_upgrade)
 	furnace_panel.add_child(upgrade_btn)
 	
 	var slice_btn = Button.new()
 	slice_btn.name = "slice_btn"
 	slice_btn.text = "🔪 切片加工"
-	slice_btn.position = Vector2(610, 135)
-	slice_btn.size = Vector2(140, 50)
+	slice_btn.position = Vector2(915, 202)
+	slice_btn.size = Vector2(210, 75)
 	slice_btn.disabled = true
 	slice_btn.pressed.connect(_do_slice)
 	furnace_panel.add_child(slice_btn)
 	
 	var tier_label = Label.new()
 	tier_label.name = "tier_label"
-	tier_label.position = Vector2(465, 260)
-	tier_label.size = Vector2(400, 25)
+	tier_label.position = Vector2(698, 390)
+	tier_label.size = Vector2(600, 38)
 	tier_label.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
 	tier_label.add_theme_font_size_override("font_size", 12)
 	furnace_panel.add_child(tier_label)
 	
 	var result_bg = ColorRect.new()
 	result_bg.name = "result_bg"
-	result_bg.position = Vector2(465, 280)
-	result_bg.size = Vector2(400, 120)
+	result_bg.position = Vector2(698, 420)
+	result_bg.size = Vector2(600, 180)
 	result_bg.color = Color(0.08, 0.05, 0.12, 0.6)
 	furnace_panel.add_child(result_bg)
 	
 	result_label = Label.new()
 	result_label.name = "result_label"
-	result_label.position = Vector2(475, 290)
-	result_label.size = Vector2(380, 100)
+	result_label.position = Vector2(712, 435)
+	result_label.size = Vector2(570, 150)
 	result_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	result_label.add_theme_font_size_override("font_size", 13)
 	result_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -228,14 +228,14 @@ func _build_ui():
 	
 	var history_label = Label.new()
 	history_label.text = "  今日熔炼记录"
-	history_label.position = Vector2(15, 420)
+	history_label.position = Vector2(22, 630)
 	history_label.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
 	history_label.add_theme_font_size_override("font_size", 14)
 	furnace_panel.add_child(history_label)
 	
 	var history_scroll = ScrollContainer.new()
-	history_scroll.position = Vector2(15, 445)
-	history_scroll.size = Vector2(870, 120)
+	history_scroll.position = Vector2(22, 668)
+	history_scroll.size = Vector2(1305, 180)
 	furnace_panel.add_child(history_scroll)
 	
 	var history_box = VBoxContainer.new()
@@ -246,8 +246,8 @@ func _build_ui():
 	# ---- 策略选择面板（默认隐藏） ----
 	strategy_panel = Panel.new()
 	strategy_panel.visible = false
-	strategy_panel.position = Vector2(200, 100)
-	strategy_panel.size = Vector2(520, 280)
+	strategy_panel.position = Vector2(300, 150)
+	strategy_panel.size = Vector2(780, 420)
 	furnace_panel.add_child(strategy_panel)
 	
 	var s_bg = ColorRect.new()
@@ -259,7 +259,7 @@ func _build_ui():
 	var s_title = Label.new()
 	s_title.text = "⚡ 选择熔炼策略"
 	s_title.position = Vector2(0, 5)
-	s_title.size = Vector2(520, 30)
+	s_title.size = Vector2(780, 45)
 	s_title.add_theme_color_override("font_color", Color(1, 0.7, 0.2))
 	s_title.add_theme_font_size_override("font_size", 20)
 	s_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -267,8 +267,8 @@ func _build_ui():
 	
 	var s_info = Label.new()
 	s_info.name = "strategy_info"
-	s_info.position = Vector2(30, 40)
-	s_info.size = Vector2(460, 30)
+	s_info.position = Vector2(45, 60)
+	s_info.size = Vector2(690, 45)
 	s_info.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	s_info.add_theme_font_size_override("font_size", 13)
 	s_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -287,7 +287,7 @@ func _build_ui():
 		var btn = Button.new()
 		btn.text = s.name
 		btn.position = Vector2(40, y)
-		btn.size = Vector2(140, 50)
+		btn.size = Vector2(210, 75)
 		btn.add_theme_font_size_override("font_size", 15)
 		btn.pressed.connect(_on_strategy_picked.bind(i))
 		strategy_panel.add_child(btn)
@@ -295,7 +295,7 @@ func _build_ui():
 		var desc = Label.new()
 		desc.text = s.desc
 		desc.position = Vector2(195, y)
-		desc.size = Vector2(290, 50)
+		desc.size = Vector2(435, 75)
 		desc.add_theme_color_override("font_color", s.color)
 		desc.add_theme_font_size_override("font_size", 12)
 		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

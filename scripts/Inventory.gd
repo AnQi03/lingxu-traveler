@@ -27,8 +27,8 @@ func _build_ui():
 	inv_panel.visible = false
 	add_child(inv_panel)
 	
-	inv_panel.position = Vector2(120, 30)
-	inv_panel.size = Vector2(1050, 640)
+	inv_panel.position = Vector2(180, 45)
+	inv_panel.size = Vector2(1575, 960)
 	
 	var bg = ColorRect.new()
 	bg.color = Color(0.08, 0.1, 0.15, 0.97)
@@ -38,7 +38,7 @@ func _build_ui():
 	
 	var title_bar = HBoxContainer.new()
 	title_bar.position = Vector2(0, 0)
-	title_bar.size = Vector2(1050, 36)
+	title_bar.size = Vector2(1575, 54)
 	inv_panel.add_child(title_bar)
 	
 	var title = Label.new()
@@ -55,15 +55,15 @@ func _build_ui():
 	title_bar.add_child(close_btn)
 	
 	var filter_hbox = HBoxContainer.new()
-	filter_hbox.position = Vector2(15, 42)
-	filter_hbox.size = Vector2(1020, 30)
+	filter_hbox.position = Vector2(22, 63)
+	filter_hbox.size = Vector2(1530, 45)
 	inv_panel.add_child(filter_hbox)
 	
 	var filter_label = Label.new()
 	filter_label.text = "筛选品阶:"
 	filter_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	filter_label.add_theme_font_size_override("font_size", 14)
-	filter_label.custom_minimum_size = Vector2(80, 0)
+	filter_label.custom_minimum_size = Vector2(120, 0)
 	filter_hbox.add_child(filter_label)
 	
 	var all_btn = Button.new()
@@ -86,8 +86,8 @@ func _build_ui():
 	filter_hbox.add_child(count_label)
 	
 	var scroll = ScrollContainer.new()
-	scroll.position = Vector2(15, 78)
-	scroll.size = Vector2(1020, 555)
+	scroll.position = Vector2(22, 117)
+	scroll.size = Vector2(1530, 832)
 	inv_panel.add_child(scroll)
 	
 	item_grid = GridContainer.new()
@@ -181,30 +181,30 @@ func _refresh_items():
 		
 		var card = ColorRect.new()
 		card.color = card_color
-		card.custom_minimum_size = Vector2(330, 70)
+		card.custom_minimum_size = Vector2(495, 105)
 		
 		var elem_bar = ColorRect.new()
 		elem_bar.color = elem_col
-		elem_bar.size = Vector2(4, 70)
+		elem_bar.size = Vector2(6, 105)
 		card.add_child(elem_bar)
 		
 		var name_label = Label.new()
 		name_label.text = "[%s] %s" % [tier_str, item.name]
-		name_label.position = Vector2(12, 6)
+		name_label.position = Vector2(18, 9)
 		name_label.add_theme_color_override("font_color", Color.WHITE)
 		name_label.add_theme_font_size_override("font_size", 15)
 		card.add_child(name_label)
 		
 		var info_label = Label.new()
 		info_label.text = "五行: %s  |  数量: ×%d" % [elem_str, item.get("count", 1)]
-		info_label.position = Vector2(12, 28)
+		info_label.position = Vector2(18, 42)
 		info_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 		info_label.add_theme_font_size_override("font_size", 12)
 		card.add_child(info_label)
 		
 		var price_label = Label.new()
 		price_label.text = "%d灵石/个" % item.get("price", 0)
-		price_label.position = Vector2(12, 46)
+		price_label.position = Vector2(18, 69)
 		price_label.add_theme_color_override("font_color", Color(1, 0.87, 0.53))
 		price_label.add_theme_font_size_override("font_size", 12)
 		card.add_child(price_label)
@@ -212,7 +212,7 @@ func _refresh_items():
 		if item.has("origin") and item.origin != "":
 			var origin_label = Label.new()
 			origin_label.text = "来源: %s" % item.origin
-			origin_label.position = Vector2(200, 46)
+			origin_label.position = Vector2(300, 69)
 			origin_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 			origin_label.add_theme_font_size_override("font_size", 11)
 			card.add_child(origin_label)

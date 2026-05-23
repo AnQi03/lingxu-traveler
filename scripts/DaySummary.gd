@@ -19,8 +19,8 @@ func _build_ui():
 	summary_panel.visible = false
 	add_child(summary_panel)
 	
-	summary_panel.position = Vector2(320, 80)
-	summary_panel.size = Vector2(620, 490)
+	summary_panel.position = Vector2(480, 120)
+	summary_panel.size = Vector2(930, 735)
 	
 	var bg = ColorRect.new()
 	bg.color = Color(0.05, 0.08, 0.18, 0.95)
@@ -32,7 +32,7 @@ func _build_ui():
 	var title = Label.new()
 	title.name = "title_label"
 	title.position = Vector2(0, 0)
-	title.size = Vector2(620, 50)
+	title.size = Vector2(930, 75)
 	title.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
 	title.add_theme_font_size_override("font_size", 24)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -42,8 +42,8 @@ func _build_ui():
 	## 核心数据（紧凑横排）
 	var info_label = Label.new()
 	info_label.name = "info_label"
-	info_label.position = Vector2(30, 55)
-	info_label.size = Vector2(560, 50)
+	info_label.position = Vector2(45, 82)
+	info_label.size = Vector2(840, 75)
 	info_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	info_label.add_theme_font_size_override("font_size", 14)
 	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -52,15 +52,15 @@ func _build_ui():
 	## 分隔线
 	var sep1 = HSeparator.new()
 	sep1.name = "sep1"
-	sep1.position = Vector2(30, 110)
-	sep1.size = Vector2(560, 2)
+	sep1.position = Vector2(45, 165)
+	sep1.size = Vector2(840, 3)
 	summary_panel.add_child(sep1)
 	
 	## 熔炉升级进度条
 	var furnace_bar = Label.new()
 	furnace_bar.name = "furnace_bar"
-	furnace_bar.position = Vector2(30, 118)
-	furnace_bar.size = Vector2(560, 22)
+	furnace_bar.position = Vector2(45, 177)
+	furnace_bar.size = Vector2(840, 33)
 	furnace_bar.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3))
 	furnace_bar.add_theme_font_size_override("font_size", 13)
 	summary_panel.add_child(furnace_bar)
@@ -68,8 +68,8 @@ func _build_ui():
 	## 碎片收集进度条
 	var fragment_bar = Label.new()
 	fragment_bar.name = "fragment_bar"
-	fragment_bar.position = Vector2(30, 143)
-	fragment_bar.size = Vector2(560, 22)
+	fragment_bar.position = Vector2(45, 214)
+	fragment_bar.size = Vector2(840, 33)
 	fragment_bar.add_theme_color_override("font_color", Color(0.7, 0.45, 0.85))
 	fragment_bar.add_theme_font_size_override("font_size", 13)
 	summary_panel.add_child(fragment_bar)
@@ -77,8 +77,8 @@ func _build_ui():
 	## 里程碑倒计时
 	var milestone_label = Label.new()
 	milestone_label.name = "milestone_label"
-	milestone_label.position = Vector2(30, 170)
-	milestone_label.size = Vector2(560, 22)
+	milestone_label.position = Vector2(45, 255)
+	milestone_label.size = Vector2(840, 33)
 	milestone_label.add_theme_color_override("font_color", Color(0.5, 1.0, 0.7))
 	milestone_label.add_theme_font_size_override("font_size", 13)
 	summary_panel.add_child(milestone_label)
@@ -86,15 +86,15 @@ func _build_ui():
 	## 分隔线2
 	var sep2 = HSeparator.new()
 	sep2.name = "sep2"
-	sep2.position = Vector2(30, 198)
-	sep2.size = Vector2(560, 2)
+	sep2.position = Vector2(45, 297)
+	sep2.size = Vector2(840, 3)
 	summary_panel.add_child(sep2)
 	
 	## 明日预告（亮点）
 	var tomorrow_label = Label.new()
 	tomorrow_label.name = "tomorrow_label"
-	tomorrow_label.position = Vector2(30, 205)
-	tomorrow_label.size = Vector2(560, 55)
+	tomorrow_label.position = Vector2(45, 308)
+	tomorrow_label.size = Vector2(840, 82)
 	tomorrow_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.5))
 	tomorrow_label.add_theme_font_size_override("font_size", 15)
 	tomorrow_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -103,8 +103,8 @@ func _build_ui():
 	## 小目标
 	var goal_label = Label.new()
 	goal_label.name = "goal_label"
-	goal_label.position = Vector2(30, 265)
-	goal_label.size = Vector2(560, 40)
+	goal_label.position = Vector2(45, 398)
+	goal_label.size = Vector2(840, 60)
 	goal_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	goal_label.add_theme_font_size_override("font_size", 14)
 	goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -113,8 +113,8 @@ func _build_ui():
 	## 管家来信
 	var butler_label = Label.new()
 	butler_label.name = "butler_label"
-	butler_label.position = Vector2(30, 310)
-	butler_label.size = Vector2(560, 55)
+	butler_label.position = Vector2(45, 465)
+	butler_label.size = Vector2(840, 82)
 	butler_label.add_theme_color_override("font_color", Color(0.5, 1.0, 0.7))
 	butler_label.add_theme_font_size_override("font_size", 13)
 	butler_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -124,8 +124,8 @@ func _build_ui():
 	## 世界反馈
 	var world_label = Label.new()
 	world_label.name = "world_label"
-	world_label.position = Vector2(30, 380)
-	world_label.size = Vector2(560, 40)
+	world_label.position = Vector2(45, 570)
+	world_label.size = Vector2(840, 60)
 	world_label.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
 	world_label.add_theme_font_size_override("font_size", 12)
 	world_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -136,8 +136,8 @@ func _build_ui():
 	var hint = Label.new()
 	hint.name = "hint_label"
 	hint.text = "（点击任意位置继续，或12秒后自动消失……）"
-	hint.position = Vector2(0, 455)
-	hint.size = Vector2(620, 30)
+	hint.position = Vector2(0, 682)
+	hint.size = Vector2(930, 45)
 	hint.add_theme_color_override("font_color", Color(0.4, 0.4, 0.5))
 	hint.add_theme_font_size_override("font_size", 12)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

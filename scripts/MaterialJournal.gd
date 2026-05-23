@@ -12,8 +12,8 @@ func _ready():
 
 func _build_ui():
 	journal_panel = Panel.new()
-	journal_panel.position = Vector2(120, 40)
-	journal_panel.size = Vector2(1040, 600)
+	journal_panel.position = Vector2(180, 60)
+	journal_panel.size = Vector2(1560, 900)
 	journal_panel.visible = false
 	add_child(journal_panel)
 	
@@ -24,7 +24,7 @@ func _build_ui():
 	
 	var title_bar = HBoxContainer.new()
 	title_bar.position = Vector2(0, 0)
-	title_bar.size = Vector2(1040, 36)
+	title_bar.size = Vector2(1560, 54)
 	journal_panel.add_child(title_bar)
 	
 	var title = Label.new()
@@ -39,8 +39,8 @@ func _build_ui():
 	title_bar.add_child(close_btn)
 	
 	content = VBoxContainer.new()
-	content.position = Vector2(20, 46)
-	content.size = Vector2(1000, 540)
+	content.position = Vector2(30, 69)
+	content.size = Vector2(1500, 810)
 	content.add_theme_constant_override("separation", 8)
 	journal_panel.add_child(content)
 
@@ -49,7 +49,6 @@ func toggle():
 		_build_ui()
 	if is_open: close()
 	else: open()
-
 func open():
 	if not journal_panel:
 		_build_ui()

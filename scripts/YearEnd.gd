@@ -12,8 +12,8 @@ func _ready():
 
 func _build_ui():
 	panel = Panel.new()
-	panel.position = Vector2(200, 60)
-	panel.size = Vector2(752, 530)
+	panel.position = Vector2(300, 90)
+	panel.size = Vector2(1128, 795)
 	add_child(panel)
 	
 	var bg = ColorRect.new()
@@ -32,8 +32,8 @@ func _build_ui():
 	# 标题
 	var title = Label.new()
 	title.text = "🏛️ 灵墟商会 · 年度评定"
-	title.position = Vector2(0, 15)
-	title.size = Vector2(752, 40)
+	title.position = Vector2(0, 22)
+	title.size = Vector2(1128, 60)
 	title.add_theme_color_override("font_color", Color(1, 0.85, 0.3))
 	title.add_theme_font_size_override("font_size", 26)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -42,8 +42,8 @@ func _build_ui():
 	# 评级
 	var rating = Label.new()
 	rating.text = result.rating_text
-	rating.position = Vector2(0, 60)
-	rating.size = Vector2(752, 50)
+	rating.position = Vector2(0, 90)
+	rating.size = Vector2(1128, 75)
 	rating.add_theme_color_override("font_color", result.rating_color)
 	rating.add_theme_font_size_override("font_size", 30)
 	rating.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -52,8 +52,8 @@ func _build_ui():
 	# 分数
 	var score_label = Label.new()
 	score_label.text = "得分：%d / %d" % [result.score, result.max_score]
-	score_label.position = Vector2(0, 110)
-	score_label.size = Vector2(752, 25)
+	score_label.position = Vector2(0, 165)
+	score_label.size = Vector2(1128, 38)
 	score_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	score_label.add_theme_font_size_override("font_size", 16)
 	score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -61,30 +61,30 @@ func _build_ui():
 	
 	# 分隔线
 	var sep = HSeparator.new()
-	sep.position = Vector2(60, 145)
-	sep.size = Vector2(632, 2)
+	sep.position = Vector2(90, 218)
+	sep.size = Vector2(948, 3)
 	panel.add_child(sep)
 	
 	# 各项得分
 	var parts_label = Label.new()
 	parts_label.text = "\n".join(result.parts)
-	parts_label.position = Vector2(80, 155)
-	parts_label.size = Vector2(592, 100)
+	parts_label.position = Vector2(120, 232)
+	parts_label.size = Vector2(888, 150)
 	parts_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	parts_label.add_theme_font_size_override("font_size", 13)
 	panel.add_child(parts_label)
 	
 	# 分隔线2
 	var sep2 = HSeparator.new()
-	sep2.position = Vector2(60, 260)
-	sep2.size = Vector2(632, 2)
+	sep2.position = Vector2(90, 390)
+	sep2.size = Vector2(948, 3)
 	panel.add_child(sep2)
 	
 	# 叙事文字
 	var narrative = Label.new()
 	narrative.text = result.narrative
-	narrative.position = Vector2(60, 270)
-	narrative.size = Vector2(632, 50)
+	narrative.position = Vector2(90, 405)
+	narrative.size = Vector2(948, 75)
 	narrative.add_theme_color_override("font_color", Color(0.5, 1.0, 0.7))
 	narrative.add_theme_font_size_override("font_size", 15)
 	narrative.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -94,8 +94,8 @@ func _build_ui():
 	# 管家来信
 	var butler = Label.new()
 	butler.text = _get_butler_assessment(result.rating)
-	butler.position = Vector2(60, 330)
-	butler.size = Vector2(632, 60)
+	butler.position = Vector2(90, 495)
+	butler.size = Vector2(948, 90)
 	butler.add_theme_color_override("font_color", Color(0.5, 1.0, 0.7))
 	butler.add_theme_font_size_override("font_size", 13)
 	butler.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -104,8 +104,8 @@ func _build_ui():
 	# 统计
 	var stats = Label.new()
 	stats.text = _get_stats()
-	stats.position = Vector2(60, 400)
-	stats.size = Vector2(632, 60)
+	stats.position = Vector2(90, 600)
+	stats.size = Vector2(948, 90)
 	stats.add_theme_color_override("font_color", Color(0.5, 0.6, 0.8))
 	stats.add_theme_font_size_override("font_size", 12)
 	stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -113,8 +113,8 @@ func _build_ui():
 	
 	var hint = Label.new()
 	hint.text = "评定结束。你可以继续在灵墟经营下去。\n（点击任意位置继续）"
-	hint.position = Vector2(0, 475)
-	hint.size = Vector2(752, 40)
+	hint.position = Vector2(0, 712)
+	hint.size = Vector2(1128, 60)
 	hint.add_theme_color_override("font_color", Color(0.4, 0.4, 0.5))
 	hint.add_theme_font_size_override("font_size", 13)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

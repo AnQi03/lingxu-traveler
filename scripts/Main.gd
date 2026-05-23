@@ -65,7 +65,7 @@ func _show_opening():
 func _create_scene_background():
 	scene_bg = TextureRect.new()
 	scene_bg.name = "SceneBackground"
-	scene_bg.size = Vector2(1152, 648)
+	scene_bg.size = Vector2(1728, 972)
 	scene_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	scene_bg.stretch_mode = TextureRect.STRETCH_SCALE
 	scene_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -74,15 +74,15 @@ func _create_scene_background():
 	
 	var overlay = ColorRect.new()
 	overlay.name = "SceneOverlay"
-	overlay.size = Vector2(1152, 648)
+	overlay.size = Vector2(1728, 972)
 	overlay.color = Color(0, 0, 0, 0.35)
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	scene_bg.add_child(overlay)
 	
 	atmosphere_label = Label.new()
 	atmosphere_label.name = "Atmosphere"
-	atmosphere_label.position = Vector2(0, 590)
-	atmosphere_label.size = Vector2(1152, 50)
+	atmosphere_label.position = Vector2(0, 885)
+	atmosphere_label.size = Vector2(1728, 75)
 	atmosphere_label.add_theme_font_size_override("font_size", 13)
 	atmosphere_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	atmosphere_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -264,7 +264,7 @@ func _on_period_changed(_period: String):
 func _create_player():
 	player = Player.new()
 	player.name = "Player"
-	player.position = Vector2(576, 324)
+	player.position = Vector2(864, 486)
 	add_child(player)
 	
 	var sprite = Sprite2D.new()
@@ -298,19 +298,19 @@ func _setup_camera():
 
 func _create_interact_points():
 	interact_points = [
-		{"name": "集市", "pos": Vector2(150, 324), "radius": 100, "action": "market"},
-		{"name": "摊位", "pos": Vector2(576, 420), "radius": 100, "action": "stall"},
-		{"name": "熔炉", "pos": Vector2(950, 324), "radius": 100, "action": "furnace"},
+		{"name": "集市", "pos": Vector2(225, 486), "radius": 100, "action": "market"},
+		{"name": "摊位", "pos": Vector2(864, 630), "radius": 100, "action": "stall"},
+		{"name": "熔炉", "pos": Vector2(1425, 486), "radius": 100, "action": "furnace"},
 	]
 	
 	# 建筑精灵（场景装饰）
-	_spawn_building(Vector2(120, 280), "res://assets/img/buildings/market_shop.png", 0.15)
-	_spawn_building(Vector2(540, 370), "res://assets/img/buildings/stall_stand.png", 0.13)
-	_spawn_building(Vector2(910, 280), "res://assets/img/buildings/furnace_forge.png", 0.14)
+	_spawn_building(Vector2(180, 420), "res://assets/img/buildings/market_shop.png", 0.15)
+	_spawn_building(Vector2(810, 555), "res://assets/img/buildings/stall_stand.png", 0.13)
+	_spawn_building(Vector2(1365, 420), "res://assets/img/buildings/furnace_forge.png", 0.14)
 	
 	# 装饰NPC（让场景有生气）
-	_spawn_npc(Vector2(80, 260), "res://assets/img/characters/npc_elder.png", 0.12)
-	_spawn_npc(Vector2(1050, 380), "res://assets/img/characters/npc_girl.png", 0.12)
+	_spawn_npc(Vector2(120, 390), "res://assets/img/characters/npc_elder.png", 0.12)
+	_spawn_npc(Vector2(1575, 570), "res://assets/img/characters/npc_girl.png", 0.12)
 	
 	var hint = Label.new()
 	hint.name = "InteractHint"
@@ -362,7 +362,7 @@ func _process_interact_hint(_delta):
 	else:
 		hint.text = "🏷 按 E — %s" % nearest.name
 		hint.position = player.position + Vector2(-60, -50)
-		hint.size = Vector2(120, 30)
+		hint.size = Vector2(180, 45)
 		hint.visible = true
 
 func _do_interact(action: String):

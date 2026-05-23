@@ -29,8 +29,8 @@ func _ready():
 
 func _build_ui():
 	panel = Panel.new()
-	panel.position = Vector2(180, 80)
-	panel.size = Vector2(792, 460)
+	panel.position = Vector2(270, 120)
+	panel.size = Vector2(1188, 690)
 	add_child(panel)
 	
 	var bg = ColorRect.new()
@@ -52,8 +52,8 @@ func _render_page():
 	
 	var title = Label.new()
 	title.text = p.title
-	title.position = Vector2(0, 30)
-	title.size = Vector2(792, 40)
+	title.position = Vector2(0, 45)
+	title.size = Vector2(1188, 60)
 	title.add_theme_color_override("font_color", p.color)
 	title.add_theme_font_size_override("font_size", 28)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -61,8 +61,8 @@ func _render_page():
 	
 	var text = Label.new()
 	text.text = p.text
-	text.position = Vector2(50, 85)
-	text.size = Vector2(692, 280)
+	text.position = Vector2(75, 128)
+	text.size = Vector2(1038, 420)
 	text.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
 	text.add_theme_font_size_override("font_size", 17)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -71,8 +71,8 @@ func _render_page():
 	
 	var hint = Label.new()
 	hint.text = "（点击任意位置继续）" if page < pages.size() - 1 else "（点击开始游戏）"
-	hint.position = Vector2(0, 400)
-	hint.size = Vector2(792, 30)
+	hint.position = Vector2(0, 600)
+	hint.size = Vector2(1188, 45)
 	hint.add_theme_color_override("font_color", Color(0.4, 0.4, 0.5))
 	hint.add_theme_font_size_override("font_size", 14)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

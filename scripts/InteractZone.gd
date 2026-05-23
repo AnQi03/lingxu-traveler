@@ -20,7 +20,7 @@ func _ready():
 	prompt_label.visible = false
 	add_child(prompt_label)
 	prompt_label.position = Vector2(-60, -30)
-	prompt_label.size = Vector2(120, 20)
+	prompt_label.size = Vector2(180, 30)
 
 
 func _on_body_entered(body):

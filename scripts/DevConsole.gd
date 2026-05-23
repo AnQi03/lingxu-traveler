@@ -16,8 +16,8 @@ func _build_ui():
 	dev_panel.visible = false
 	add_child(dev_panel)
 	
-	dev_panel.position = Vector2(100, 30)
-	dev_panel.size = Vector2(1100, 640)
+	dev_panel.position = Vector2(150, 45)
+	dev_panel.size = Vector2(1650, 960)
 	
 	var bg = ColorRect.new()
 	bg.color = Color(0.05, 0.08, 0.15, 0.97)
@@ -27,7 +27,7 @@ func _build_ui():
 	
 	var title_bar = HBoxContainer.new()
 	title_bar.position = Vector2(0, 0)
-	title_bar.size = Vector2(1100, 36)
+	title_bar.size = Vector2(1650, 54)
 	dev_panel.add_child(title_bar)
 	
 	var title = Label.new()
@@ -44,8 +44,8 @@ func _build_ui():
 	title_bar.add_child(close_btn)
 	
 	var scroll = ScrollContainer.new()
-	scroll.position = Vector2(15, 45)
-	scroll.size = Vector2(1070, 575)
+	scroll.position = Vector2(22, 68)
+	scroll.size = Vector2(1605, 862)
 	dev_panel.add_child(scroll)
 	
 	var vbox = VBoxContainer.new()
@@ -70,7 +70,7 @@ func _build_ui():
 	advance_label.text = "时间推进:"
 	advance_label.add_theme_color_override("font_color", Color.WHITE)
 	advance_label.add_theme_font_size_override("font_size", 14)
-	advance_label.custom_minimum_size = Vector2(120, 0)
+	advance_label.custom_minimum_size = Vector2(180, 0)
 	advance_hbox.add_child(advance_label)
 	
 	var advance_1h = Button.new()
@@ -114,13 +114,13 @@ func _build_ui():
 	item_label.text = "选择灵材:"
 	item_label.add_theme_color_override("font_color", Color.WHITE)
 	item_label.add_theme_font_size_override("font_size", 14)
-	item_label.custom_minimum_size = Vector2(120, 0)
+	item_label.custom_minimum_size = Vector2(180, 0)
 	item_hbox.add_child(item_label)
 	
 	var item_option = OptionButton.new()
 	item_option.name = "item_selector"
 	item_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	item_option.custom_minimum_size = Vector2(350, 0)
+	item_option.custom_minimum_size = Vector2(525, 0)
 	
 	var tier_names = ["凡", "灵", "宝", "仙"]
 	var element_icons = ["金", "木", "水", "火", "土"]
@@ -137,7 +137,7 @@ func _build_ui():
 	count_spin.min_value = 1
 	count_spin.max_value = 999
 	count_spin.value = 1
-	count_spin.custom_minimum_size = Vector2(80, 0)
+	count_spin.custom_minimum_size = Vector2(120, 0)
 	item_hbox.add_child(count_spin)
 	
 	var add_item_btn = Button.new()
@@ -220,14 +220,14 @@ func _add_field_row(parent: VBoxContainer, label_text: String, setter_method: St
 	label.text = label_text
 	label.add_theme_color_override("font_color", Color.WHITE)
 	label.add_theme_font_size_override("font_size", 14)
-	label.custom_minimum_size = Vector2(120, 0)
+	label.custom_minimum_size = Vector2(180, 0)
 	hbox.add_child(label)
 	
 	var line_edit = LineEdit.new()
 	line_edit.name = "input_" + setter_method
 	line_edit.text = str(default_value)
 	line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	line_edit.custom_minimum_size = Vector2(100, 0)
+	line_edit.custom_minimum_size = Vector2(150, 0)
 	hbox.add_child(line_edit)
 	
 	var set_btn = Button.new()

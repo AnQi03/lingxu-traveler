@@ -17,8 +17,8 @@ func _build_ui():
 	market_ui.visible = false
 	add_child(market_ui)
 	
-	market_ui.position = Vector2(100, 40)
-	market_ui.size = Vector2(1080, 600)
+	market_ui.position = Vector2(150, 60)
+	market_ui.size = Vector2(1620, 900)
 	
 	var bg = ColorRect.new()
 	bg.color = Color(0.14, 0.10, 0.06, 0.95)  # 暖暗底，仿羊皮纸暗面
@@ -40,7 +40,7 @@ func _build_ui():
 	
 	var title_bar = HBoxContainer.new()
 	title_bar.position = Vector2(0, 0)
-	title_bar.size = Vector2(1080, 40)
+	title_bar.size = Vector2(1620, 60)
 	market_ui.add_child(title_bar)
 	
 	var title = Label.new()
@@ -57,8 +57,8 @@ func _build_ui():
 	title_bar.add_child(close_btn)
 	
 	var scroll = ScrollContainer.new()
-	scroll.position = Vector2(20, 50)
-	scroll.size = Vector2(1040, 530)
+	scroll.position = Vector2(30, 75)
+	scroll.size = Vector2(1560, 795)
 	market_ui.add_child(scroll)
 	
 	item_grid = GridContainer.new()
@@ -73,15 +73,15 @@ func _build_ui():
 	var qty_label = Label.new()
 	qty_label.name = "qty_label"
 	qty_label.text = "数量: ×1"
-	qty_label.position = Vector2(20, 50)
+	qty_label.position = Vector2(30, 75)
 	qty_label.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
 	qty_label.add_theme_font_size_override("font_size", 13)
 	market_ui.add_child(qty_label)
 	
 	var qty_slider = HSlider.new()
 	qty_slider.name = "qty_slider"
-	qty_slider.position = Vector2(120, 52)
-	qty_slider.size = Vector2(200, 20)
+	qty_slider.position = Vector2(180, 78)
+	qty_slider.size = Vector2(300, 30)
 	qty_slider.min_value = 1
 	qty_slider.max_value = 20
 	qty_slider.step = 1
@@ -92,28 +92,28 @@ func _build_ui():
 	var qty_max_btn = Button.new()
 	qty_max_btn.name = "qty_max_btn"
 	qty_max_btn.text = "最大"
-	qty_max_btn.position = Vector2(330, 50)
-	qty_max_btn.size = Vector2(50, 24)
+	qty_max_btn.position = Vector2(495, 75)
+	qty_max_btn.size = Vector2(75, 36)
 	qty_max_btn.add_theme_font_size_override("font_size", 11)
 	qty_max_btn.pressed.connect(_on_qty_max)
 	market_ui.add_child(qty_max_btn)
 	
 	# 调整 scroll 位置让出滑块空间
-	scroll.position = Vector2(20, 80)
-	scroll.size = Vector2(1040, 470)
+	scroll.position = Vector2(30, 120)
+	scroll.size = Vector2(1560, 705)
 	
 	# ---- 灵石庄 ----
 	var exchange_bg = ColorRect.new()
 	exchange_bg.name = "exchange_bg"
-	exchange_bg.position = Vector2(20, 540)
-	exchange_bg.size = Vector2(1040, 28)
+	exchange_bg.position = Vector2(30, 810)
+	exchange_bg.size = Vector2(1560, 42)
 	exchange_bg.color = Color(0.08, 0.05, 0.15, 0.8)
 	market_ui.add_child(exchange_bg)
 	
 	var exchange_label = Label.new()
 	exchange_label.name = "exchange_label"
-	exchange_label.position = Vector2(30, 542)
-	exchange_label.size = Vector2(450, 24)
+	exchange_label.position = Vector2(45, 813)
+	exchange_label.size = Vector2(675, 36)
 	exchange_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	exchange_label.add_theme_font_size_override("font_size", 11)
 	market_ui.add_child(exchange_label)
@@ -121,8 +121,8 @@ func _build_ui():
 	var btn_extreme = Button.new()
 	btn_extreme.name = "exchange_extreme_btn"
 	btn_extreme.text = "✨极品→上品"
-	btn_extreme.position = Vector2(500, 540)
-	btn_extreme.size = Vector2(130, 26)
+	btn_extreme.position = Vector2(750, 810)
+	btn_extreme.size = Vector2(195, 39)
 	btn_extreme.add_theme_font_size_override("font_size", 10)
 	btn_extreme.pressed.connect(_exchange_extreme)
 	market_ui.add_child(btn_extreme)
@@ -130,8 +130,8 @@ func _build_ui():
 	var btn_high = Button.new()
 	btn_high.name = "exchange_high_btn"
 	btn_high.text = "💎上品→中品"
-	btn_high.position = Vector2(635, 540)
-	btn_high.size = Vector2(130, 26)
+	btn_high.position = Vector2(952, 810)
+	btn_high.size = Vector2(195, 39)
 	btn_high.add_theme_font_size_override("font_size", 10)
 	btn_high.pressed.connect(_exchange_high)
 	market_ui.add_child(btn_high)
@@ -139,8 +139,8 @@ func _build_ui():
 	var btn_mid = Button.new()
 	btn_mid.name = "exchange_mid_btn"
 	btn_mid.text = "💰中品→下品"
-	btn_mid.position = Vector2(770, 540)
-	btn_mid.size = Vector2(130, 26)
+	btn_mid.position = Vector2(1155, 810)
+	btn_mid.size = Vector2(195, 39)
 	btn_mid.add_theme_font_size_override("font_size", 10)
 	btn_mid.pressed.connect(_exchange_mid)
 	market_ui.add_child(btn_mid)
@@ -149,8 +149,8 @@ func _build_ui():
 	var intel_btn = Button.new()
 	intel_btn.name = "intel_btn"
 	intel_btn.text = "🔮 灵墟情报(100)"
-	intel_btn.position = Vector2(500, 572)
-	intel_btn.size = Vector2(150, 26)
+	intel_btn.position = Vector2(750, 858)
+	intel_btn.size = Vector2(225, 39)
 	intel_btn.add_theme_font_size_override("font_size", 10)
 	intel_btn.pressed.connect(_buy_intel)
 	market_ui.add_child(intel_btn)
@@ -158,8 +158,8 @@ func _build_ui():
 	var deco_fire = Button.new()
 	deco_fire.name = "deco_fire"
 	deco_fire.text = "🔥火系招牌(5000)"
-	deco_fire.position = Vector2(655, 572)
-	deco_fire.size = Vector2(140, 26)
+	deco_fire.position = Vector2(982, 858)
+	deco_fire.size = Vector2(210, 39)
 	deco_fire.add_theme_font_size_override("font_size", 10)
 	deco_fire.pressed.connect(_buy_deco.bind("fire_sign", 5000, "🔥火系招牌"))
 	market_ui.add_child(deco_fire)
@@ -167,8 +167,8 @@ func _build_ui():
 	var deco_charm = Button.new()
 	deco_charm.name = "deco_charm"
 	deco_charm.text = "💝熟客牌(3000)"
-	deco_charm.position = Vector2(800, 572)
-	deco_charm.size = Vector2(130, 26)
+	deco_charm.position = Vector2(1200, 858)
+	deco_charm.size = Vector2(195, 39)
 	deco_charm.add_theme_font_size_override("font_size", 10)
 	deco_charm.pressed.connect(_buy_deco.bind("regular_charm", 3000, "💝熟客牌"))
 	market_ui.add_child(deco_charm)
@@ -238,7 +238,7 @@ func _refresh_grid():
 		var elem_str = element_icons[inst.element] if inst.element >= 0 else "无"
 		
 		var card = Panel.new()
-		card.custom_minimum_size = Vector2(500, 80)
+		card.custom_minimum_size = Vector2(750, 120)
 		
 		var vbox = VBoxContainer.new()
 		vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
