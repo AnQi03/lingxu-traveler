@@ -23,11 +23,11 @@ static func get_market_items() -> Array:
 		{ "id": "tengluomu_fan", "name": "藤萝木", "tier": Tier.FAN, "element": Element.MU, "base_price": 7, "desc": "柔韧的灵木纤维，制符常用", "origin": "苍木域" },
 		{ "id": "tiexingshi_fan", "name": "铁星石", "tier": Tier.FAN, "element": Element.JIN, "base_price": 9, "desc": "含微量星辰铁的矿石", "origin": "金戈域" },
 		# ===== 灵品（5种）— 偶尔出现，熔炼起始目标 =====
-		{ "id": "chiyancao_ling", "name": "赤炎草·灵", "tier": Tier.LING, "element": Element.HUO, "base_price": 50, "desc": "百年火候的灵草，炼丹师最爱", "origin": "炎狱域", "market_rare": true },
-		{ "id": "cuilingmu_ling", "name": "翠灵木·灵", "tier": Tier.LING, "element": Element.MU, "base_price": 55, "desc": "千年灵木的嫩枝，灵气充沛", "origin": "苍木域", "market_rare": true },
-		{ "id": "jinlingshi_ling", "name": "金灵石", "tier": Tier.LING, "element": Element.JIN, "base_price": 48, "desc": "蕴含锐金之气的矿石", "origin": "金戈域", "market_rare": true },
-		{ "id": "hanluyu_ling", "name": "寒露玉", "tier": Tier.LING, "element": Element.SHUI, "base_price": 52, "desc": "万载寒露凝成的灵玉", "origin": "玄冰域", "market_rare": true },
-		{ "id": "dilinggu_ling", "name": "地灵菇", "tier": Tier.LING, "element": Element.TU, "base_price": 45, "desc": "吸取地脉灵气的奇菌", "origin": "中央荒原", "market_rare": true },
+		{ "id": "chiyancao_ling", "name": "赤炎草·灵", "tier": Tier.LING, "element": Element.HUO, "base_price": 200, "desc": "百年火候的灵草。二枚中品灵石——炼丹师攒一个月才舍得买", "origin": "炎狱域", "market_rare": true },
+		{ "id": "cuilingmu_ling", "name": "翠灵木·灵", "tier": Tier.LING, "element": Element.MU, "base_price": 500, "desc": "千年灵木的嫩枝。五中品——小宗门长老才能随意出手", "origin": "苍木域", "market_rare": true },
+		{ "id": "jinlingshi_ling", "name": "金灵石", "tier": Tier.LING, "element": Element.JIN, "base_price": 300, "desc": "蕴含锐金之气的矿石。三中品——炼器师的最爱", "origin": "金戈域", "market_rare": true },
+		{ "id": "hanluyu_ling", "name": "寒露玉", "tier": Tier.LING, "element": Element.SHUI, "base_price": 400, "desc": "万载寒露凝成的灵玉。四中品——冰系修士梦寐以求", "origin": "玄冰域", "market_rare": true },
+		{ "id": "dilinggu_ling", "name": "地灵菇", "tier": Tier.LING, "element": Element.TU, "base_price": 100, "desc": "吸取地脉灵气的奇菌。一中品——最亲民的灵品灵材", "origin": "中央荒原", "market_rare": true },
 	]
 
 ## 宝品/仙品（熔炼专属，不在市场售卖）— 世间罕见的至宝
