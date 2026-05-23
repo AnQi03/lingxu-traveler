@@ -250,12 +250,16 @@ func _build_ui():
 
 
 func toggle():
+	if not furnace_panel:
+		_build_ui()
 	if is_open:
 		close()
 	else:
 		open()
 
 func open():
+	if not furnace_panel:
+		_build_ui()
 	furnace_panel.visible = true
 	is_open = true
 	get_tree().paused = true
