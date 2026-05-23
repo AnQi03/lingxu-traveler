@@ -143,6 +143,13 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	customer_panel.show()
 	haggle_panel.show()
 	haggle_result.text = ""
+	
+	# 顾客到达弹出
+	customer_panel.scale = Vector2(0.8, 0.8)
+	var tw = create_tween()
+	tw.set_ease(Tween.EASE_OUT)
+	tw.set_trans(Tween.TRANS_BACK)
+	tw.tween_property(customer_panel, "scale", Vector2(1.0, 1.0), 0.25)
 	# 滑块从顾客出价到市场价×1.3（给博弈空间）
 	haggle_slider.min_value = customer.offer_price
 	haggle_slider.max_value = max(customer.max_price, int(ref_total * 1.6))

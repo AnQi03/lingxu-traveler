@@ -161,6 +161,13 @@ func show_summary():
 	is_showing = true
 	timer = DISPLAY_DURATION
 	
+	# 滑入动画
+	summary_panel.position.y = 160
+	var tw = create_tween()
+	tw.set_ease(Tween.EASE_OUT)
+	tw.set_trans(Tween.TRANS_BACK)
+	tw.tween_property(summary_panel, "position:y", -10, 0.4)
+	
 	var day = PlayerData.game_day - 1  # game_day 已经+1了
 	var season_idx = PlayerData.season_index
 	var season_name = PlayerData.SEASON_EMOJI[season_idx] + PlayerData.SEASON_NAMES[season_idx]

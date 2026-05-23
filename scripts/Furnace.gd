@@ -717,6 +717,12 @@ func _play_smelt_animation(outcome_type: String, result_text: String, result_col
 	# 结果背景闪光
 	_flash_result(result_color)
 	
+	# 屏幕震动
+	if outcome_type == "upgrade":
+		_shake(furnace_panel, 6.0, 0.3)
+	elif outcome_type == "destroy":
+		_shake(furnace_panel, 3.0, 0.2)
+	
 	# 粒子飞散效果
 	_spawn_smelt_particles(outcome_type, result_color)
 	
@@ -858,6 +864,16 @@ func _flash_result(flash_color: Color):
 	bg.color = Color(flash_color.r, flash_color.g, flash_color.b, 0.3)
 	var tw = create_tween()
 	tw.tween_property(bg, "color", orig, 0.6)
+
+
+func _shake(node: Control, intensity: float, duration: float):
+	var orig_pos = node.position
+	var tw = create_tween()
+	var steps = int(duration / 0.03)
+	for i in range(steps):
+		var offset = Vector2(randf_range(-intensity, intensity), randf_range(-intensity, intensity))
+		tw.tween_property(node, "position", orig_pos + offset, 0.03)
+	tw.tween_property(node, "position", orig_pos, 0.03)
 
 
 func _do_slice():
