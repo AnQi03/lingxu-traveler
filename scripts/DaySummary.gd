@@ -301,71 +301,26 @@ func _calc_today_income() -> int:
 
 ## ---------- 明日预告（升级版） ----------
 func _get_tomorrow_preview() -> String:
-	var day = PlayerData.game_day
-	var season_idx = PlayerData.season_index
-	var tomorrow_season_day = PlayerData.season_day + 1
+	var events = PlayerData.today_events
+	if events.is_empty():
+		return "📅 今日风平浪静，一切如常。"
 	
 	var parts = []
-	
-	# 季节信息
-	parts.append("📅 %s第%d天" % [PlayerData.SEASON_EMOJI[season_idx] + PlayerData.SEASON_NAMES[season_idx], tomorrow_season_day])
-	
-	# 集市大日检测
-	var next_festival = PlayerData.FESTIVAL_INTERVAL - (PlayerData.season_day % PlayerData.FESTIVAL_INTERVAL)
-	if next_festival == PlayerData.FESTIVAL_INTERVAL:
-		next_festival = 0
-	if PlayerData.is_festival_day():
-		parts.append("🎪 今天就是集市大日！客流量翻倍，灵材种类更多！")
-	elif next_festival == 1:
-		parts.append("🎪 明天就是集市大日！准备好灵石，稀有灵材会出现！")
-	
-	# 随机事件预告（30%概率）
-	if randf() < 0.3:
-		var events = _tomorrow_random_events()
-		parts.append(events[randi() % events.size()])
-	
-	# 季节性具体建议
-	match season_idx:
-		0:  # 灵潮季
-			if tomorrow_season_day <= 5:
-				parts.append("🌱 灵潮刚起，五行灵材都很温和，适合新手熔炼")
-		1:  # 炎阳季
-			parts.append("☀️ 火系灵材更活跃，熔炼火属性灵材成功率+5%")
-		2:  # 丰收季
-			parts.append("🍂 灵材价格普降，是囤货的好时机")
-		3:  # 静修季
-			var frags = PlayerData.lingxu_fragments
-			if frags > 0:
-				parts.append("❄️ 天寒地冻，但灵墟碎片在冬季更容易共鸣")
-	
-	# 常客预告（忠诚度高的顾客更可能明天来）
-	var regular_names = PlayerData.get_known_customer_names()
-	if not regular_names.is_empty():
-		var loyal_regular = ""
-		for name in regular_names:
-			if PlayerData.get_customer_loyalty(name) >= 4:
-				loyal_regular = name
-				break
-		if loyal_regular != "" and randf() < 0.4:
-			parts.append("👤 %s明天可能会来——她最近常来光顾" % loyal_regular)
-	
-	# 商道感知（高级商道给市场预测）
-	if PlayerData.shang_dao >= 30:
-		var season_idx2 = PlayerData.season_index
-		var hints = ["明天灵材市场似乎有不少好东西", "隐约感觉明天来的顾客会比较大方", "明天适合多熔炼几次"]
-		parts.append("💼 " + hints[randi() % hints.size()])
+	parts.append("📅 今日灵墟事件：")
+	for ev in events:
+		var line = "%s %s" % [ev.icon, ev.name]
+		if ev.has("smelt_luck_bonus") and ev.smelt_luck_bonus != 0:
+			var sign = "+" if ev.smelt_luck_bonus > 0 else ""
+			line += "（熔炼%s%.0f%%）" % [sign, ev.smelt_luck_bonus * 100]
+		if ev.has("market_price_mod") and ev.market_price_mod != 1.0:
+			var sign = "+" if ev.market_price_mod > 1.0 else ""
+			line += "（价格%s%.0f%%）" % [sign, (ev.market_price_mod - 1.0) * 100]
+		if ev.has("customer_bonus") and ev.customer_bonus != 0:
+			var sign = "+" if ev.customer_bonus > 0 else ""
+			line += "（顾客%s%d）" % [sign, ev.customer_bonus]
+		parts.append(line)
 	
 	return "\n".join(parts)
-
-func _tomorrow_random_events() -> Array:
-	return [
-		"📰 灵墟商会传出消息：明天可能有稀有灵材到货",
-		"🗣️ 听说有位远道而来的大商人明天会来灵墟",
-		"🌙 管家说今晚星象有异——明天熔炉运势似乎不错",
-		"🔔 隔壁摊主说明天有个大客户要来集市——准备好货！",
-		"💬 几个散修在讨论一种新的熔炼配方……也许明天能打听到",
-		"✨ 你感觉明天的灵材市场会有一批好货",
-	]
 
 
 ## ---------- 小目标（动态 + 进度感知） ----------

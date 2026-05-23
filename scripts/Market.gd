@@ -198,8 +198,23 @@ func _refresh_grid():
 	var element_icons = ["金", "木", "水", "火", "土"]
 	var items = MaterialData.get_daily_market_items()
 	
+	# 世界事件：稀有灵材到货
+	var rare_bonus = WorldEvents.get_rare_bonus(PlayerData.today_events)
+	if rare_bonus > 0:
+		var all_rare = []
+		for it in MaterialData.get_market_items():
+			if it.get("market_rare", false):
+				all_rare.append(it)
+		var rng = RandomNumberGenerator.new()
+		rng.set_seed(PlayerData.game_day * 37)
+		for _i in range(mini(rare_bonus, all_rare.size())):
+			var idx = rng.randi() % all_rare.size()
+			items.append(all_rare[idx])
+	
 	for item_def in items:
 		var inst = MaterialData.create_market_instance(item_def)
+		# 世界事件影响价格
+		inst.price = WorldEvents.apply_market_event(inst.price, inst.element, PlayerData.today_events)
 		var elem_str = element_icons[inst.element] if inst.element >= 0 else "无"
 		
 		var card = Panel.new()

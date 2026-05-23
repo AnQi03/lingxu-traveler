@@ -425,7 +425,7 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 	var luck_mod = STRATEGY_LUCK_MOD[strategy]
 	var upgrade_mod = STRATEGY_UPGRADE_MOD[strategy]
 	
-	luck_table[0] += tian_bonus + streak_bonus + luck_mod
+	luck_table[0] += tian_bonus + streak_bonus + luck_mod + WorldEvents.get_smelt_luck_bonus(PlayerData.today_events)
 	luck_table[1] += tian_bonus + streak_bonus + luck_mod
 	luck_table[2] += tian_bonus + streak_bonus + luck_mod
 	
@@ -460,12 +460,12 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 	var outcome_type = "same"  # upgrade / same / degrade / destroy
 	
 	if roll < base_destroy:
-		result_text += "💀 熔炼失败！灵材化为灰烬……\n🔮 但天道留下了灵墟碎片（+3）"
+		result_text += "💀 熔炼失败！灵材化为灰烬……\n🔮 但天道留下了灵墟碎片（+%d）" % (3 + WorldEvents.get_fragment_bonus(PlayerData.today_events))
 		result_color = Color(0.5, 0.2, 0.2)
 		outcome_type = "destroy"
 		PlayerData.daily_refine_count += 1
 		PlayerData.tian_dao += 1
-		PlayerData.add_fragments(3)
+		PlayerData.add_fragments(3 + WorldEvents.get_fragment_bonus(PlayerData.today_events))
 		PlayerData.smelt_streak = 0
 		
 	elif roll < base_destroy + base_fail:
@@ -475,12 +475,12 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 			"id": new_id, "name": item.name, "tier": nt,
 			"element": item.element, "price": _tier_price(nt), "count": 1
 		})
-		result_text += "⚠️ 品阶下降：[%s] → [%s]\n🔮 残留了一丝灵墟碎片（+1）" % [tier_names[item.tier], tier_names[nt]]
+		result_text += "⚠️ 品阶下降：[%s] → [%s]\n🔮 残留了一丝灵墟碎片（+%d）" % [tier_names[item.tier], tier_names[nt], 1 + WorldEvents.get_fragment_bonus(PlayerData.today_events)]
 		result_color = Color(0.7, 0.5, 0.2)
 		outcome_type = "degrade"
 		PlayerData.daily_refine_count += 1
 		PlayerData.tian_dao += 1
-		PlayerData.add_fragments(1)
+		PlayerData.add_fragments(1 + WorldEvents.get_fragment_bonus(PlayerData.today_events))
 		PlayerData.smelt_streak = 0
 		
 	elif roll < base_destroy + base_fail + base_same:

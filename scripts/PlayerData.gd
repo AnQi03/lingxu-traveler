@@ -63,6 +63,9 @@ var has_stalled_today: bool = false
 var smelt_streak: int = 0      # 熔炼升品连胜
 var trade_streak: int = 0      # 交易成功连胜
 
+## ---------- 世界事件 ----------
+var today_events: Array = []   # 今日活跃的随机事件
+
 ## ---------- 灵墟碎片 ----------
 var lingxu_fragments: int = 0  # 熔炼失败时获得，积累解锁隐藏配方
 const FRAGMENT_SECRET: int = 10   # 10碎片→解锁隐藏熔炼配方
@@ -448,6 +451,9 @@ func advance_time(hours: float) -> void:
 		daily_refine_count = 0
 		reset_ling_shi()
 		
+		# 每日随机事件
+		today_events = WorldEvents.roll_daily_events()
+		
 		# 连续出摊追踪
 		if has_stalled_today:
 			consecutive_stall_days += 1
@@ -511,6 +517,7 @@ func save_game() -> void:
 		"furnace_tier": furnace_tier,
 		"smelt_streak": smelt_streak,
 		"trade_streak": trade_streak,
+		"today_events": today_events,
 		"consecutive_stall_days": consecutive_stall_days,
 		"inventory": inventory,
 		"customer_relations": customer_relations,
@@ -565,6 +572,7 @@ func load_game() -> bool:
 	furnace_tier = data.get("furnace_tier", 1)
 	smelt_streak = data.get("smelt_streak", 0)
 	trade_streak = data.get("trade_streak", 0)
+	today_events = data.get("today_events", [])
 	consecutive_stall_days = data.get("consecutive_stall_days", 0)
 	inventory = data.get("inventory", [])
 	customer_relations = data.get("customer_relations", {})
