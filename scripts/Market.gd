@@ -69,17 +69,38 @@ func _build_ui():
 	item_grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.add_child(item_grid)
 	
-	# 批量购买提示
-	var batch_hint = Label.new()
-	batch_hint.text = "💡 Shift+点击买5个 | Ctrl+点击全买"
-	batch_hint.position = Vector2(20, 50)  # 暂时压在 title 下面，scroll 往下挪
-	batch_hint.add_theme_color_override("font_color", Color(0.4, 0.5, 0.6))
-	batch_hint.add_theme_font_size_override("font_size", 11)
-	market_ui.add_child(batch_hint)
+	# 批量购买滑块
+	var qty_label = Label.new()
+	qty_label.name = "qty_label"
+	qty_label.text = "数量: ×1"
+	qty_label.position = Vector2(20, 50)
+	qty_label.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0))
+	qty_label.add_theme_font_size_override("font_size", 13)
+	market_ui.add_child(qty_label)
 	
-	# 调整 scroll 位置让出提示空间
-	scroll.position = Vector2(20, 70)
-	scroll.size = Vector2(1040, 480)
+	var qty_slider = HSlider.new()
+	qty_slider.name = "qty_slider"
+	qty_slider.position = Vector2(120, 52)
+	qty_slider.size = Vector2(200, 20)
+	qty_slider.min_value = 1
+	qty_slider.max_value = 20
+	qty_slider.step = 1
+	qty_slider.value = 1
+	qty_slider.value_changed.connect(_on_qty_changed)
+	market_ui.add_child(qty_slider)
+	
+	var qty_max_btn = Button.new()
+	qty_max_btn.name = "qty_max_btn"
+	qty_max_btn.text = "最大"
+	qty_max_btn.position = Vector2(330, 50)
+	qty_max_btn.size = Vector2(50, 24)
+	qty_max_btn.add_theme_font_size_override("font_size", 11)
+	qty_max_btn.pressed.connect(_on_qty_max)
+	market_ui.add_child(qty_max_btn)
+	
+	# 调整 scroll 位置让出滑块空间
+	scroll.position = Vector2(20, 80)
+	scroll.size = Vector2(1040, 470)
 	
 	# ---- 灵石庄 ----
 	var exchange_bg = ColorRect.new()
@@ -227,13 +248,12 @@ func _buy(data):
 	var qty = 1
 	var total_cost = data.price
 	
-	# Shift+点击：买5个（不够则买可负担数量）
-	if Input.is_key_pressed(KEY_SHIFT):
+	# 从滑块读取数量
+	var slider = market_ui.find_child("qty_slider", true, false)
+	if slider:
+		qty = maxi(1, int(slider.value))
 		var max_afford = maxi(1, int(float(PlayerData.get_total_stones()) / float(data.price)))
-		qty = mini(5, max_afford)
-	# Ctrl+点击：买最大可负担数量
-	elif Input.is_key_pressed(KEY_CTRL):
-		qty = maxi(1, int(float(PlayerData.get_total_stones()) / float(data.price)))
+		qty = mini(qty, max_afford)
 	
 	total_cost = data.price * qty
 	
@@ -248,6 +268,17 @@ func _buy(data):
 		})
 		_refresh_grid()
 		_refresh_exchange()
+
+
+func _on_qty_changed(value: float):
+	var label = market_ui.find_child("qty_label", true, false)
+	if label:
+		label.text = "数量: ×%d" % int(value)
+
+func _on_qty_max():
+	var slider = market_ui.find_child("qty_slider", true, false)
+	if slider:
+		slider.value = slider.max_value
 
 
 func _exchange_high():
