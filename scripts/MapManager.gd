@@ -133,20 +133,23 @@ func _create_tileset() -> void:
 	_tileset.add_physics_layer(0)  # collision
 	_tileset.add_physics_layer(1)  # decoration occlusion
 
-	# 水和悬崖 → 设置碰撞
+	# 水和悬崖 → 设置碰撞（直接修改 TileData 引用，无需 set 回去）
 	for terrain_id in [Terrain.WATER, Terrain.CLIFF]:
 		var sid: int = _terrain_source.get(terrain_id, -1)
 		if sid < 0:
 			continue
-		var tile_data := _tileset.get_source(sid).get_tile_data(Vector2i(0, 0), 0)
+		var tile_data: TileData = _tileset.get_source(sid).get_tile_data(Vector2i(0, 0), 0)
 		if not tile_data:
-			tile_data = TileData.new()
-		tile_data.set_collision_polygon_one_way(0, false)
-		var rect_shape := RectangleShape2D.new()
-		rect_shape.size = Vector2(TILE_SIZE, TILE_SIZE)
-		tile_data.add_collision_polygon(0)
-		tile_data.set_collision_shape(0, 0, rect_shape)
-		_tileset.get_source(sid).set_tile_data(Vector2i(0, 0), 0, tile_data)
+			continue
+		# 矩形碰撞 → 4个顶点 polygon
+		var poly := PackedVector2Array([
+			Vector2(0, 0),
+			Vector2(TILE_SIZE, 0),
+			Vector2(TILE_SIZE, TILE_SIZE),
+			Vector2(0, TILE_SIZE),
+		])
+		tile_data.set_collision_polygons_count(0, 1)
+		tile_data.set_collision_polygon_points(0, 0, poly)
 
 	print("MapManager: TileSet 创建完毕，%d 种地形" % tex_paths.size())
 
@@ -393,7 +396,7 @@ func _place_decorations() -> void:
 ## 获取锚点的世界坐标（像素）
 func get_world_pos(anchor_key: String) -> Vector2:
 	if ANCHORS.has(anchor_key):
-		var tile_pos := ANCHORS[anchor_key]
+		var tile_pos: Vector2i = ANCHORS[anchor_key]
 		return Vector2(tile_pos.x * TILE_SIZE + TILE_SIZE / 2, tile_pos.y * TILE_SIZE + TILE_SIZE / 2)
 	return Vector2.ZERO
 
