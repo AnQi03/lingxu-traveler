@@ -1,28 +1,27 @@
-extends CanvasLayer
+extends Node
+
+class_name Furnace
+
+const STRATEGY_NAMES = ["稳扎稳打", "标准熔炼", "孤注一掷"]
+const STRATEGY_LUCK_MOD = [0.15, 0.0, -0.20]
+const STRATEGY_UPGRADE_MOD = [-0.20, 0.0, 0.30]
+const STRATEGY_COSTS = [8, 10, 12]
 
 var is_open: bool = false
-var furnace_panel: Panel = null
+var furnace_panel: Panel
+var strategy_panel: Panel
+var item_grid: GridContainer
+var result_label: Label
 var selected_item_idx: int = -1
-var item_grid: GridContainer = null
-var result_label: Label = null
+var pending_item_id: String = ""
+
 var tier_names = ["凡品", "灵品", "宝品", "仙品"]
 var element_icons = ["金", "木", "水", "火", "土"]
 
-# 熔炼策略
-enum SmeltStrategy { SAFE = 0, NORMAL = 1, RISKY = 2 }
-const STRATEGY_NAMES = ["稳扎稳打", "标准熔炼", "孤注一掷"]
-const STRATEGY_COSTS = [8, 10, 12]      # 灵识消耗
-const STRATEGY_LUCK_MOD = [0.15, 0.0, -0.20]   # 成功率修正
-const STRATEGY_UPGRADE_MOD = [-0.20, 0.0, 0.30] # 升品率修正
-var strategy_panel: Panel = null    # 策略选择面板
-var pending_item_id: String = ""    # 待熔炼灵材的base_id
-
 
 func _ready():
-	set_process_mode(PROCESS_MODE_WHEN_PAUSED)
+	set_process_mode(PROCESS_MODE_ALWAYS)
 	_build_ui()
-	if is_instance_valid(furnace_panel):
-		furnace_panel.visible = false
 
 
 func _build_ui():
@@ -34,12 +33,11 @@ func _build_ui():
 	furnace_panel.size = Vector2(900, 580)
 	
 	var bg = ColorRect.new()
-	bg.color = Color(0.10, 0.06, 0.04, 0.97)  # 暖暗底，比集市更深 — 熔炉氛围
+	bg.color = Color(0.10, 0.06, 0.04, 0.97)
 	bg.size = furnace_panel.size
 	bg.mouse_filter = 0
 	furnace_panel.add_child(bg)
 	
-	# 像素面板边框纹理
 	var border_tex = load("res://assets/img/ui/ui/panel_border.png")
 	if border_tex:
 		var border = TextureRect.new()
@@ -223,7 +221,6 @@ func _build_ui():
 	s_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	strategy_panel.add_child(s_info)
 	
-	# 三个策略按钮
 	var strategies = [
 		{"name": "🛡 稳扎稳打", "desc": "成功率+15% | 升品率-20% | 灵识-8\n稳妥的选择，适合练手和保本", "color": Color(0.3, 0.8, 0.3)},
 		{"name": "⚖ 标准熔炼", "desc": "默认概率 | 灵识-10\n不疾不徐，随天道流转", "color": Color(0.7, 0.7, 0.7)},
@@ -258,42 +255,29 @@ func toggle():
 	else:
 		open()
 
-
 func open():
-	if not is_instance_valid(furnace_panel):
-		_build_ui()
-	if not is_instance_valid(furnace_panel):
-		return
-	
-	is_open = true
 	furnace_panel.visible = true
-	if is_instance_valid(strategy_panel):
-		strategy_panel.visible = false
-	furnace_panel.modulate.a = 0.0
-	var tw = create_tween()
-	tw.tween_property(furnace_panel, "modulate:a", 1.0, 0.2)
+	is_open = true
+	get_tree().paused = true
+	PlayerData.set_meta("hud", get_node("/root/Main").find_child("HUD", true, false))
 	_refresh_tier()
 	_refresh_items()
 	_refresh_history()
-	get_tree().paused = true
-
+	selected_item_idx = -1
 
 func close():
+	furnace_panel.visible = false
+	strategy_panel.visible = false
 	is_open = false
-	if is_instance_valid(furnace_panel):
-		var tw = create_tween()
-		tw.tween_property(furnace_panel, "modulate:a", 0.0, 0.15)
-		furnace_panel.visible = false
 	get_tree().paused = false
-
 
 func _on_close():
 	close()
 
-
 func _get_base_id(item_id: String) -> String:
-	if "_t" in item_id:
-		return item_id.split("_t")[0]
+	var idx = item_id.rfind("_t")
+	if idx != -1:
+		return item_id.substr(0, idx)
 	return item_id
 
 
@@ -302,56 +286,32 @@ func _refresh_items():
 		child.queue_free()
 	
 	selected_item_idx = -1
-	var btn = find_child("smelt_btn", true, false)
-	if btn:
-		btn.disabled = true
-	var sbtn = find_child("slice_btn", true, false)
-	if sbtn:
-		sbtn.disabled = true
-	var name_label = find_child("select_name", true, false)
-	if name_label:
-		name_label.text = "未选择灵材"
-	var desc_label = find_child("select_desc", true, false)
-	if desc_label:
-		desc_label.text = "点击左侧背包中的灵材选择"
 	
-	var info = find_child("refine_info", true, false)
-	if info:
-		info.text = "  选择灵材投入熔炉（每天最多5次）  |  今日已熔炼: %d/%d" % [PlayerData.daily_refine_count, PlayerData.MAX_DAILY_REFINE]
+	var select_name = find_child("select_name", true, false)
+	if select_name:
+		select_name.text = "未选择灵材"
+	var select_desc = find_child("select_desc", true, false)
+	if select_desc:
+		select_desc.text = "点击左侧背包中的灵材选择"
 	
-	if PlayerData.inventory.is_empty():
-		var empty_label = Label.new()
-		empty_label.text = "   背包为空，先去集市进货吧"
-		empty_label.add_theme_color_override("font_color", Color(0.4, 0.4, 0.4))
-		item_grid.add_child(empty_label)
-		return
+	var smelt_btn = find_child("smelt_btn", true, false)
+	if smelt_btn:
+		smelt_btn.disabled = true
 	
+	var slice_btn = find_child("slice_btn", true, false)
+	if slice_btn:
+		slice_btn.disabled = true
+	
+	# 给每个灵材创建一行
 	for i in range(PlayerData.inventory.size()):
 		var item = PlayerData.inventory[i]
+		var btn = Button.new()
 		var tier_str = tier_names[item.tier] if item.tier < tier_names.size() else "?"
-		var elem_str = element_icons[item.element] if item.element >= 0 and item.element < element_icons.size() else "?"
-		
-		var card = Panel.new()
-		card.custom_minimum_size = Vector2(400, 36)
-		
-		var hbox = HBoxContainer.new()
-		hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		card.add_child(hbox)
-		
-		var label = Label.new()
-		label.text = "[%s][%s] %s ×%d" % [tier_str, elem_str, item.name, item.get("count", 1)]
-		label.add_theme_color_override("font_color", Color.WHITE)
-		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		label.add_theme_font_size_override("font_size", 13)
-		hbox.add_child(label)
-		
-		var idx = i
-		card.gui_input.connect(func(event):
-			if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-				_select_item(idx)
-		)
-		
-		item_grid.add_child(card)
+		btn.text = "  [%s] %s ×%d" % [tier_str, item.name, item.get("count", 1)]
+		btn.add_theme_font_size_override("font_size", 13)
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		btn.pressed.connect(_select_item.bind(i))
+		item_grid.add_child(btn)
 
 
 func _select_item(idx: int):
@@ -395,7 +355,6 @@ func _do_smelt():
 	var item = PlayerData.inventory[selected_item_idx]
 	pending_item_id = _get_base_id(item.id)
 	
-	# 灵识检查移到策略选择后（不同策略消耗不同）
 	var min_cost = STRATEGY_COSTS[0]
 	if PlayerData.ling_shi < min_cost:
 		if is_instance_valid(result_label):
@@ -403,7 +362,6 @@ func _do_smelt():
 			result_label.add_theme_color_override("font_color", Color(1, 0.5, 0.2))
 		return
 	
-	# 显示策略面板
 	if is_instance_valid(strategy_panel):
 		var info = strategy_panel.find_child("strategy_info", true, false)
 		if info:
@@ -429,6 +387,7 @@ func _on_strategy_picked(strategy: int):
 	if not PlayerData.remove_item(item.id, 1):
 		return
 	
+	# 异步执行熔炼动画
 	_do_smelt_with_strategy(item, strategy)
 
 
@@ -436,13 +395,10 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 	var base_id = _get_base_id(item.id)
 	var feat_name = STRATEGY_NAMES[strategy]
 	
-	# 根据熔炉等级动态概率
+	# ---- 概率计算（和原来一样） ----
 	var luck_table = PlayerData.get_furnace_luck(PlayerData.furnace_tier).duplicate()
-	
-	# 天道加成
 	var tian_bonus = float(PlayerData.tian_dao) / 10.0 * 0.02
 	
-	# 连胜加成
 	var streak_bonus = 0.0
 	if PlayerData.smelt_streak >= 5:
 		streak_bonus = 0.15
@@ -451,7 +407,6 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 	elif PlayerData.smelt_streak >= 2:
 		streak_bonus = 0.05
 	
-	# 策略修正
 	var luck_mod = STRATEGY_LUCK_MOD[strategy]
 	var upgrade_mod = STRATEGY_UPGRADE_MOD[strategy]
 	
@@ -481,23 +436,23 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 			base_fail = 0.40
 			base_destroy = 0.30
 	
-	# 应用升品率修正
 	base_luck = clamp(base_luck + upgrade_mod, 0.02, 0.95)
 	var base_same = clamp(1.0 - base_luck - base_fail - base_destroy, 0.0, 1.0)
 	
 	var roll = randf()
 	var result_text = "[%s] " % feat_name
 	var result_color = Color(0.6, 0.6, 0.6)
+	var outcome_type = "same"  # upgrade / same / degrade / destroy
 	
 	if roll < base_destroy:
 		result_text += "💀 熔炼失败！灵材化为灰烬……\n🔮 但天道留下了灵墟碎片（+3）"
 		result_color = Color(0.5, 0.2, 0.2)
+		outcome_type = "destroy"
 		PlayerData.daily_refine_count += 1
 		PlayerData.tian_dao += 1
 		PlayerData.add_fragments(3)
 		PlayerData.smelt_streak = 0
-		SoundManager.sfx_smelt_destroy()
-
+		
 	elif roll < base_destroy + base_fail:
 		var nt = max(0, item.tier - 1)
 		var new_id = base_id + "_t" + str(nt) if nt > 0 else base_id
@@ -507,12 +462,12 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 		})
 		result_text += "⚠️ 品阶下降：[%s] → [%s]\n🔮 残留了一丝灵墟碎片（+1）" % [tier_names[item.tier], tier_names[nt]]
 		result_color = Color(0.7, 0.5, 0.2)
+		outcome_type = "degrade"
 		PlayerData.daily_refine_count += 1
 		PlayerData.tian_dao += 1
 		PlayerData.add_fragments(1)
 		PlayerData.smelt_streak = 0
-		SoundManager.sfx_smelt_normal()
-
+		
 	elif roll < base_destroy + base_fail + base_same:
 		var keep_tier = max(0, item.tier)
 		var keep_id = base_id + "_t" + str(keep_tier) if keep_tier > 0 else base_id
@@ -522,10 +477,10 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 		})
 		result_text += "  品阶不变：[%s]" % tier_names[item.tier]
 		result_color = Color(0.6, 0.6, 0.6)
+		outcome_type = "same"
 		PlayerData.daily_refine_count += 1
 		PlayerData.smelt_streak = 0
-		SoundManager.sfx_smelt_normal()
-
+		
 	else:
 		var nt = min(3, item.tier + 1)
 		var new_id = base_id + "_t" + str(nt)
@@ -535,10 +490,10 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 		})
 		result_text += "✨ 升品成功！[%s] → [%s]！" % [tier_names[item.tier], tier_names[nt]]
 		result_color = Color(1, 0.8, 0.3)
+		outcome_type = "upgrade"
 		PlayerData.daily_refine_count += 1
 		PlayerData.tian_dao += 1
 		PlayerData.smelt_streak += 1
-		SoundManager.sfx_smelt_success()
 		if PlayerData.smelt_streak >= 5:
 			result_text += " 🔥天道眷顾！连升%d次！" % PlayerData.smelt_streak
 		elif PlayerData.smelt_streak >= 3:
@@ -546,10 +501,83 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 		elif PlayerData.smelt_streak >= 2:
 			result_text += " 🔥手感正热！连升%d次！" % PlayerData.smelt_streak
 	
-	if is_instance_valid(result_label):
-		result_label.text = result_text
-		result_label.add_theme_color_override("font_color", result_color)
+	# ---- 🆕 动画序列 ----
+	_play_smelt_animation(outcome_type, result_text, result_color, item)
 	
+	# ---- 天道初体验 ----
+	if not PlayerData.tian_voice_heard and PlayerData.tian_dao >= 1:
+		PlayerData.tian_voice_heard = true
+		var hud = PlayerData.get_meta("hud")
+		if hud and hud.has_method("show_toast"):
+			hud.show_toast("💫 天道：「炉火在跳动…我能感觉到。这灵材在呼应你。」", Color(0.7, 0.45, 0.85), 6.0)
+
+
+func _play_smelt_animation(outcome_type: String, result_text: String, result_color: Color, item: Dictionary):
+	# 禁用按钮防止重复操作
+	var smelt_btn = find_child("smelt_btn", true, false)
+	var upgrade_btn = find_child("upgrade_btn", true, false)
+	var slice_btn = find_child("slice_btn", true, false)
+	if smelt_btn: smelt_btn.disabled = true
+	if upgrade_btn: upgrade_btn.disabled = true
+	if slice_btn: slice_btn.disabled = true
+	
+	# 阶段1：熔炼中...（0.6s 期待）
+	if is_instance_valid(result_label):
+		result_label.text = "⚡ 熔炼中…"
+		result_label.add_theme_color_override("font_color", Color(1, 0.6, 0.2))
+		result_label.scale = Vector2(1.0, 1.0)
+	
+	# 熔炉边框闪烁效果
+	var select_frame = find_child("select_frame", true, false)
+	if select_frame:
+		var tw = create_tween()
+		tw.tween_property(select_frame, "color", Color(0.3, 0.15, 0.05, 0.9), 0.15)
+		tw.tween_property(select_frame, "color", Color(0.12, 0.08, 0.18, 0.8), 0.2)
+		tw.tween_property(select_frame, "color", Color(0.3, 0.15, 0.05, 0.9), 0.15)
+		tw.tween_property(select_frame, "color", Color(0.12, 0.08, 0.18, 0.8), 0.2)
+	
+	# 等待动画完成（使用 process_always 以在暂停时运行）
+	await get_tree().create_timer(0.8, true, false, true)
+	
+	# 阶段2：结果揭晓
+	if not is_instance_valid(result_label):
+		return
+	
+	result_label.text = ""
+	
+	# 短暂悬念
+	await get_tree().create_timer(0.12, true, false, true)
+	
+	# 显示结果 + 缩放弹入
+	result_label.text = result_text
+	result_label.add_theme_color_override("font_color", result_color)
+	result_label.scale = Vector2(0.3, 0.3)
+	
+	var tw2 = create_tween()
+	tw2.set_ease(Tween.EASE_OUT)
+	tw2.set_trans(Tween.TRANS_BACK)
+	tw2.tween_property(result_label, "scale", Vector2(1.05, 1.05), 0.35)
+	tw2.tween_property(result_label, "scale", Vector2(1.0, 1.0), 0.15)
+	
+	# 结果背景闪光
+	_flash_result(result_color)
+	
+	# 粒子飞散效果
+	_spawn_smelt_particles(outcome_type, result_color)
+	
+	# 音效
+	match outcome_type:
+		"upgrade":
+			SoundManager.sfx_smelt_success()
+		"destroy":
+			SoundManager.sfx_smelt_destroy()
+		_:
+			SoundManager.sfx_smelt_normal()
+	
+	# 等待粒子动画
+	await get_tree().create_timer(0.5, true, false, true)
+	
+	# 刷新界面
 	_refresh_items()
 	_refresh_history()
 	
@@ -557,12 +585,47 @@ func _do_smelt_with_strategy(item: Dictionary, strategy: int):
 		if is_instance_valid(result_label):
 			result_label.text = "⚠️ 今日熔炼次数已用完！\n" + result_label.text
 	
-	# 天道初体验
-	if not PlayerData.tian_voice_heard and PlayerData.tian_dao >= 1:
-		PlayerData.tian_voice_heard = true
-		var hud = PlayerData.get_meta("hud")
-		if hud and hud.has_method("show_toast"):
-			hud.show_toast("💫 天道：「炉火在跳动…我能感觉到。这灵材在呼应你。」", Color(0.7, 0.45, 0.85), 6.0)
+	# 重新启用按钮
+	if smelt_btn: smelt_btn.disabled = (selected_item_idx < 0)
+	if upgrade_btn: upgrade_btn.disabled = false
+	if slice_btn and PlayerData.is_slicing_unlocked(): slice_btn.disabled = false
+
+
+func _spawn_smelt_particles(outcome_type: String, base_color: Color):
+	var result_bg = find_child("result_bg", true, false)
+	if not result_bg:
+		return
+	
+	var count = 6
+	match outcome_type:
+		"upgrade": count = 12
+		"destroy": count = 8
+	
+	var center = result_bg.position + result_bg.size / 2
+	
+	for i in range(count):
+		var p = ColorRect.new()
+		p.size = Vector2(6, 6)
+		p.position = center - Vector2(3, 3)
+		
+		# 颜色变化 ±20% 增加自然感
+		var r = clamp(base_color.r + randf_range(-0.15, 0.15), 0.0, 1.0)
+		var g = clamp(base_color.g + randf_range(-0.15, 0.15), 0.0, 1.0)
+		var b = clamp(base_color.b + randf_range(-0.15, 0.15), 0.0, 1.0)
+		p.color = Color(r, g, b, 0.9)
+		
+		furnace_panel.add_child(p)
+		
+		# 随机方向飞散
+		var angle = randf_range(0, TAU)
+		var dist = randf_range(40, 100)
+		var target_pos = center + Vector2(cos(angle), sin(angle)) * dist
+		
+		var tw = create_tween()
+		tw.set_parallel(true)
+		tw.tween_property(p, "position", target_pos, randf_range(0.4, 0.8))
+		tw.tween_property(p, "color:a", 0.0, randf_range(0.4, 0.8))
+		tw.chain().tween_callback(p.queue_free)
 
 
 func _refresh_history():
@@ -667,4 +730,3 @@ func _do_slice():
 	
 	_show_result("🔪 切片完成！%s → %s（+15%%价值）" % [item.name, sliced.name], Color(0.5, 0.9, 0.5))
 	_refresh_items()
-	_refresh_history()
