@@ -28,10 +28,12 @@ const REGULARS = [
 
 static func generate_customer() -> Dictionary:
 	var items = MaterialData._get_all_game_items()
-	# Day1-7只出凡品/灵品，Day8-15出到宝品，Day16+全品阶
+	# Day1-3: 只出凡品, Day4-7: 凡品+灵品, Day8-15: 到宝品, Day16+: 全品阶
 	var max_tier = 0
-	if PlayerData.game_day <= 7:
-		max_tier = 1  # 凡品/灵品
+	if PlayerData.game_day <= 3:
+		max_tier = 0  # 只有凡品
+	elif PlayerData.game_day <= 7:
+		max_tier = 1  # 凡品+灵品
 	elif PlayerData.game_day <= 15:
 		max_tier = 2  # 到宝品
 	else:

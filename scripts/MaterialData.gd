@@ -60,14 +60,15 @@ static func get_daily_market_items() -> Array:
 	var result: Array = []
 	result.append_array(all_fan)  # 凡品全部出现
 	
-	# 灵品：每个20%概率出现，至少出1个
+	# 灵品：Day1-3不出现，Day4+每个20%概率出现，至少出1个
 	var ling_count = 0
-	for it in all_ling:
-		if rng.randf() < 0.20:
-			result.append(it)
-			ling_count += 1
-	if ling_count == 0 and not all_ling.is_empty():
-		result.append(all_ling[rng.randi() % all_ling.size()])
+	if PlayerData.game_day > 3:
+		for it in all_ling:
+			if rng.randf() < 0.20:
+				result.append(it)
+				ling_count += 1
+		if ling_count == 0 and not all_ling.is_empty():
+			result.append(all_ling[rng.randi() % all_ling.size()])
 	
 	result.sort_custom(func(a, b): return a.tier < b.tier if a.tier != b.tier else a.base_price < b.base_price)
 	return result
