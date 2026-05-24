@@ -356,7 +356,7 @@ func _get_nearest_interact() -> Dictionary:
 
 
 ## 调试可视化：画出所有交互范围（F3 切换显示，或默认在debug构建中显示）
-var _show_debug_overlay: bool = OS.is_debug_build()
+var _show_debug_overlay: bool = true  # 强制开启调试
 
 func _draw() -> void:
 	if not _show_debug_overlay:
@@ -405,6 +405,9 @@ func _do_interact(action: String):
 
 
 func _input(event):
+	# 游戏暂停时（Opening开场等），放行所有事件
+	if get_tree().paused:
+		return
 	if event is InputEventMouseMotion or event is InputEventMouseButton:
 		return
 	
