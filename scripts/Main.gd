@@ -312,6 +312,8 @@ func _create_interact_points():
 		{"name": "摊位", "pos": get_pos.call("player_stall", Vector2(864, 630)), "radius": 150, "action": "stall"},
 		{"name": "熔炉", "pos": get_pos.call("furnace", Vector2(1425, 486)), "radius": 150, "action": "furnace"},
 	]
+	for pt in interact_points:
+		print("[DEBUG] 交互点: %s → (%.0f, %.0f)" % [pt.name, pt.pos.x, pt.pos.y])
 	
 	# 建筑精灵（地图锚点位置）
 	_spawn_building(get_pos.call("market_gate", Vector2(180, 420)), "res://assets/img/buildings/market_shop.png", 0.15)
@@ -337,7 +339,7 @@ func _spawn_building(pos: Vector2, tex_path: String, scale: float):
 	if tex:
 		spr.texture = tex
 		spr.scale = Vector2(scale, scale)
-		spr.z_index = -1
+		spr.z_index = 10  # 建筑在地图上方可见
 	add_child(spr)
 
 func _spawn_npc(pos: Vector2, tex_path: String, scale: float):
