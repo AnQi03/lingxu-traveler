@@ -154,8 +154,9 @@ func _create_tileset() -> void:
 
 	print("MapManager: TileSet 创建完毕，%d 种地形" % tex_paths.size())
 	
-	# ── 草地↔泥土过渡变体（Terrain Auto-Tiling 验证）──
-	_setup_grass_dirt_terrains()
+	# ── 草地↔泥土过渡变体（Terrain Auto-Tiling）──
+	# NOTE: Godot 4.6 TileSet terrain API 不稳定，暂时跳过
+	# _setup_grass_dirt_terrains()
 
 
 # ══════════════════════════════════════════
