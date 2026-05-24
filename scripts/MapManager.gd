@@ -184,9 +184,12 @@ func _setup_grass_dirt_terrains() -> void:
 	const G := 0  # Grass terrain ID
 	const D := 1  # Dirt terrain ID
 	
+	if _tileset.get_terrain_sets_count() == 0:
+		_tileset.add_terrain_set()
 	_tileset.set_terrain_set_mode(TERRAIN_SET, TileSet.TERRAIN_MODE_MATCH_CORNERS_AND_SIDES)
-	_tileset.add_terrain(G)  # Grass
-	_tileset.add_terrain(D)  # Dirt
+	_tileset.set_terrains_count(TERRAIN_SET, 2)  # Grass + Dirt
+	_tileset.set_terrain_name(TERRAIN_SET, G, "Grass")
+	_tileset.set_terrain_name(TERRAIN_SET, D, "Dirt")
 	
 	# Terrain 角落 peering 使用 TileSet.CellNeighbor 枚举
 	const C_TL := TileSet.CELL_NEIGHBOR_TOP_LEFT_CORNER
