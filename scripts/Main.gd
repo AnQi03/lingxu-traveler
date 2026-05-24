@@ -409,7 +409,7 @@ func _do_interact(action: String):
 			if not PlayerData.is_furnace_unlocked():
 				var hud = PlayerData.get_meta("hud")
 				if hud and hud.has_method("show_toast"):
-					hud.show_toast("🔥 熔炉 Day5解锁", Color(1, 0.6, 0.2), 3.0)
+					hud.show_toast("🔥 熔炉 Day2解锁", Color(1, 0.6, 0.2), 3.0)
 			elif furnace_node and furnace_node.has_method("toggle"):
 				furnace_node.toggle()
 

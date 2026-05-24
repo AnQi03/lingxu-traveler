@@ -100,7 +100,7 @@ var furnace_tier: int = 1
 
 ## ---------- 系统解锁 ----------
 func is_furnace_unlocked() -> bool:
-	return game_day >= 5
+	return game_day >= 2
 
 func is_slicing_unlocked() -> bool:
 	return game_day >= 10
