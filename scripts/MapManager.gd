@@ -5,11 +5,11 @@ class_name MapManager
 ## 混合模式：TileMapLayer主导 + 手工锚点 + 程序化填充
 ## 参考：pixel-game-map-generation skill 第九节
 
-const TILE_SIZE: int = 32
-const MAP_WIDTH: int = 48   # tiles
-const MAP_HEIGHT: int = 32  # tiles
-const MAP_PX_W: int = MAP_WIDTH * TILE_SIZE   # 1536
-const MAP_PX_H: int = MAP_HEIGHT * TILE_SIZE  # 1024
+const TILE_SIZE: int = 64
+const MAP_WIDTH: int = 48
+const MAP_HEIGHT: int = 32
+const MAP_PX_W: int = MAP_WIDTH * TILE_SIZE   # 3072
+const MAP_PX_H: int = MAP_HEIGHT * TILE_SIZE  # 2048
 
 # ── 地形枚举 ──
 enum Terrain {
@@ -102,11 +102,11 @@ func _create_tileset() -> void:
 
 	# ── 加载 terrain_tileset.png，如果不存在则回退到独立文件 ──
 	var tex_paths := {
-		Terrain.GRASS: "res://assets/tilesets/gen_grass.png",
-		Terrain.DIRT:  "res://assets/tilesets/gen_dirt.png",
-		Terrain.WATER: "res://assets/tilesets/gen_water.png",
-		Terrain.STONE: "res://assets/tilesets/gen_stone.png",
-		Terrain.CLIFF: "res://assets/tilesets/gen_stone.png",
+		Terrain.GRASS: "res://assets/tilesets/grass.png",
+		Terrain.DIRT:  "res://assets/tilesets/dirt.png",
+		Terrain.WATER: "res://assets/tilesets/water.png",
+		Terrain.STONE: "res://assets/tilesets/stone.png",
+		Terrain.CLIFF: "res://assets/tilesets/cliff.png",
 	}
 
 	# 为每种地形创建 AtlasSource（每个源一个 tile 变体）

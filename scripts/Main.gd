@@ -286,8 +286,8 @@ func _setup_camera():
 	# 相机限制匹配地图大小（48×32 tiles × 32px = 1536×1024）
 	cam.limit_left = 0
 	cam.limit_top = 0
-	cam.limit_right = 1536
-	cam.limit_bottom = 1024
+	cam.limit_right = 3072
+	cam.limit_bottom = 2048
 	add_child(cam)
 	cam.make_current()
 	cam.reparent(player)
