@@ -62,7 +62,7 @@ static func generate_customer() -> Dictionary:
 		customer_bg = regular.bg
 		if randf() < 0.6:
 			var matching = []
-			for it in items:
+			for it in filtered:
 				if it.element == regular.pref_element:
 					matching.append(it)
 			if not matching.is_empty():
@@ -77,7 +77,7 @@ static func generate_customer() -> Dictionary:
 		# 常客偏好特定五行，60%概率要对应灵材
 		if randf() < 0.6:
 			var matching = []
-			for it in items:
+			for it in filtered:
 				if it.element == regular.pref_element:
 					matching.append(it)
 			if not matching.is_empty():
@@ -154,6 +154,7 @@ static func generate_customer() -> Dictionary:
 		pass  # 事后在对话中体现
 	
 	# 最低接受价：低于此价可能直接走人
+	var min_accept = int(offer_price * 0.7)
 	
 	# 好感度加成
 	if loyalty >= 7:
