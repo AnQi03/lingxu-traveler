@@ -135,8 +135,25 @@ static func generate_customer() -> Dictionary:
 			elif last_result == "walk_away":
 				max_price = int(max_price * 0.80)
 	
+	# 市价天花板：顾客知道集市价格，不愿出太高
+	# 不同性格对溢价的容忍度不同
+	var market_cap_mult = 1.0
+	match personality:
+		Personality.JINGMING: market_cap_mult = 1.05  # 精明：几乎不溢价
+		Personality.LINSE:   market_cap_mult = 1.05   # 吝啬
+		Personality.DUOYI:   market_cap_mult = 1.10   # 多疑
+		Personality.NAIXIN:  market_cap_mult = 1.15   # 耐心：愿意多出
+		Personality.SHUANGZHI: market_cap_mult = 1.20 # 爽直
+		Personality.KANGKAI: market_cap_mult = 1.30   # 慷慨：最愿意溢价
+		Personality.JIZAO:   market_cap_mult = 1.15   # 急躁：不想多跑
+		Personality.QINGXIN: market_cap_mult = 1.20   # 轻信
+	var market_cap = int(reference_price * market_cap_mult)
+	max_price = mini(max_price, market_cap)
+	# 精明/吝啬的顾客会直接说出来
+	if personality == Personality.JINGMING and max_price < reference_price * 1.3:
+		pass  # 事后在对话中体现
+	
 	# 最低接受价：低于此价可能直接走人
-	var min_accept = int(offer_price * 0.7)
 	
 	# 好感度加成
 	if loyalty >= 7:
@@ -670,6 +687,10 @@ static func get_customer_greeting(customer_name: String, customer_data: Dictiona
 				return "「今天希望能谈成。上次没买成，我回去想了想。」"
 			else:
 				return "「好久不见。上次没谈拢——今天再看看。」"
+	
+		# 1.5 精明顾客知道市价
+	if mem.get("personality", -1) == Personality.JINGMING and randf() < 0.4:
+		return "「集市那边我都看过了。你这价可别比那边高。」"
 	
 	# 2. 上下文对话
 	var context = _get_context_line(customer_name, loyalty)
