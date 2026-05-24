@@ -149,8 +149,9 @@ func _create_tileset() -> void:
 			Vector2(TILE_SIZE, TILE_SIZE),
 			Vector2(0, TILE_SIZE),
 		])
-		tile_data.set_collision_polygons_count(0, 1)
-		tile_data.set_collision_polygon_points(0, 0, poly)
+		# 🚧 临时禁用碰撞（排查空气墙）
+		# tile_data.set_collision_polygons_count(0, 1)
+		# tile_data.set_collision_polygon_points(0, 0, poly)
 
 	print("MapManager: TileSet 创建完毕，%d 种地形" % tex_paths.size())
 	

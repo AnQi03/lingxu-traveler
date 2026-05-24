@@ -297,6 +297,7 @@ func _setup_camera():
 	add_child(cam)
 	cam.make_current()
 	cam.reparent(player)
+	cam.position = Vector2.ZERO  # 相机跟随玩家（reparent保持了旧位置需复位）
 
 
 func _create_interact_points():
