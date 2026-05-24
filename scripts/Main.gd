@@ -53,6 +53,8 @@ func _ready():
 func _process(delta):
 	_process_interact_hint(delta)
 	queue_redraw()  # 调试可视化：每帧刷新交互范围颜色
+	if player and Engine.get_process_frames() % 60 == 0:
+		print("[DEBUG] 主角位置: (%.0f, %.0f) | 可见节点: %d | 交互点: %d" % [player.position.x, player.position.y, get_child_count(), interact_points.size()])
 
 
 func _show_opening():
