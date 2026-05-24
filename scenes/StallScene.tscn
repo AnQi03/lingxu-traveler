@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://d0djvpqlvao11"]
+[gd_scene format=3 uid="uid://d0djvpqlvao11"]
 
 [ext_resource type="Script" path="res://scripts/StallScene.gd" id="1_6x8ln"]
 
@@ -60,7 +60,7 @@ autowrap_mode = 2
 offset_left = 320.0
 offset_top = 50.0
 offset_right = 720.0
-offset_bottom = 210.0
+offset_bottom = 280.0
 visible = false
 
 [node name="NameLabel" type="Label" parent="CustomerPanel"]
@@ -82,19 +82,21 @@ theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 offset_left = 10.0
 offset_top = 58.0
 offset_right = 390.0
-offset_bottom = 80.0
+offset_bottom = 140.0
 text = "想要:"
+autowrap_mode = 2
 
 [node name="PriceLabel" type="Label" parent="CustomerPanel"]
 offset_left = 10.0
-offset_top = 84.0
+offset_top = 148.0
 offset_right = 390.0
-offset_bottom = 106.0
+offset_bottom = 180.0
 text = "出价:"
+autowrap_mode = 2
 
 [node name="HagglePanel" type="Panel" parent="."]
 offset_left = 320.0
-offset_top = 220.0
+offset_top = 290.0
 offset_right = 820.0
 offset_bottom = 400.0
 visible = false
