@@ -267,7 +267,7 @@ func _create_player():
 	var tex = load("res://assets/img/characters/player_front.png")
 	if tex:
 		sprite.texture = tex
-		sprite.scale = Vector2(0.18, 0.18)  # 素白仙袍角色稍大
+		sprite.scale = Vector2(0.35, 0.35)  # 主角精灵（1920×1080适配）
 	player.add_child(sprite)
 	
 	var shape = CollisionShape2D.new()
@@ -362,11 +362,10 @@ func _draw() -> void:
 	if not _show_debug_overlay:
 		return
 	for pt in interact_points:
-		var in_range = player and player.position.distance_to(pt.pos) < pt.radius
-		var col = Color.GREEN if in_range else Color(0.2, 0.6, 0.2, 0.15)
-		draw_circle(pt.pos, pt.radius, col, false, 1.0)
-		# 标签
-		draw_string(ThemeDB.fallback_font, pt.pos + Vector2(0, -pt.radius - 10), pt.name, HORIZONTAL_ALIGNMENT_CENTER, -1, 14, Color.WHITE)
+		if player:
+			var in_range = player.position.distance_to(pt.pos) < pt.radius
+			var col = Color.GREEN if in_range else Color(0.2, 0.6, 0.2, 0.15)
+			draw_circle(pt.pos, pt.radius, col, false, 1.0)
 
 func _process_interact_hint(_delta):
 	var hint = find_child("InteractHint", false, false)
