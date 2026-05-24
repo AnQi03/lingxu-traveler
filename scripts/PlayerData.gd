@@ -664,35 +664,17 @@ func save_game() -> void:
 		"season_day": season_day,
 		"game_year": game_year,
 		"furnace_tier": furnace_tier,
-		"smelt_streak": smelt_streak,
-		"trade_streak": trade_streak,
-		"today_events": today_events,
-		"stall_decorations": stall_decorations,
-		"rent_paid_day": rent_paid_day,
-		"orders": orders,
-		"material_journal": material_journal,
-		"discovered_recipes": discovered_recipes,
 		"consecutive_stall_days": consecutive_stall_days,
 		"inventory": inventory,
 		"customer_relations": customer_relations,
-		"loyalty_events_triggered": loyalty_events_triggered,
 		"lingxu_fragments": lingxu_fragments,
 		"has_seen_opening": has_seen_opening,
-		"shang_voice_heard": shang_voice_heard,
-		"tian_voice_heard": tian_voice_heard,
-		"renxin_voice_heard": renxin_voice_heard,
-		"first_high_stone": first_high_stone,
-		"first_extreme_stone": first_extreme_stone,
 		"year_assessed": year_assessed,
-		"assessment_score": assessment_score,
-		"assessment_rating": assessment_rating,
-		"customer_memory": customer_memory
 	}
 	var file = FileAccess.open("user://save.json", FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(data, "\t"))
 		file.close()
-		print("存档成功！")
 
 func load_game() -> bool:
 	if not FileAccess.file_exists("user://save.json"):
