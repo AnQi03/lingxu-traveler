@@ -53,8 +53,6 @@ func _ready():
 func _process(delta):
 	_process_interact_hint(delta)
 	queue_redraw()
-	if player and Engine.get_process_frames() % 60 == 0:
-		print("[DEBUG] 主角位置: (%.0f, %.0f) | 子节点: %d" % [player.position.x, player.position.y, player.get_child_count()])  # 调试可视化：每帧刷新交互范围颜色
 
 
 func _show_opening():
@@ -270,10 +268,7 @@ func _create_player():
 	var tex = load("res://assets/img/characters/player_front.png")
 	if tex:
 		sprite.texture = tex
-		sprite.scale = Vector2(5.0, 5.0)  # 放大找主角
-		print("[DEBUG] 主角精灵加载成功: %dx%d" % [tex.get_width(), tex.get_height()])
-	else:
-		print("[ERROR] 主角精灵加载失败！")
+		sprite.scale = Vector2(2.0, 2.0)
 	player.add_child(sprite)
 	
 	var shape = CollisionShape2D.new()
@@ -281,7 +276,6 @@ func _create_player():
 	circle.radius = 18
 	shape.shape = circle
 	player.add_child(shape)
-	print("[DEBUG] 主角创建完毕，位置: (%.0f, %.0f), z_index: %d" % [player.position.x, player.position.y, player.z_index])
 
 func _setup_camera():
 	var cam = Camera2D.new()
@@ -312,8 +306,6 @@ func _create_interact_points():
 		{"name": "摊位", "pos": get_pos.call("player_stall", Vector2(864, 630)), "radius": 150, "action": "stall"},
 		{"name": "熔炉", "pos": get_pos.call("furnace", Vector2(1425, 486)), "radius": 150, "action": "furnace"},
 	]
-	for pt in interact_points:
-		print("[DEBUG] 交互点: %s → (%.0f, %.0f)" % [pt.name, pt.pos.x, pt.pos.y])
 	
 	# 建筑精灵（地图锚点位置）
 	_spawn_building(get_pos.call("market_gate", Vector2(180, 420)), "res://assets/img/buildings/market_shop.png", 0.15)
@@ -366,7 +358,7 @@ func _get_nearest_interact() -> Dictionary:
 
 
 ## 调试可视化：画出所有交互范围（F3 切换显示，或默认在debug构建中显示）
-var _show_debug_overlay: bool = true  # 强制开启调试
+var _show_debug_overlay: bool = OS.is_debug_build()  # debug构建默认开启，release隐藏
 
 func _draw() -> void:
 	if not _show_debug_overlay:
