@@ -52,9 +52,9 @@ func _ready():
 
 func _process(delta):
 	_process_interact_hint(delta)
-	queue_redraw()  # 调试可视化：每帧刷新交互范围颜色
+	queue_redraw()
 	if player and Engine.get_process_frames() % 60 == 0:
-		print("[DEBUG] 主角位置: (%.0f, %.0f) | 可见节点: %d | 交互点: %d" % [player.position.x, player.position.y, get_child_count(), interact_points.size()])
+		print("[DEBUG] 主角位置: (%.0f, %.0f) | 子节点: %d" % [player.position.x, player.position.y, player.get_child_count()])  # 调试可视化：每帧刷新交互范围颜色
 
 
 func _show_opening():
@@ -262,6 +262,7 @@ func _create_player():
 	if map and map.has_method("get_spawn_pos"):
 		spawn_pos = map.get_spawn_pos()
 	player.position = spawn_pos
+	player.z_index = 100  # 确保在最上层
 	add_child(player)
 	
 	var sprite = Sprite2D.new()
@@ -269,7 +270,10 @@ func _create_player():
 	var tex = load("res://assets/img/characters/player_front.png")
 	if tex:
 		sprite.texture = tex
-		sprite.scale = Vector2(0.35, 0.35)  # 主角精灵（1920×1080适配）
+		sprite.scale = Vector2(5.0, 5.0)  # 放大找主角
+		print("[DEBUG] 主角精灵加载成功: %dx%d" % [tex.get_width(), tex.get_height()])
+	else:
+		print("[ERROR] 主角精灵加载失败！")
 	player.add_child(sprite)
 	
 	var shape = CollisionShape2D.new()
@@ -277,6 +281,7 @@ func _create_player():
 	circle.radius = 18
 	shape.shape = circle
 	player.add_child(shape)
+	print("[DEBUG] 主角创建完毕，位置: (%.0f, %.0f), z_index: %d" % [player.position.x, player.position.y, player.z_index])
 
 func _setup_camera():
 	var cam = Camera2D.new()
