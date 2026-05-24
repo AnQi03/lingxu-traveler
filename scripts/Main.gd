@@ -49,6 +49,17 @@ func _ready():
 		call_deferred("_show_opening")
 	
 	print("WASD 移动  |  E 场景交互/背包  |  Tab 背包  |  空格 摆摊  |  ESC 关闭面板")
+	
+	# 新手引导：首次游戏提示核心循环
+	if PlayerData.game_day == 1 and PlayerData.total_earned == 0:
+		call_deferred("_show_newbie_guide")
+
+func _show_newbie_guide():
+	await get_tree().create_timer(1.0).timeout  # 等开场结束
+	var hud = PlayerData.get_meta("hud")
+	if hud and hud.has_method("show_toast"):
+		hud.show_toast("🛒 去集市(E)买灵材 → 🔥 明天熔炉解锁 → 💰 摆摊(空格)卖掉！", Color(1, 0.85, 0.3), 8.0)
+
 
 func _process(delta):
 	_process_interact_hint(delta)

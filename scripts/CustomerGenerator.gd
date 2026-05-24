@@ -46,6 +46,15 @@ static func generate_customer() -> Dictionary:
 		filtered = items
 	var target_item = filtered[randi() % filtered.size()]
 	
+	# 库存匹配：玩家有货时，70%概率要玩家库存里有的东西
+	if not PlayerData.inventory.is_empty() and randf() < 0.7:
+		var inv_items = []
+		for it in filtered:
+			if PlayerData.find_similar_item(it.name, it.tier):
+				inv_items.append(it)
+		if not inv_items.is_empty():
+			target_item = inv_items[randi() % inv_items.size()]
+	
 	var personality = randi() % 8
 	var name = ""
 	var loyalty = 0
