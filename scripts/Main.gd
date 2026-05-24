@@ -179,13 +179,13 @@ func _create_furnace():
 func is_any_panel_open() -> bool:
 	if day_summary_node and is_instance_valid(day_summary_node) and day_summary_node.get("is_showing"):
 		return true
-	if market_node and market_node.get("is_open"):
+	if market_node and market_node.has_method("toggle") and market_node.get("is_open"):
 		return true
-	if furnace_node and furnace_node.get("is_open"):
+	if furnace_node and furnace_node.has_method("toggle") and furnace_node.get("is_open"):
 		return true
-	if inventory_node and inventory_node.get("is_open"):
+	if inventory_node and inventory_node.has_method("toggle") and inventory_node.get("is_open"):
 		return true
-	if journal_node and journal_node.get("is_open"):
+	if journal_node and journal_node.has_method("toggle") and journal_node.get("is_open"):
 		return true
 	return false
 
@@ -467,11 +467,11 @@ func _input(event):
 		if is_any_panel_open():
 			if event.keycode == KEY_E:
 				# E = 万能关闭键：关闭任何打开的交互面板
-				if furnace_node and furnace_node.get("is_open"):
+				if furnace_node and furnace_node.has_method("toggle") and furnace_node.get("is_open"):
 					furnace_node.toggle()
-				elif market_node and market_node.get("is_open"):
+				elif market_node and market_node.has_method("toggle") and market_node.get("is_open"):
 					market_node.toggle()
-				elif inventory_node and inventory_node.get("is_open"):
+				elif inventory_node and inventory_node.has_method("toggle") and inventory_node.get("is_open"):
 					inventory_node.toggle()
 				get_viewport().set_input_as_handled()
 				return
@@ -491,12 +491,9 @@ func _input(event):
 		match event.keycode:
 			KEY_E:
 				var nearest = _get_nearest_interact()
-				if nearest.is_empty():
-					# 附近无交互物 → 打开背包
-					if inventory_node and inventory_node.has_method("toggle"):
-						inventory_node.toggle()
-				else:
+				if not nearest.is_empty():
 					_do_interact(nearest.action)
+				# 空地按E = 不做任何事（防止误开背包）
 				get_viewport().set_input_as_handled()
 			KEY_TAB:
 				if inventory_node and inventory_node.has_method("toggle"):

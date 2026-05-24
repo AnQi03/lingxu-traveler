@@ -28,7 +28,21 @@ const REGULARS = [
 
 static func generate_customer() -> Dictionary:
 	var items = MaterialData._get_all_game_items()
-	var target_item = items[randi() % items.size()]
+	# Day1-7只出凡品/灵品，Day8-15出到宝品，Day16+全品阶
+	var max_tier = 0
+	if PlayerData.game_day <= 7:
+		max_tier = 1  # 凡品/灵品
+	elif PlayerData.game_day <= 15:
+		max_tier = 2  # 到宝品
+	else:
+		max_tier = 3  # 全品阶
+	var filtered = []
+	for it in items:
+		if it.tier <= max_tier:
+			filtered.append(it)
+	if filtered.is_empty():
+		filtered = items
+	var target_item = filtered[randi() % filtered.size()]
 	
 	var personality = randi() % 8
 	var name = ""

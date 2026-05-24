@@ -113,26 +113,15 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	if customer.name in ["石老", "青儿", "霍老板", "冷面客", "金娘子"]:
 		greeting = CustomerGenerator.get_customer_greeting(customer.name, customer)
 	elif randf() < 0.3:
-		# 无名顾客偶尔也有话说
 		var pool = ["来看看。", "今天有什么好货？", "随便看看。", "这个怎么卖？"]
 		greeting = pool[randi() % pool.size()]
 	
-	if greeting != "":
-		customer_request.text = "💬 %s" % greeting
-	
-	# 商道提示：越高越能感知顾客底线
-	if PlayerData.shang_dao >= 50:
-		customer_mood.text += "\n💼 经验告诉你：这位顾客还有很大加价空间"
-	elif PlayerData.shang_dao >= 30:
-		customer_mood.text += "\n💼 你感觉这位顾客还能再加一些"
-	elif PlayerData.shang_dao >= 10:
-		customer_mood.text += "\n💼 隐约感觉这位顾客还有议价空间"
-	
+	# 需求文本：先清再写
 	customer_request.text = "想要: [%s][%s] %s × %d" % [tier_names[item.tier], elem_str, item.name, customer.want_count]
-	
-	# 对话气泡附在需求下方
 	if greeting != "":
 		customer_request.text += "\n💬 %s" % greeting
+	
+	# 商道提示：越高越能感知顾客底线（不追加，直接替换mood行）
 	
 	# 显示市场参考价和顾客出价
 	var ref_total = customer.base_price  # 市场价总额
