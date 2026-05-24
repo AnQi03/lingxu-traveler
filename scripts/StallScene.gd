@@ -124,7 +124,9 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 		var pool = ["来看看。", "今天有什么好货？", "随便看看。", "这个怎么卖？"]
 		greeting = pool[randi() % pool.size()]
 	
-	# 需求文本：先清再写
+	# 需求文本：先清再写，确保足够高度
+	customer_request.custom_minimum_size = Vector2(380, 60)
+	customer_request.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	customer_request.text = "想要: [%s][%s] %s × %d" % [tier_names[item.tier], elem_str, item.name, customer.want_count]
 	if greeting != "":
 		customer_request.text += "\n💬 %s" % greeting
@@ -132,12 +134,15 @@ func _on_customer_arrived(customer: Dictionary) -> void:
 	# 商道提示：越高越能感知顾客底线（不追加，直接替换mood行）
 	
 	# 显示市场参考价和顾客出价
+	customer_price.custom_minimum_size = Vector2(380, 40)
+	customer_price.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var ref_total = customer.base_price  # 市场价总额
 	var price_text = "出价: %d灵石 | 市场价: %d灵石（%d/个×%d）" % [customer.offer_price, ref_total, customer.unit_price, customer.want_count]
 	if customer.offer_price < ref_total:
 		price_text += "\n⚠️ 出价低于市场价，需要谈判抬价！"
 	customer_price.text = price_text
 	
+	customer_panel.custom_minimum_size = Vector2(400, 220)
 	customer_panel.show()
 	haggle_panel.show()
 	haggle_result.text = ""
