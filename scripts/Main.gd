@@ -225,6 +225,7 @@ func _on_monthly_report(day: int) -> void:
 func _on_night_falling():
 	SoundManager.sfx_day_transition()
 	force_close_stall()
+	PlayerData.save_game()  # 每日自动存档
 	
 	# 年度评定日 → 用 YearEnd 替代 DaySummary
 	if PlayerData.game_day == PlayerData.ASSESSMENT_DAY and not PlayerData.year_assessed:
