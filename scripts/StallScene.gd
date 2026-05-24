@@ -53,6 +53,8 @@ func _ready() -> void:
 	haggle_slider.value_changed.connect(_on_slider_changed)
 	
 	# 初始隐藏
+	customer_request.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	customer_request.custom_minimum_size = Vector2(400, 80)
 	customer_panel.hide()
 	haggle_panel.hide()
 	_update_ui()
@@ -100,6 +102,12 @@ func _on_stall_closed() -> void:
 func _on_customer_arrived(customer: Dictionary) -> void:
 	SoundManager.sfx_customer_arrive()
 	is_trading = true
+	# 先清空所有文字防止重叠
+	customer_name.text = ""
+	customer_mood.text = ""
+	customer_request.text = ""
+	customer_price.text = ""
+	haggle_result.text = ""
 	var item = customer.want_item
 	var tier_names = ["凡品", "灵品", "宝品", "仙品"]
 	var element_icons = ["金", "木", "水", "火", "土"]
