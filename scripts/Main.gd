@@ -361,6 +361,10 @@ var _show_debug_overlay: bool = OS.is_debug_build()
 func _draw() -> void:
 	if not _show_debug_overlay:
 		return
+	# 玩家位置标记（大红圈，方便定位）
+	if player:
+		draw_circle(player.position, 30, Color.RED, false, 2.0)
+	# 交互范围圈
 	for pt in interact_points:
 		if player:
 			var in_range = player.position.distance_to(pt.pos) < pt.radius
