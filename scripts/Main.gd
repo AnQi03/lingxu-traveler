@@ -283,11 +283,11 @@ func _setup_camera():
 	cam.position_smoothing_enabled = true
 	cam.position_smoothing_speed = 5.0
 	cam.zoom = Vector2(1.0, 1.0)
-	# 相机限制匹配地图大小（48×32 tiles × 64px = 3072×2048）
+	# 相机限制匹配地图大小（48×32 tiles × 32px = 1536×1024）
 	cam.limit_left = 0
 	cam.limit_top = 0
-	cam.limit_right = 3072
-	cam.limit_bottom = 2048
+	cam.limit_right = 1536
+	cam.limit_bottom = 1024
 	add_child(cam)
 	cam.make_current()
 	cam.reparent(player)
